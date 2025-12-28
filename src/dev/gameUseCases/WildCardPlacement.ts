@@ -45,6 +45,9 @@ const gameState: GameState = {
     theme: 'light',
     useGradients: true,
     gameMode: 'full',
+    showInvalidPlacements: false,
+    wildcardVariant: 'modern',
+    cardVariant: 'modern',
   },
 };
 

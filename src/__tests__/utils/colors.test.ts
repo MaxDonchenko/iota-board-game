@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ColorUtils } from '@/utils/colors';
-import type { GameColor } from '@/types/Card.types';
+import type { GameColor } from '@/utils/colors';
 
 describe('ColorUtils', () => {
   it('should convert color to hex', () => {

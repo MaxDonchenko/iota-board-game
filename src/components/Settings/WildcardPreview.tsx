@@ -1,17 +1,12 @@
 import { Card } from '../Card/Card';
 import { Card as CardClass } from '@/game/Card';
-import { useTheme } from '@/context/ThemeContext';
 
 interface WildcardPreviewProps {
   variant: 'modern' | 'original';
 }
 
-export function WildcardPreview({ variant }: WildcardPreviewProps) {
-  const { settings } = useTheme();
+export function WildcardPreview({ variant: _variant }: WildcardPreviewProps) {
   const wildcard = new CardClass('Square', 1, 'Red', true);
-  
-  // Temporarily override settings for preview
-  const previewSettings = { ...settings, wildcardVariant: variant };
   
   // We need to pass the variant directly since Card component reads from context
   // For now, create a wrapper that forces the variant

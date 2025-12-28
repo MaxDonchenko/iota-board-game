@@ -52,7 +52,7 @@ export class WildCardManager {
   static determineWildValue(
     wildCard: Card,
     lineCards: Card[],
-    grid: Grid
+    _grid: Grid
   ): WildValue | null {
     // Determine wild card value based on line constraints
     // Must satisfy: all same OR all different for each property

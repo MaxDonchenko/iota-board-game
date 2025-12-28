@@ -9,7 +9,6 @@ interface GameOverviewProps {
 export function GameOverview({ gameState, gameStartTime }: GameOverviewProps) {
   const cardsPlayed = gameState.grid.positions.size;
   const cardsInDeck = gameState.deck.drawPile.length;
-  const totalCards = gameState.gameMode === 'full' ? 64 + 8 : 32 + 4; // cards + wildcards
   
   const formatDuration = (startTime?: Date) => {
     if (!startTime) return 'N/A';

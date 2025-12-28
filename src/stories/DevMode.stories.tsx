@@ -24,6 +24,7 @@ function DevModeContent() {
   const [selectedUseCase, setSelectedUseCase] = useState<string>('');
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate }>>([]);
+  const [nextCardIndex, setNextCardIndex] = useState(0);
 
   const handleLoadUseCase = (useCaseName: string) => {
     const useCase = Object.values(useCases).find(uc => uc.name === useCaseName);
@@ -42,11 +43,13 @@ function DevModeContent() {
     }
   };
 
-  const handlePlaceCard = (card: CardType, position: Coordinate) => {
-    if (!gameState) return;
+  const handlePlaceCard = (position: Coordinate) => {
+    if (!gameState || nextCardIndex >= selectedCards.length) return;
 
+    const card = selectedCards[nextCardIndex];
     const newPlacements = [...pendingPlacements, { card, position }];
     setPendingPlacements(newPlacements);
+    setNextCardIndex(nextCardIndex + 1);
 
     if (newPlacements.length === selectedCards.length) {
       const placements = newPlacements.map(p => ({
@@ -58,9 +61,11 @@ function DevModeContent() {
       if (result.success) {
         setSelectedCards([]);
         setPendingPlacements([]);
+        setNextCardIndex(0);
       } else {
         alert(result.error || 'Invalid placement');
         setPendingPlacements([]);
+        setNextCardIndex(0);
       }
     }
   };
@@ -102,6 +107,7 @@ function DevModeContent() {
           <GameBoard
             grid={gameState.grid}
             selectedCards={selectedCards}
+            nextCardIndex={nextCardIndex}
             onPlaceCard={handlePlaceCard}
           />
           {gameState.players[gameState.currentPlayerIndex] && (

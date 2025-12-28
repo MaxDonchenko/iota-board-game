@@ -1,5 +1,5 @@
 import { Card } from './Card';
-import { SHAPES, NUMBERS, COLORS, DECK_SIZES, WILD_CARD_COUNTS } from './constants';
+import { SHAPES, NUMBERS, COLORS, WILD_CARD_COUNTS } from './constants';
 import type { GameMode } from '@/types/Game.types';
 
 export class Deck {

@@ -1,9 +1,8 @@
-import { GameStateManager } from '@/game/GameState';
 import { Grid } from '@/game/Grid';
 import { Deck } from '@/game/Deck';
 import { Card } from '@/game/Card';
 import type { GameState, GameSettings } from '@/types/Game.types';
-import type { Player } from '@/types/Game.types';
+import type { Shape, Number, Color } from '@/types/Card.types';
 
 export interface SerializableGameState {
   id: string;
@@ -64,12 +63,17 @@ function serializeCard(card: Card): SerializableCard {
 }
 
 function deserializeCard(serialized: SerializableCard): Card {
-  const card = new Card(serialized.shape, serialized.number, serialized.color, serialized.isWild);
+  const card = new Card(
+    serialized.shape as Shape,
+    serialized.number as Number,
+    serialized.color as Color,
+    serialized.isWild
+  );
   if (serialized.wildValue) {
     card.wildValue = {
-      shape: serialized.wildValue.shape,
-      number: serialized.wildValue.number,
-      color: serialized.wildValue.color,
+      shape: serialized.wildValue.shape as Shape,
+      number: serialized.wildValue.number as Number,
+      color: serialized.wildValue.color as Color,
     };
   }
   return card;

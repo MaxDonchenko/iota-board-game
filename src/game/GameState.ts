@@ -1,7 +1,6 @@
 import { Deck } from './Deck';
 import { Grid } from './Grid';
-import type { GameState, GamePhase, TurnPhase, Player, GameSettings, GameMode } from '@/types/Game.types';
-import type { Card } from './Card';
+import type { GameState, Player, GameSettings, GameMode } from '@/types/Game.types';
 
 export class GameStateManager {
   static createInitialState(

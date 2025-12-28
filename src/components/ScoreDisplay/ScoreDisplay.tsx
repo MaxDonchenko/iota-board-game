@@ -6,7 +6,6 @@ interface ScoreDisplayProps {
 }
 
 export function ScoreDisplay({ gameState }: ScoreDisplayProps) {
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const maxScore = Math.max(...gameState.players.map(p => p.score), 1);
 
   return (

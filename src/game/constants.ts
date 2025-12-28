@@ -1,5 +1,4 @@
 import type { Shape, Number, Color } from '@/types/Card.types';
-import type { GameMode } from '@/types/Game.types';
 
 export const MAX_LINE_LENGTH = 4 as const;
 export const HAND_SIZE = 4 as const;

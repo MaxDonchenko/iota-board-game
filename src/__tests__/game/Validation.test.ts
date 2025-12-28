@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Validation } from '@/game/Validation';
 import { Grid } from '@/game/Grid';
 import { Card } from '@/game/Card';
-import type { Placement } from '@/types/Grid.types';
+import type { Placement } from '@/game/Validation';
 
 describe('Validation', () => {
   it('should validate a valid line with all same color', () => {
