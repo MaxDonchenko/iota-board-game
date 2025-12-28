@@ -31,6 +31,32 @@ function AppContent() {
     }
   }, [gameState?.currentPlayerIndex]);
 
+  // Clear pending placements when all cards are deselected
+  useEffect(() => {
+    if (selectedCards.length === 0 && pendingPlacements.length > 0) {
+      setPendingPlacements([]);
+      setNextCardIndex(0);
+      return;
+    }
+    
+    // Remove placements for cards that are no longer selected
+    const placementsToKeep = pendingPlacements.filter(p => selectedCards.includes(p.card));
+    if (placementsToKeep.length !== pendingPlacements.length) {
+      setPendingPlacements(placementsToKeep);
+      // Recalculate nextCardIndex to point to first unplaced card
+      let newNextCardIndex = 0;
+      for (let i = 0; i < selectedCards.length; i++) {
+        const isPlaced = placementsToKeep.some(p => p.card === selectedCards[i]);
+        if (!isPlaced) {
+          newNextCardIndex = i;
+          break;
+        }
+        newNextCardIndex = i + 1;
+      }
+      setNextCardIndex(Math.min(newNextCardIndex, selectedCards.length));
+    }
+  }, [selectedCards, pendingPlacements]);
+
   const handleStartGame = (playerNames: string[], gameMode: GameMode) => {
     startGame(playerNames, gameMode, settings);
     setSelectedCards([]);
@@ -39,6 +65,8 @@ function AppContent() {
 
   const handleCardSelect = (card: CardType) => {
     if (selectedCards.includes(card)) {
+      // Deselecting a card - just remove it from selection
+      // The useEffect will handle cleaning up pending placements
       setSelectedCards(selectedCards.filter(c => c !== card));
     } else if (selectedCards.length < 4) {
       setSelectedCards([...selectedCards, card]);
@@ -170,7 +198,7 @@ function AppContent() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        visibility: pendingPlacements.length > 0 ? 'visible' : 'hidden',
+        visibility: pendingPlacements.length > 0 && selectedCards.length > 0 ? 'visible' : 'hidden',
       }}>
         <div style={{
           display: 'flex',
