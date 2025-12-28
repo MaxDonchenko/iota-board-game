@@ -25,7 +25,7 @@ function CardTesterContent() {
   grid.setStarterCard(0, 0, card);
 
   return (
-    <div style={{ padding: '1rem', color: 'var(--text-primary)' }}>
+    <div style={{ padding: '1rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)' }}>
       <h3 style={{ color: 'var(--text-primary)' }}>Card Tester</h3>
       <p style={{ color: 'var(--text-primary)' }}>Adjust the controls below to test different card combinations.</p>
       

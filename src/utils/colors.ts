@@ -2,48 +2,54 @@ import type { Color } from '@/types/Card.types';
 
 export type GameColor = Color;
 
-// Light mode colors (darker, for white text)
+// Base colors from RGB values
+// Red: rgb(238 29 36) = #EE1D24
+// Yellow: rgb(249 165 27) = #F9A51B
+// Green: rgb(97 187 70) = #61BB46
+// Blue: rgb(37 131 197) = #2583C5
+
+// Light mode colors (base colors, for white text)
 const COLOR_HEX_MAP_LIGHT: Record<Color, string> = {
-  Red: '#CC3333',
-  Blue: '#2E8B87',
-  Green: '#5FAE9E',
-  Yellow: '#CC9900',
+  Red: '#EE1D24',
+  Yellow: '#F9A51B',
+  Green: '#61BB46',
+  Blue: '#2583C5',
 };
 
 const COLOR_GRADIENT_MAP_LIGHT: Record<Color, string> = {
-  Red: 'linear-gradient(135deg, #CC3333 0%, #E64A4A 100%)',
-  Blue: 'linear-gradient(135deg, #2E8B87 0%, #3FAFA9 100%)',
-  Green: 'linear-gradient(135deg, #5FAE9E 0%, #7FC8B8 100%)',
-  Yellow: 'linear-gradient(135deg, #CC9900 0%, #E6B800 100%)',
+  Red: 'linear-gradient(135deg, #EE1D24 0%, #FF3D44 100%)',
+  Yellow: 'linear-gradient(135deg, #F9A51B 0%, #FFB53B 100%)',
+  Green: 'linear-gradient(135deg, #61BB46 0%, #81DB66 100%)',
+  Blue: 'linear-gradient(135deg, #2583C5 0%, #45A3E5 100%)',
 };
 
 const COLOR_SOLID_MAP_LIGHT: Record<Color, string> = {
-  Red: '#CC3333',
-  Blue: '#2E8B87',
-  Green: '#5FAE9E',
-  Yellow: '#CC9900',
+  Red: '#EE1D24',
+  Yellow: '#F9A51B',
+  Green: '#61BB46',
+  Blue: '#2583C5',
 };
 
-// Dark mode colors (lighter, for black text)
+// Dark mode colors (lighter versions, for black text)
 const COLOR_HEX_MAP_DARK: Record<Color, string> = {
-  Red: '#FF9999',
-  Blue: '#7EDDD6',
-  Green: '#B5F0E3',
-  Yellow: '#FFE066',
+  Red: '#FF5D64',
+  Yellow: '#FFC55B',
+  Green: '#91DB7A',
+  Blue: '#65B3E5',
 };
 
 const COLOR_GRADIENT_MAP_DARK: Record<Color, string> = {
-  Red: 'linear-gradient(135deg, #FF9999 0%, #FFB3B3 100%)',
-  Blue: 'linear-gradient(135deg, #7EDDD6 0%, #9EEFE8 100%)',
-  Green: 'linear-gradient(135deg, #B5F0E3 0%, #D5FFF5 100%)',
-  Yellow: 'linear-gradient(135deg, #FFE066 0%, #FFF099 100%)',
+  Red: 'linear-gradient(135deg, #FF5D64 0%, #FF7D84 100%)',
+  Yellow: 'linear-gradient(135deg, #FFC55B 0%, #FFE57B 100%)',
+  Green: 'linear-gradient(135deg, #91DB7A 0%, #B1FB9A 100%)',
+  Blue: 'linear-gradient(135deg, #65B3E5 0%, #85D3FF 100%)',
 };
 
 const COLOR_SOLID_MAP_DARK: Record<Color, string> = {
-  Red: '#FF9999',
-  Blue: '#7EDDD6',
-  Green: '#B5F0E3',
-  Yellow: '#FFE066',
+  Red: '#FF5D64',
+  Yellow: '#FFC55B',
+  Green: '#91DB7A',
+  Blue: '#65B3E5',
 };
 
 export class ColorUtils {
