@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { GameSetup } from './components/GameSetup/GameSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
@@ -20,6 +20,16 @@ function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate }>>([]);
+  const [nextCardIndex, setNextCardIndex] = useState(0);
+
+  // Clear selections when turn changes
+  useEffect(() => {
+    if (gameState) {
+      setSelectedCards([]);
+      setPendingPlacements([]);
+      setNextCardIndex(0);
+    }
+  }, [gameState?.currentPlayerIndex]);
 
   const handleStartGame = (playerNames: string[], gameMode: GameMode) => {
     startGame(playerNames, gameMode, settings);
@@ -35,34 +45,51 @@ function AppContent() {
     }
   };
 
-  const handlePlaceCard = (card: CardType, position: Coordinate) => {
-    if (!gameState) return;
+  const handlePlaceCard = (position: Coordinate) => {
+    if (!gameState || selectedCards.length === 0) return;
 
+    // Get the next card to place
+    if (nextCardIndex >= selectedCards.length) {
+      return; // All cards already placed in preview
+    }
+
+    const card = selectedCards[nextCardIndex];
     const newPlacements = [...pendingPlacements, { card, position }];
     setPendingPlacements(newPlacements);
+    setNextCardIndex(nextCardIndex + 1);
+  };
 
-    // If we've placed all selected cards, validate and place them
-    if (newPlacements.length === selectedCards.length) {
-      const placements = newPlacements.map(p => ({
-        card: p.card,
-        position: p.position,
-      }));
+  const handleConfirmTurn = () => {
+    if (!gameState || pendingPlacements.length === 0) return;
 
-      const result = placeCards(placements);
-      if (result.success) {
-        setSelectedCards([]);
-        setPendingPlacements([]);
-      } else {
-        // Show error and reset
-        alert(result.error || 'Invalid placement');
-        setPendingPlacements([]);
-      }
+    const placements = pendingPlacements.map(p => ({
+      card: p.card,
+      position: p.position,
+    }));
+
+    const result = placeCards(placements);
+    if (result.success) {
+      setSelectedCards([]);
+      setPendingPlacements([]);
+      setNextCardIndex(0);
+    } else {
+      // Show error and reset
+      alert(result.error || 'Invalid placement');
+      setPendingPlacements([]);
+      setNextCardIndex(0);
     }
+  };
+
+  const handleCancelPreview = () => {
+    setPendingPlacements([]);
+    setNextCardIndex(0);
   };
 
   const handlePass = () => {
     passTurn();
     setSelectedCards([]);
+    setPendingPlacements([]);
+    setNextCardIndex(0);
   };
 
   if (showSettings) {
@@ -121,6 +148,8 @@ function AppContent() {
       <GameBoard
         grid={gameState.grid}
         selectedCards={selectedCards}
+        pendingPlacements={pendingPlacements}
+        nextCardIndex={nextCardIndex}
         onPlaceCard={handlePlaceCard}
       />
 
@@ -128,8 +157,78 @@ function AppContent() {
         <PlayerHand
           cards={currentPlayer.hand}
           onCardSelect={handleCardSelect}
+          selectedCards={selectedCards}
+          onSelectionChange={setSelectedCards}
         />
       )}
+
+      {/* Preview mode controls - reserved space */}
+      <div style={{
+        minHeight: '80px',
+        padding: '1rem',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        visibility: pendingPlacements.length > 0 ? 'visible' : 'hidden',
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: '1rem',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            color: 'var(--text-primary)',
+            marginRight: '1rem'
+          }}>
+            <span>Preview: {pendingPlacements.length} of {selectedCards.length} cards placed</span>
+            {nextCardIndex < selectedCards.length && (
+              <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+                (Next: {selectedCards[nextCardIndex].getEffectiveShape()} {selectedCards[nextCardIndex].getEffectiveNumber()} {selectedCards[nextCardIndex].getEffectiveColor()})
+              </span>
+            )}
+          </div>
+          {pendingPlacements.length === selectedCards.length && (
+            <button
+              onClick={handleConfirmTurn}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#61BB46',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+              }}
+            >
+              Confirm Turn
+            </button>
+          )}
+          <button
+            onClick={handleCancelPreview}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

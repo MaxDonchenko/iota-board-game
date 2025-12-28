@@ -8,9 +8,10 @@ interface CardProps {
   onClick?: () => void;
   selected?: boolean;
   className?: string;
+  cursor?: 'pointer' | 'not-allowed' | 'default';
 }
 
-export function Card({ card, onClick, selected, className = '' }: CardProps) {
+export function Card({ card, onClick, selected, className = '', cursor }: CardProps) {
   const { settings } = useTheme();
   const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
 
@@ -28,6 +29,7 @@ export function Card({ card, onClick, selected, className = '' }: CardProps) {
       style={{
         background: colorStyle,
         color: textColor,
+        cursor: cursor || (onClick ? 'pointer' : undefined),
       }}
     >
       {isWild && <div className={styles.wildBadge}>WILD</div>}

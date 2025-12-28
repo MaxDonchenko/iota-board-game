@@ -1,5 +1,4 @@
 import { Card } from '../Card/Card';
-import { useCardSelection } from '@/hooks/useCardSelection';
 import type { Card as CardType } from '@/game/Card';
 import styles from './PlayerHand.module.css';
 
@@ -7,18 +6,33 @@ interface PlayerHandProps {
   cards: CardType[];
   onCardSelect?: (card: CardType) => void;
   maxSelection?: number;
+  selectedCards?: CardType[];
+  onSelectionChange?: (selected: CardType[]) => void;
 }
 
-export function PlayerHand({ cards, onCardSelect, maxSelection = 4 }: PlayerHandProps) {
-  const { selectedCards, selectCard, deselectCard, isSelected } = useCardSelection(maxSelection);
+export function PlayerHand({ 
+  cards, 
+  onCardSelect, 
+  maxSelection = 4,
+  selectedCards = [],
+  onSelectionChange
+}: PlayerHandProps) {
+  const isSelected = (card: CardType) => selectedCards.includes(card);
 
   const handleCardClick = (card: CardType) => {
     if (isSelected(card)) {
-      deselectCard(card);
+      // Deselect
+      const newSelection = selectedCards.filter(c => c !== card);
+      onSelectionChange?.(newSelection);
+      onCardSelect?.(card);
     } else {
-      selectCard(card);
+      // Select (if under max)
+      if (selectedCards.length < maxSelection) {
+        const newSelection = [...selectedCards, card];
+        onSelectionChange?.(newSelection);
+        onCardSelect?.(card);
+      }
     }
-    onCardSelect?.(card);
   };
 
   return (

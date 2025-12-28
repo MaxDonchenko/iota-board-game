@@ -9,10 +9,19 @@ interface GameBoardProps {
   grid: Grid;
   onCellClick?: (x: number, y: number) => void;
   selectedCards?: CardType[];
-  onPlaceCard?: (card: CardType, position: Coordinate) => void;
+  pendingPlacements?: Array<{ card: CardType; position: Coordinate }>;
+  nextCardIndex?: number;
+  onPlaceCard?: (position: Coordinate) => void;
 }
 
-export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }: GameBoardProps) {
+export function GameBoard({ 
+  grid, 
+  onCellClick, 
+  selectedCards = [], 
+  pendingPlacements = [],
+  nextCardIndex = 0,
+  onPlaceCard 
+}: GameBoardProps) {
   const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
   // Get grid bounds
@@ -50,10 +59,21 @@ export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }
   const width = bounds.maxX - bounds.minX + 1;
   const height = bounds.maxY - bounds.minY + 1;
 
-  const handleCellClick = (x: number, y: number) => {
-    if (selectedCards.length > 0 && onPlaceCard) {
-      const card = selectedCards[0];
-      onPlaceCard(card, { x, y });
+  const handleCellClick = (x: number, y: number, hasCard: boolean) => {
+    // Don't allow placing on occupied cells
+    if (hasCard) {
+      return;
+    }
+
+    // Only allow placing if we have selected cards and haven't placed all yet
+    if (selectedCards.length > 0 && nextCardIndex < selectedCards.length && onPlaceCard) {
+      // Check if this position is already used in pending placements
+      const isAlreadyPlaced = pendingPlacements.some(p => 
+        p.position.x === x && p.position.y === y
+      );
+      if (!isAlreadyPlaced) {
+        onPlaceCard({ x, y });
+      }
     }
     onCellClick?.(x, y);
   };
@@ -68,15 +88,38 @@ export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }
       const starterPosition = grid.getStarterPosition();
       const isStarter = starterPosition?.x === x && starterPosition?.y === y;
       
+      // Check if this position has a pending placement
+      const pendingPlacement = pendingPlacements.find(p => 
+        p.position.x === x && p.position.y === y
+      );
+      const showPendingCard = pendingPlacement && !hasCard;
+      
+      // Show preview card if in preview mode
+      const displayCard = card || (showPendingCard ? pendingPlacement?.card : undefined);
+      const isPreview = showPendingCard && !hasCard;
+      
+      // Determine if this cell is clickable for placement
+      const isPlacementMode = selectedCards.length > 0 && nextCardIndex < selectedCards.length;
+      const isClickable = !hasCard && isPlacementMode && !pendingPlacements.some(p => p.position.x === x && p.position.y === y);
+      const isNotAllowed = hasCard && isPlacementMode;
+      
+      // Determine cursor for card
+      let cardCursor: 'pointer' | 'not-allowed' | undefined;
+      if (isNotAllowed) {
+        cardCursor = 'not-allowed';
+      } else if (isClickable) {
+        cardCursor = 'pointer';
+      }
+      
       cells.push(
         <div
           key={`${x},${y}`}
-          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''} ${isStarter ? styles.starter : ''}`}
-          onClick={() => handleCellClick(x, y)}
+          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''} ${isStarter ? styles.starter : ''} ${isPreview ? styles.preview : ''} ${isNotAllowed ? styles.notAllowed : ''}`}
+          onClick={() => handleCellClick(x, y, hasCard)}
           onMouseEnter={() => setHoveredCell({ x, y })}
           onMouseLeave={() => setHoveredCell(null)}
         >
-          {card && <Card card={card} />}
+          {displayCard && <Card card={displayCard} cursor={cardCursor} />}
         </div>
       );
     }

@@ -54,3 +54,20 @@
   border-width: 3px;
 }
 
+.cell.preview {
+  border-style: dashed;
+  border-color: #61BB46;
+  border-width: 2px;
+  opacity: 0.8;
+}
+
+.cell.preview:hover {
+  opacity: 1;
+  border-width: 3px;
+}
+
+.cell.notAllowed {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
