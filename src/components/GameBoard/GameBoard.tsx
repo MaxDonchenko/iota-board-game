@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '../Card/Card';
 import { Grid } from '@/game/Grid';
+import { Validation } from '@/game/Validation';
 import type { Coordinate } from '@/types/Grid.types';
 import type { Card as CardType } from '@/game/Card';
+import type { GameSettings } from '@/types/Game.types';
 import styles from './GameBoard.module.css';
 
 interface GameBoardProps {
@@ -12,6 +14,7 @@ interface GameBoardProps {
   pendingPlacements?: Array<{ card: CardType; position: Coordinate }>;
   nextCardIndex?: number;
   onPlaceCard?: (position: Coordinate) => void;
+  settings?: GameSettings;
 }
 
 export function GameBoard({ 
@@ -20,7 +23,8 @@ export function GameBoard({
   selectedCards = [], 
   pendingPlacements = [],
   nextCardIndex = 0,
-  onPlaceCard 
+  onPlaceCard,
+  settings
 }: GameBoardProps) {
   const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
@@ -54,6 +58,46 @@ export function GameBoard({
       maxY: maxY + 2,
     };
   };
+
+  // Calculate invalid placements when in placement mode and setting is enabled
+  const invalidPlacements = useMemo(() => {
+    if (!settings?.showInvalidPlacements || selectedCards.length === 0 || nextCardIndex >= selectedCards.length) {
+      return new Set<string>();
+    }
+
+    const invalid = new Set<string>();
+    const nextCard = selectedCards[nextCardIndex];
+    const bounds = getBounds();
+    
+    // Create a temporary grid with pending placements
+    const tempGrid = new Grid();
+    for (const [key, card] of grid.positions.entries()) {
+      const [x, y] = key.split(',').map(Number);
+      tempGrid.addCard(x, y, card);
+    }
+    for (const placement of pendingPlacements) {
+      tempGrid.addCard(placement.position.x, placement.position.y, placement.card);
+    }
+
+    // Check each empty cell in visible bounds
+    for (let y = bounds.minY; y <= bounds.maxY; y++) {
+      for (let x = bounds.minX; x <= bounds.maxX; x++) {
+        if (tempGrid.hasCard(x, y)) continue; // Skip occupied cells
+        
+        // Check if placing the next card here would be valid
+        const result = Validation.validatePlacement(
+          [{ card: nextCard, position: { x, y } }],
+          tempGrid
+        );
+        
+        if (!result.isValid) {
+          invalid.add(`${x},${y}`);
+        }
+      }
+    }
+
+    return invalid;
+  }, [grid, selectedCards, nextCardIndex, pendingPlacements, settings?.showInvalidPlacements]);
 
   const bounds = getBounds();
   const width = bounds.maxX - bounds.minX + 1;
@@ -102,10 +146,11 @@ export function GameBoard({
       const isPlacementMode = selectedCards.length > 0 && nextCardIndex < selectedCards.length;
       const isClickable = !hasCard && isPlacementMode && !pendingPlacements.some(p => p.position.x === x && p.position.y === y);
       const isNotAllowed = hasCard && isPlacementMode;
+      const isInvalidPlacement = !hasCard && isPlacementMode && invalidPlacements.has(`${x},${y}`);
       
       // Determine cursor for card
       let cardCursor: 'pointer' | 'not-allowed' | undefined;
-      if (isNotAllowed) {
+      if (isNotAllowed || isInvalidPlacement) {
         cardCursor = 'not-allowed';
       } else if (isClickable) {
         cardCursor = 'pointer';
@@ -114,7 +159,7 @@ export function GameBoard({
       cells.push(
         <div
           key={`${x},${y}`}
-          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''} ${isStarter ? styles.starter : ''} ${isPreview ? styles.preview : ''} ${isNotAllowed ? styles.notAllowed : ''}`}
+          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''} ${isStarter ? styles.starter : ''} ${isPreview ? styles.preview : ''} ${isNotAllowed ? styles.notAllowed : ''} ${isInvalidPlacement ? styles.invalidPlacement : ''}`}
           onClick={() => handleCellClick(x, y, hasCard)}
           onMouseEnter={() => setHoveredCell({ x, y })}
           onMouseLeave={() => setHoveredCell(null)}

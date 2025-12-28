@@ -6,6 +6,7 @@ interface ThemeContextType {
   updateSettings: (settings: Partial<GameSettings>) => void;
   toggleTheme: () => void;
   toggleGradients: () => void;
+  toggleShowInvalidPlacements: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -14,6 +15,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   theme: 'light',
   useGradients: true,
   gameMode: 'full',
+  showInvalidPlacements: true,
 };
 
 const STORAGE_KEY = 'iota-game-settings';
@@ -58,8 +60,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const toggleShowInvalidPlacements = () => {
+    setSettings(prev => ({
+      ...prev,
+      showInvalidPlacements: !prev.showInvalidPlacements,
+    }));
+  };
+
   return (
-    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients }}>
+    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements }}>
       {children}
     </ThemeContext.Provider>
   );

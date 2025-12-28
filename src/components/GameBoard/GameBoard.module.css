@@ -71,3 +71,13 @@
   opacity: 0.6;
 }
 
+.cell.invalidPlacement {
+  background-color: rgba(238, 29, 36, 0.1);
+  border: 1px dashed rgba(238, 29, 36, 0.4);
+}
+
+.cell.invalidPlacement:hover {
+  background-color: rgba(238, 29, 36, 0.15);
+  border-color: rgba(238, 29, 36, 0.6);
+}
+

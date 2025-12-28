@@ -151,6 +151,7 @@ function AppContent() {
         pendingPlacements={pendingPlacements}
         nextCardIndex={nextCardIndex}
         onPlaceCard={handlePlaceCard}
+        settings={settings}
       />
 
       {currentPlayer && (

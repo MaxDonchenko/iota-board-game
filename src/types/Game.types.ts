@@ -17,6 +17,7 @@ export interface GameSettings {
   theme: 'light' | 'dark';
   useGradients: boolean;
   gameMode: GameMode;
+  showInvalidPlacements: boolean;
 }
 
 export interface GameState {
