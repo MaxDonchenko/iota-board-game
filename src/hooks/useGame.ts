@@ -5,7 +5,7 @@ import { Scoring } from '@/game/Scoring';
 import { WildCardManager } from '@/game/WildCard';
 import { Card } from '@/game/Card';
 import { generateGameId, saveGameToStorage, loadGameFromStorage } from '@/utils/gamePersistence';
-import type { GameState, Player, GameSettings } from '@/types/Game.types';
+import type { GameState, GameSettings } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
 
@@ -14,6 +14,7 @@ interface UseGameReturn {
   startGame: (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => void;
   placeCards: (placements: Placement[], cardMapping?: Map<Card, Card>) => { success: boolean; error?: string };
   passTurn: (cardsToTrade?: string[]) => void;
+  discardCards: (cards: Card[]) => { success: boolean; error?: string };
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
   resetGame: () => void;
 }
@@ -189,10 +190,8 @@ export function useGame(): UseGameReturn {
     if (!gameState) {
       return { success: false, error: 'No game in progress' };
     }
-
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
     
-    if (!WildCardManager.canReplaceWild(replacement.wildCard, replacement.replacementCard, gameState.grid)) {
+    if (!Validation.canReplaceWild(replacement.wildCard, replacement.replacementCard, gameState.grid)) {
       return { success: false, error: 'Cannot replace wild card' };
     }
 
@@ -229,6 +228,48 @@ export function useGame(): UseGameReturn {
     }
   }, [gameState]);
 
+  const discardCards = useCallback((cards: Card[]) => {
+    if (!gameState) {
+      return { success: false, error: 'No game in progress' };
+    }
+
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    
+    // Verify all cards are in player's hand
+    const cardsToDiscard = cards.filter(card => currentPlayer.hand.includes(card));
+    if (cardsToDiscard.length === 0) {
+      return { success: false, error: 'No valid cards to discard' };
+    }
+
+    // Return cards to bottom of draw pile (addToDrawPile adds to the end of the array)
+    for (const card of cardsToDiscard) {
+      gameState.deck.drawPile.unshift(card); // Add to bottom (beginning) of draw pile
+    }
+
+    // Remove from hand
+    const updatedHand = currentPlayer.hand.filter(card => !cardsToDiscard.includes(card));
+    
+    // Draw replacements from top (dealCards uses pop, which takes from the end)
+    const newCards = gameState.deck.dealCards(cardsToDiscard.length);
+    
+    const updatedPlayers = gameState.players.map((p, idx) => {
+      if (idx === gameState.currentPlayerIndex) {
+        return { ...p, hand: [...updatedHand, ...newCards] };
+      }
+      return p;
+    });
+
+    // Move to next turn
+    const newState = GameStateManager.nextTurn({
+      ...gameState,
+      players: updatedPlayers,
+    });
+
+    setGameState(newState);
+
+    return { success: true };
+  }, [gameState]);
+
   const resetGame = useCallback(() => {
     setGameState(null);
     setGameId(null);
@@ -247,6 +288,7 @@ export function useGame(): UseGameReturn {
     startGame,
     placeCards,
     passTurn,
+    discardCards,
     recycleWildCard,
     resetGame,
   };

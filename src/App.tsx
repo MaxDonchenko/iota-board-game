@@ -7,6 +7,7 @@ import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
 import { GameControls } from './components/GameControls/GameControls';
 import { Settings } from './components/Settings/Settings';
 import { Card as CardComponent } from './components/Card/Card';
+import { EqualWidthContainer } from './components/Layout/EqualWidthContainer';
 import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
 import type { Coordinate } from './types/Grid.types';
@@ -21,7 +22,7 @@ import './styles/card-animations.css';
 
 function AppContent() {
   const { settings } = useTheme();
-  const { gameState, startGame, placeCards, passTurn, resetGame } = useGame();
+  const { gameState, startGame, placeCards, passTurn, discardCards, resetGame } = useGame();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>>([]);
@@ -284,6 +285,19 @@ function AppContent() {
     setNextCardIndex(0);
   };
 
+  const handleDiscardSelected = () => {
+    if (selectedCards.length === 0) return;
+    
+    const result = discardCards(selectedCards);
+    if (result.success) {
+      setSelectedCards([]);
+      setPendingPlacements([]);
+      setNextCardIndex(0);
+    } else {
+      alert(result.error || 'Failed to discard cards');
+    }
+  };
+
   if (showSettings) {
     return (
       <div>
@@ -325,17 +339,24 @@ function AppContent() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <div style={{ textAlign: 'right', padding: '1rem' }}>
-        <button onClick={() => setShowSettings(true)}>Settings</button>
-      </div>
-      
-      <ScoreDisplay gameState={gameState} />
-      
-      <GameControls
-        gameState={gameState}
-        onPass={handlePass}
-        onNewGame={resetGame}
-      />
+      {/* Top section: Scores, Current Player, Settings */}
+      <EqualWidthContainer itemCount={3}>
+        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column' }}>
+          <ScoreDisplay gameState={gameState} />
+        </div>
+        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column' }}>
+          <GameControls
+            gameState={gameState}
+            onPass={handlePass}
+            onNewGame={resetGame}
+          />
+        </div>
+        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
+          <div style={{ textAlign: 'right', padding: '1rem' }}>
+            <button onClick={() => setShowSettings(true)}>Settings</button>
+          </div>
+        </div>
+      </EqualWidthContainer>
 
       <GameBoard
         grid={gameState.grid}
@@ -346,18 +367,10 @@ function AppContent() {
         settings={settings}
       />
 
-      {/* Bottom section: Hand, Preview, Wildcard Selection - horizontal layout */}
-      <div style={{
-        display: 'flex',
-        gap: '1rem',
-        padding: '1rem',
-        flexWrap: 'wrap',
-        alignItems: 'stretch',
-      }}>
+      {/* Bottom section: Hand, Place Cards, Discard, Wildcard Selection - horizontal layout */}
+      <EqualWidthContainer itemCount={4}>
         {/* Player Hand */}
         <div style={{ 
-          flex: '1 1 300px', 
-          minWidth: '200px', 
           visibility: currentPlayer ? 'visible' : 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -374,11 +387,9 @@ function AppContent() {
           )}
         </div>
 
-        {/* Preview and Confirm Turn */}
+        {/* Option A: Place Cards */}
         <div style={{
-          flex: '1 1 300px',
-          minWidth: '200px',
-          visibility: pendingPlacements.length > 0 && selectedCards.length > 0 ? 'visible' : 'hidden',
+          visibility: selectedCards.length > 0 ? 'visible' : 'hidden',
           display: 'flex',
           flexDirection: 'column',
         }}>
@@ -397,67 +408,154 @@ function AppContent() {
               fontSize: '1.2rem',
               fontWeight: 'bold',
             }}>
-              Preview Turn
+              Option A: Place Cards
             </h3>
+            
             <div style={{
-              display: 'flex',
-              gap: '1rem',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
+              marginBottom: '1rem',
+              padding: '0.75rem',
+              backgroundColor: 'var(--bg-tertiary)',
+              borderRadius: '6px',
+              color: 'var(--text-primary)',
+              fontSize: '0.9rem',
             }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '1rem',
-                color: 'var(--text-primary)',
-                flexWrap: 'wrap',
+              <p style={{ margin: 0 }}>
+                {pendingPlacements.length === 0 
+                  ? 'Place your selected cards on the board to score points.'
+                  : 'Place all cards on the board to complete your turn.'}
+              </p>
+            </div>
+            
+            {pendingPlacements.length > 0 && (
+              <div style={{
+                marginBottom: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                alignItems: 'center',
               }}>
-                <span>{pendingPlacements.length} of {selectedCards.length} cards placed</span>
-                {nextCardIndex < selectedCards.length && (
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    fontSize: '0.9rem',
-                  }}>
-                    <span style={{ opacity: 0.8 }}>Next:</span>
-                    <div style={{ transform: 'scale(0.5)', transformOrigin: 'left center' }}>
-                      <CardComponent card={selectedCards[nextCardIndex]} />
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '1rem',
+                  color: 'var(--text-primary)',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                }}>
+                  <span>{pendingPlacements.length} of {selectedCards.length} cards placed</span>
+                  {nextCardIndex < selectedCards.length && (
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      fontSize: '0.9rem',
+                    }}>
+                      <span style={{ opacity: 0.8 }}>Next:</span>
+                      <div style={{ transform: 'scale(0.5)', transformOrigin: 'left center' }}>
+                        <CardComponent card={selectedCards[nextCardIndex]} />
+                      </div>
                     </div>
+                  )}
+                </div>
+                
+                {pendingPlacements.length === selectedCards.length && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    width: '100%',
+                    justifyContent: 'center',
+                  }}>
+                    <button
+                      onClick={handleConfirmTurn}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        backgroundColor: '#61BB46',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Confirm Turn
+                    </button>
+                    <button
+                      onClick={handleCancelPreview}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        fontSize: '1rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 )}
               </div>
-              {pendingPlacements.length === selectedCards.length && (
-                <button
-                  onClick={handleConfirmTurn}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    backgroundColor: '#61BB46',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Confirm Turn
-                </button>
-              )}
+            )}
+          </div>
+        </div>
+
+        {/* Option B: Discard */}
+        <div style={{
+          visibility: selectedCards.length > 0 && pendingPlacements.length === 0 ? 'visible' : 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            <h3 style={{
+              color: 'var(--text-primary)',
+              marginBottom: '1rem',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+            }}>
+              Option B: Discard
+            </h3>
+            
+            <div style={{
+              marginBottom: '1rem',
+              padding: '0.75rem',
+              backgroundColor: 'var(--bg-tertiary)',
+              borderRadius: '6px',
+              color: 'var(--text-primary)',
+              fontSize: '0.9rem',
+            }}>
+              <p style={{ margin: 0 }}>
+                Return selected cards to the deck and draw new ones. Your turn will end.
+              </p>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+            }}>
               <button
-                onClick={handleCancelPreview}
+                onClick={handleDiscardSelected}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: 'var(--bg-tertiary)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  backgroundColor: '#F9A51B',
+                  color: 'white',
+                  border: 'none',
                   borderRadius: '6px',
                   fontSize: '1rem',
+                  fontWeight: 'bold',
                   cursor: 'pointer',
                 }}
               >
-                Cancel
+                Discard Selected ({selectedCards.length})
               </button>
             </div>
           </div>
@@ -465,8 +563,6 @@ function AppContent() {
 
         {/* Wildcard Value Selection - always rendered but hidden */}
         <div style={{
-          flex: '1 1 300px',
-          minWidth: '200px',
           visibility: (() => {
             const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
             if (!wildcardPlacement) return 'hidden';
@@ -499,8 +595,21 @@ function AppContent() {
                   fontSize: '1.2rem',
                   fontWeight: 'bold',
                 }}>
-                  Select Wildcard Value
+                  Wildcard Value
                 </h3>
+                
+                <div style={{
+                  marginBottom: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--bg-tertiary)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem',
+                }}>
+                  <p style={{ margin: 0 }}>
+                    Choose which card value your wildcard should represent for scoring.
+                  </p>
+                </div>
                 <div style={{
                   display: 'flex',
                   gap: '0.5rem',
@@ -568,7 +677,7 @@ function AppContent() {
             );
           })()}
         </div>
-      </div>
+      </EqualWidthContainer>
     </div>
   );
 }
