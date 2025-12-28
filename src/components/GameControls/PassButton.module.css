@@ -1,0 +1,9 @@
+.passButton {
+  background: #2196F3;
+  color: white;
+}
+
+.passButton:hover {
+  background: #1976D2;
+}
+

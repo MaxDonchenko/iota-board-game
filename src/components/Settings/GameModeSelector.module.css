@@ -1,0 +1,35 @@
+.gameModeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.button {
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.button.active {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+}
+
+.description {
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+

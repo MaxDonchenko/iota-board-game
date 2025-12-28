@@ -1,0 +1,39 @@
+import { basicLinePlacement } from './BasicLinePlacement';
+import { lotCreation } from './LotCreation';
+import { wildCardPlacement } from './WildCardPlacement';
+import { wildCardRecycling } from './WildCardRecycling';
+import { multiLineScoring } from './MultiLineScoring';
+import { allFourCards } from './AllFourCards';
+import { finalTurn } from './FinalTurn';
+import { complexGrid } from './ComplexGrid';
+import { impossiblePlacement } from './ImpossiblePlacement';
+import { edgeCaseValidation } from './EdgeCaseValidation';
+import type { UseCase } from './types';
+
+export type UseCaseName = 
+  | 'BasicLinePlacement'
+  | 'LotCreation'
+  | 'WildCardPlacement'
+  | 'WildCardRecycling'
+  | 'MultiLineScoring'
+  | 'AllFourCards'
+  | 'FinalTurn'
+  | 'ComplexGrid'
+  | 'ImpossiblePlacement'
+  | 'EdgeCaseValidation';
+
+export type { UseCase };
+
+export const useCases: Record<UseCaseName, UseCase> = {
+  BasicLinePlacement: basicLinePlacement,
+  LotCreation: lotCreation,
+  WildCardPlacement: wildCardPlacement,
+  WildCardRecycling: wildCardRecycling,
+  MultiLineScoring: multiLineScoring,
+  AllFourCards: allFourCards,
+  FinalTurn: finalTurn,
+  ComplexGrid: complexGrid,
+  ImpossiblePlacement: impossiblePlacement,
+  EdgeCaseValidation: edgeCaseValidation,
+};
+

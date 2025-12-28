@@ -1,0 +1,42 @@
+.gameBoard {
+  padding: 2rem;
+  overflow: auto;
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell {
+  width: 90px;
+  height: 130px;
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-secondary);
+}
+
+.cell:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+}
+
+.cell.occupied {
+  border: none;
+  background: transparent;
+}
+
+.cell.hovered {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+  border-width: 2px;
+}
+

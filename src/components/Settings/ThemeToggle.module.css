@@ -1,0 +1,28 @@
+.themeToggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.toggleButton {
+  width: 150px;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.toggleButton:hover {
+  background: var(--bg-tertiary);
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+

@@ -1,0 +1,51 @@
+.scoreDisplay {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scoreItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-primary);
+}
+
+.scoreItem.currentPlayer {
+  background: var(--bg-tertiary);
+  font-weight: bold;
+}
+
+.playerName {
+  color: var(--text-primary);
+}
+
+.score {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.finalTurn {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: #ff9800;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+}
+

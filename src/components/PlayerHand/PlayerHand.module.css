@@ -1,0 +1,27 @@
+.hand {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.selectionInfo {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
