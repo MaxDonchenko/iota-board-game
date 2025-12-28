@@ -9,18 +9,23 @@ interface CardProps {
   selected?: boolean;
   className?: string;
   cursor?: 'pointer' | 'not-allowed' | 'default';
-  wildcardVariant?: 'v1' | 'v2';
+  wildcardVariant?: 'modern' | 'original';
+  cardVariant?: 'modern' | 'original';
 }
 
-export function Card({ card, onClick, selected, className = '', cursor, wildcardVariant }: CardProps) {
+export function Card({ card, onClick, selected, className = '', cursor, wildcardVariant, cardVariant }: CardProps) {
   const { settings: contextSettings } = useTheme();
-  const settings = wildcardVariant ? { ...contextSettings, wildcardVariant } : contextSettings;
+  const settings = {
+    ...contextSettings,
+    ...(wildcardVariant && { wildcardVariant }),
+    ...(cardVariant && { cardVariant }),
+  };
   const isWild = card.isWild;
   const hasWildValue = isWild && card.wildValue;
 
   // For wildcards without values, show variant-specific design
   if (isWild && !hasWildValue) {
-    if (settings.wildcardVariant === 'v2') {
+    if (settings.wildcardVariant === 'original') {
       return (
         <div
           className={`${styles.card} ${styles.wildCard} ${styles.wildCardV2} ${selected ? styles.selected : ''} ${className}`}
@@ -30,41 +35,82 @@ export function Card({ card, onClick, selected, className = '', cursor, wildcard
           }}
         >
           <div className={styles.wildGridV2}>
-            <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Yellow', settings.theme) }}>
-              <div className={styles.wildShape}>■</div>
-            </div>
-            <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Red', settings.theme) }}>
-              <div className={styles.wildShape}>●</div>
-            </div>
-            <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}>
-              <div className={styles.wildShape}>+</div>
-            </div>
-            <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}>
-              <div className={styles.wildShape}>▲</div>
-            </div>
+            {(() => {
+              const cornerColor = settings.theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+              return (
+                <>
+                  <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Yellow', settings.theme) }}>
+                    <div className={styles.wildShape} style={{ color: cornerColor }}>■</div>
+                  </div>
+                  <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Red', settings.theme) }}>
+                    <div className={styles.wildShape} style={{ color: cornerColor }}>●</div>
+                  </div>
+                  <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}>
+                    <div className={styles.wildShape} style={{ color: cornerColor }}>
+                      {getPlusSVG(16, cornerColor, ColorUtils.toHex('Blue', settings.theme))}
+                    </div>
+                  </div>
+                  <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}>
+                    <div className={styles.wildShape} style={{ color: cornerColor }}>▲</div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
-          <div className={styles.cobweb} style={{ color: settings.theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)' }}>
-            <svg width="100%" height="100%" viewBox="0 0 60 60" style={{ position: 'absolute', top: 0, left: 0 }}>
-              <circle cx="30" cy="30" r="2" fill="currentColor" />
-              <circle cx="15" cy="15" r="1.5" fill="currentColor" />
-              <circle cx="45" cy="15" r="1.5" fill="currentColor" />
-              <circle cx="15" cy="45" r="1.5" fill="currentColor" />
-              <circle cx="45" cy="45" r="1.5" fill="currentColor" />
-              <line x1="30" y1="30" x2="15" y2="15" stroke="currentColor" strokeWidth="0.5" />
-              <line x1="30" y1="30" x2="45" y2="15" stroke="currentColor" strokeWidth="0.5" />
-              <line x1="30" y1="30" x2="15" y2="45" stroke="currentColor" strokeWidth="0.5" />
-              <line x1="30" y1="30" x2="45" y2="45" stroke="currentColor" strokeWidth="0.5" />
-              <circle cx="22" cy="22" r="1" fill="currentColor" />
-              <circle cx="38" cy="22" r="1" fill="currentColor" />
-              <circle cx="22" cy="38" r="1" fill="currentColor" />
-              <circle cx="38" cy="38" r="1" fill="currentColor" />
-            </svg>
+          <div className={styles.cobweb}>
+            {(() => {
+              const shapes = ['Square', 'Circle', 'Plus', 'Triangle'];
+              const cobwebColor = settings.theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
+              
+              return (
+                <div style={{ 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  width: '100%', 
+                  height: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gridTemplateRows: 'repeat(4, 1fr)',
+                  gap: '2px',
+                  padding: '8px',
+                  zIndex: 2,
+                  pointerEvents: 'none'
+                }}>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const row = Math.floor(i / 4);
+                    const col = i % 4;
+                    const shapeIndex = (row + col) % 4;
+                    const shape = shapes[shapeIndex];
+                    
+                    return (
+                      <div 
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '6px',
+                          color: cobwebColor,
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {shape === 'Square' && '■'}
+                        {shape === 'Circle' && '●'}
+                        {shape === 'Plus' && getPlusSVG(8, cobwebColor)}
+                        {shape === 'Triangle' && '▲'}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       );
     }
     
-    // v1 - original grid
+    // modern - grid style
     return (
       <div
         className={`${styles.card} ${styles.wildCard} ${selected ? styles.selected : ''} ${className}`}
@@ -87,10 +133,47 @@ export function Card({ card, onClick, selected, className = '', cursor, wildcard
   const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
   const shapeSymbol = getShapeSymbol(card.getEffectiveShape());
   const numberDisplay = card.getEffectiveNumber();
+  const cardColor = ColorUtils.toHex(card.getEffectiveColor(), settings.theme);
 
   // Dark mode: black text, Light mode: white text
   const textColor = settings.theme === 'dark' ? '#000000' : '#FFFFFF';
+  const oppositeColor = settings.theme === 'dark' ? '#FFFFFF' : '#000000';
 
+  // Card original: squared background with full-size shape and tiny shapes inside
+  if (settings.cardVariant === 'original') {
+    return (
+      <div
+        className={`${styles.card} ${styles.cardV2} ${selected ? styles.selected : ''} ${className}`}
+        onClick={onClick}
+        style={{
+          backgroundColor: textColor,
+          cursor: cursor || (onClick ? 'pointer' : undefined),
+        }}
+      >
+        {isWild && <div className={styles.wildBadge}>WILD</div>}
+        <div className={styles.shapeV2} style={{ color: cardColor }}>
+          {card.getEffectiveShape() === 'Plus' ? (
+            getPlusSVG(48, cardColor, textColor)
+          ) : (
+            shapeSymbol
+          )}
+        </div>
+        <div className={styles.tinyShapes} data-count={numberDisplay}>
+          {Array.from({ length: numberDisplay }, (_, i) => (
+            <div key={i} className={styles.tinyShape} style={{ color: oppositeColor }}>
+              {card.getEffectiveShape() === 'Plus' ? (
+                getPlusSVG(10, oppositeColor, cardColor)
+              ) : (
+                shapeSymbol
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Card modern: gradient design
   return (
     <div
       className={`${styles.card} ${selected ? styles.selected : ''} ${className}`}
@@ -116,10 +199,25 @@ function getShapeSymbol(shape: string): string {
       return '●';
     case 'Plus':
       return '+';
-      case 'Triangle':
-        return '▲';
+    case 'Triangle':
+      return '▲';
     default:
       return '?';
   }
+}
+
+function getPlusSVG(size: number, color: string, _backgroundColor?: string) {
+  const cutoutSize = Math.floor(size / 3); // Make cutouts slightly bigger (1-2px)
+  
+  // Create plus shape path: square with 4 corner cutouts
+  // This path will have shadows applied to its perimeter, not the bounding box
+  const path = `M ${cutoutSize} 0 L ${size - cutoutSize} 0 L ${size - cutoutSize} ${cutoutSize} L ${size} ${cutoutSize} L ${size} ${size - cutoutSize} L ${size - cutoutSize} ${size - cutoutSize} L ${size - cutoutSize} ${size} L ${cutoutSize} ${size} L ${cutoutSize} ${size - cutoutSize} L 0 ${size - cutoutSize} L 0 ${cutoutSize} L ${cutoutSize} ${cutoutSize} Z`;
+  
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {/* Use path directly so shadows apply to plus perimeter */}
+      <path d={path} fill={color} />
+    </svg>
+  );
 }
 

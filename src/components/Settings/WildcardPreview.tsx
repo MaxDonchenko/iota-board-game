@@ -3,7 +3,7 @@ import { Card as CardClass } from '@/game/Card';
 import { useTheme } from '@/context/ThemeContext';
 
 interface WildcardPreviewProps {
-  variant: 'v1' | 'v2';
+  variant: 'modern' | 'original';
 }
 
 export function WildcardPreview({ variant }: WildcardPreviewProps) {

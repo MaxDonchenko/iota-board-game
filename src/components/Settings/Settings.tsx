@@ -6,7 +6,7 @@ import { Card as CardClass } from '@/game/Card';
 import styles from './Settings.module.css';
 
 export function Settings() {
-  const { settings, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant } = useTheme();
+  const { settings, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant, setCardVariant } = useTheme();
 
   return (
     <div className={styles.settings}>
@@ -54,26 +54,54 @@ export function Settings() {
         <div className={styles.label} style={{ cursor: 'default' }}>Wildcard Style</div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div 
-            onClick={() => setWildcardVariant('v1')}
+            onClick={() => setWildcardVariant('modern')}
             style={{ 
               cursor: 'pointer',
-              border: settings.wildcardVariant === 'v1' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              border: settings.wildcardVariant === 'modern' ? '2px solid var(--text-primary)' : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px'
             }}
           >
-            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="v1" />
+            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="modern" />
           </div>
           <div 
-            onClick={() => setWildcardVariant('v2')}
+            onClick={() => setWildcardVariant('original')}
             style={{ 
               cursor: 'pointer',
-              border: settings.wildcardVariant === 'v2' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              border: settings.wildcardVariant === 'original' ? '2px solid var(--text-primary)' : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px'
             }}
           >
-            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="v2" />
+            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="original" />
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.label} style={{ cursor: 'default' }}>Card Style</div>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
+          <div 
+            onClick={() => setCardVariant('modern')}
+            style={{ 
+              cursor: 'pointer',
+              border: settings.cardVariant === 'modern' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px'
+            }}
+          >
+            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="modern" />
+          </div>
+          <div 
+            onClick={() => setCardVariant('original')}
+            style={{ 
+              cursor: 'pointer',
+              border: settings.cardVariant === 'original' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px'
+            }}
+          >
+            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="original" />
           </div>
         </div>
       </div>

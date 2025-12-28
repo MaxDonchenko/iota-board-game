@@ -7,7 +7,8 @@ interface ThemeContextType {
   toggleTheme: () => void;
   toggleGradients: () => void;
   toggleShowInvalidPlacements: () => void;
-  setWildcardVariant: (variant: 'v1' | 'v2') => void;
+  setWildcardVariant: (variant: 'modern' | 'original') => void;
+  setCardVariant: (variant: 'modern' | 'original') => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,7 +18,8 @@ const DEFAULT_SETTINGS: GameSettings = {
   useGradients: true,
   gameMode: 'full',
   showInvalidPlacements: true,
-  wildcardVariant: 'v1',
+  wildcardVariant: 'modern',
+  cardVariant: 'modern',
 };
 
 const STORAGE_KEY = 'iota-game-settings';
@@ -69,15 +71,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setWildcardVariant = (variant: 'v1' | 'v2') => {
+  const setWildcardVariant = (variant: 'modern' | 'original') => {
     setSettings(prev => ({
       ...prev,
       wildcardVariant: variant,
     }));
   };
 
+  const setCardVariant = (variant: 'modern' | 'original') => {
+    setSettings(prev => ({
+      ...prev,
+      cardVariant: variant,
+    }));
+  };
+
   return (
-    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant }}>
+    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant, setCardVariant }}>
       {children}
     </ThemeContext.Provider>
   );

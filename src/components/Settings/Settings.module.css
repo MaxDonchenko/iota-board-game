@@ -1,13 +1,12 @@
 .settings {
   max-width: 500px;
-  margin: 2rem auto;
   padding: 2rem;
   background: var(--bg-secondary);
   border-radius: 8px;
 }
 
 .title {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   text-align: center;
   color: var(--text-primary);
 }
