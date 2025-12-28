@@ -13,11 +13,33 @@ interface CardProps {
 
 export function Card({ card, onClick, selected, className = '', cursor }: CardProps) {
   const { settings } = useTheme();
-  const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
+  const isWild = card.isWild;
+  const hasWildValue = isWild && card.wildValue;
 
+  // For wildcards without values, show 2x2 grid
+  if (isWild && !hasWildValue) {
+    return (
+      <div
+        className={`${styles.card} ${styles.wildCard} ${selected ? styles.selected : ''} ${className}`}
+        onClick={onClick}
+        style={{
+          cursor: cursor || (onClick ? 'pointer' : undefined),
+        }}
+      >
+        <div className={styles.wildGrid}>
+          <div className={styles.wildCell} style={{ backgroundColor: ColorUtils.toHex('Red', settings.theme) }}>■</div>
+          <div className={styles.wildCell} style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}>●</div>
+          <div className={styles.wildCell} style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}>▲</div>
+          <div className={styles.wildCell} style={{ backgroundColor: ColorUtils.toHex('Yellow', settings.theme) }}>+</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular card or wildcard with value
+  const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
   const shapeSymbol = getShapeSymbol(card.getEffectiveShape());
   const numberDisplay = card.getEffectiveNumber();
-  const isWild = card.isWild;
 
   // Dark mode: black text, Light mode: white text
   const textColor = settings.theme === 'dark' ? '#000000' : '#FFFFFF';

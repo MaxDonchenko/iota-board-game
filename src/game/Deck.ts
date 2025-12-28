@@ -38,10 +38,14 @@ export class Deck {
       }
     }
 
-    // Add wild cards
+    // Add wild cards (without default values - they're just wildcards)
     const wildCount = gameMode === 'full' ? WILD_CARD_COUNTS.FULL : WILD_CARD_COUNTS.SHORT;
     for (let i = 0; i < wildCount; i++) {
-      this.cards.push(new Card('Square', 1, 'Red', true));
+      // Create wildcard without a value - shape/number/color are just placeholders
+      const wildCard = new Card('Square', 1, 'Red', true);
+      // Ensure no default wildValue is set
+      wildCard.wildValue = undefined;
+      this.cards.push(wildCard);
     }
   }
 

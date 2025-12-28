@@ -3,6 +3,7 @@ import { GameStateManager } from '@/game/GameState';
 import { Validation } from '@/game/Validation';
 import { Scoring } from '@/game/Scoring';
 import { WildCardManager } from '@/game/WildCard';
+import { Card } from '@/game/Card';
 import { generateGameId, saveGameToStorage, loadGameFromStorage } from '@/utils/gamePersistence';
 import type { GameState, Player, GameSettings } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
@@ -11,7 +12,7 @@ import type { WildCardReplacement } from '@/game/WildCard';
 interface UseGameReturn {
   gameState: GameState | null;
   startGame: (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => void;
-  placeCards: (placements: Placement[]) => { success: boolean; error?: string };
+  placeCards: (placements: Placement[], cardMapping?: Map<Card, Card>) => { success: boolean; error?: string };
   passTurn: (cardsToTrade?: string[]) => void;
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
   resetGame: () => void;
@@ -67,7 +68,7 @@ export function useGame(): UseGameReturn {
     saveGameToStorage(newState, newGameId);
   }, []);
 
-  const placeCards = useCallback((placements: Placement[]) => {
+  const placeCards = useCallback((placements: Placement[], cardMapping?: Map<Card, Card>) => {
     if (!gameState) {
       return { success: false, error: 'No game in progress' };
     }
@@ -104,11 +105,23 @@ export function useGame(): UseGameReturn {
     );
 
     // Remove placed cards from hand
+    // For wildcards that were replaced, use the mapping to find original card
     const updatedPlayers = newState.players.map((p, idx) => {
       if (idx === gameState.currentPlayerIndex) {
         return {
           ...p,
-          hand: p.hand.filter(card => !placements.some(pl => pl.card === card)),
+          hand: p.hand.filter(card => {
+            // Check if this card was placed
+            return !placements.some(pl => {
+              // If there's a mapping, check if this card is the original for a replaced wildcard
+              if (cardMapping && cardMapping.has(pl.card)) {
+                const originalCard = cardMapping.get(pl.card);
+                return originalCard === card;
+              }
+              // For regular cards, match by reference
+              return pl.card === card;
+            });
+          }),
         };
       }
       return p;

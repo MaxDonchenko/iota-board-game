@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { GameSetup } from './components/GameSetup/GameSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
@@ -6,10 +6,15 @@ import { PlayerHand } from './components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
 import { GameControls } from './components/GameControls/GameControls';
 import { Settings } from './components/Settings/Settings';
+import { Card as CardComponent } from './components/Card/Card';
 import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
 import type { Coordinate } from './types/Grid.types';
 import type { Card as CardType } from './game/Card';
+import type { WildValue, Shape, Color } from './types/Card.types';
+import { Card } from './game/Card';
+import { Grid } from './game/Grid';
+import { Validation } from './game/Validation';
 import './styles/index.css';
 import './styles/themes.css';
 import './styles/card-animations.css';
@@ -19,7 +24,7 @@ function AppContent() {
   const { gameState, startGame, placeCards, passTurn, resetGame } = useGame();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
-  const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate }>>([]);
+  const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>>([]);
   const [nextCardIndex, setNextCardIndex] = useState(0);
 
   // Clear selections when turn changes
@@ -73,6 +78,146 @@ function AppContent() {
     }
   };
 
+  // Helper to get complete line for wildcard validation
+  const getCompleteLineForWildcard = useCallback((
+    position: Coordinate,
+    direction: 'horizontal' | 'vertical',
+    grid: Grid,
+    wildCard: CardType
+  ): { cards: CardType[]; positions: Coordinate[] } | null => {
+    const allCards = new Map<string, CardType>();
+    
+    // Add existing cards
+    for (const [key, card] of grid.positions.entries()) {
+      allCards.set(key, card);
+    }
+    
+    // Add the wildcard at this position
+    allCards.set(`${position.x},${position.y}`, wildCard);
+    
+    const positions: Coordinate[] = [position];
+    const cards: CardType[] = [wildCard];
+    
+    if (direction === 'horizontal') {
+      let leftX = position.x - 1;
+      while (allCards.has(`${leftX},${position.y}`)) {
+        const card = allCards.get(`${leftX},${position.y}`);
+        if (card) {
+          positions.unshift({ x: leftX, y: position.y });
+          cards.unshift(card);
+        }
+        leftX--;
+      }
+      
+      let rightX = position.x + 1;
+      while (allCards.has(`${rightX},${position.y}`)) {
+        const card = allCards.get(`${rightX},${position.y}`);
+        if (card) {
+          positions.push({ x: rightX, y: position.y });
+          cards.push(card);
+        }
+        rightX++;
+      }
+    } else {
+      let upY = position.y - 1;
+      while (allCards.has(`${position.x},${upY}`)) {
+        const card = allCards.get(`${position.x},${upY}`);
+        if (card) {
+          positions.unshift({ x: position.x, y: upY });
+          cards.unshift(card);
+        }
+        upY--;
+      }
+      
+      let downY = position.y + 1;
+      while (allCards.has(`${position.x},${downY}`)) {
+        const card = allCards.get(`${position.x},${downY}`);
+        if (card) {
+          positions.push({ x: position.x, y: downY });
+          cards.push(card);
+        }
+        downY++;
+      }
+    }
+    
+    return { cards, positions };
+  }, []);
+
+  // Find all valid wildcard values for a placed wildcard
+  const getValidWildcardValues = useCallback((wildCard: CardType, position: Coordinate): WildValue[] => {
+    if (!gameState || !wildCard.isWild || wildCard.wildValue) {
+      return [];
+    }
+
+    // Create temporary grid with pending placements
+    const tempGrid = new Grid();
+    for (const [key, card] of gameState.grid.positions.entries()) {
+      const [x, y] = key.split(',').map(Number);
+      tempGrid.addCard(x, y, card);
+    }
+    
+    // Add other pending placements (excluding this wildcard)
+    for (const placement of pendingPlacements) {
+      if (placement.position.x !== position.x || placement.position.y !== position.y) {
+        const card = placement.card;
+        if (card.wildValue) {
+          const cardWithValue = new Card(card.shape, card.number, card.color, true, card.wildValue);
+          tempGrid.addCard(placement.position.x, placement.position.y, cardWithValue);
+        } else {
+          tempGrid.addCard(placement.position.x, placement.position.y, card);
+        }
+      }
+    }
+
+    // Get lines this wildcard would be part of
+    const hLine = getCompleteLineForWildcard(position, 'horizontal', tempGrid, wildCard);
+    const vLine = getCompleteLineForWildcard(position, 'vertical', tempGrid, wildCard);
+
+    const validValues: WildValue[] = [];
+    const shapes: Shape[] = ['Square', 'Circle', 'Triangle', 'Plus'];
+    const numbers: Array<1 | 2 | 3 | 4> = [1, 2, 3, 4];
+    const colors: Color[] = ['Red', 'Blue', 'Green', 'Yellow'];
+
+    // Try all combinations
+    for (const shape of shapes) {
+      for (const number of numbers) {
+        for (const color of colors) {
+          const testValue: WildValue = { shape, number, color };
+          const testCard = new Card(shape, number, color, true, testValue);
+          
+          // Check if this value works for all lines
+          let isValid = true;
+          
+          if (hLine && hLine.cards.length >= 2) {
+            const testHLine = hLine.cards
+              .filter(c => c !== undefined && c !== null)
+              .map(c => (c && c.isWild && !c.wildValue) ? testCard : c) as CardType[];
+            const hResult = Validation.validateLineRules(testHLine);
+            if (!hResult.isValid) {
+              isValid = false;
+            }
+          }
+          
+          if (isValid && vLine && vLine.cards.length >= 2) {
+            const testVLine = vLine.cards
+              .filter(c => c !== undefined && c !== null)
+              .map(c => (c && c.isWild && !c.wildValue) ? testCard : c) as CardType[];
+            const vResult = Validation.validateLineRules(testVLine);
+            if (!vResult.isValid) {
+              isValid = false;
+            }
+          }
+          
+          if (isValid) {
+            validValues.push(testValue);
+          }
+        }
+      }
+    }
+
+    return validValues;
+  }, [gameState, pendingPlacements, getCompleteLineForWildcard]);
+
   const handlePlaceCard = (position: Coordinate) => {
     if (!gameState || selectedCards.length === 0) return;
 
@@ -90,12 +235,31 @@ function AppContent() {
   const handleConfirmTurn = () => {
     if (!gameState || pendingPlacements.length === 0) return;
 
-    const placements = pendingPlacements.map(p => ({
-      card: p.card,
-      position: p.position,
-    }));
+    // Replace wildcards with regular cards using selected values
+    // Store mapping of new cards to original cards for hand removal
+    const cardMapping = new Map<Card, Card>();
+    const placements = pendingPlacements.map(p => {
+      let card = p.card;
+      const originalCard = p.card;
+      
+      // If it's a wildcard with a selected value, replace it with a regular card
+      if (card.isWild && p.wildValue) {
+        card = new Card(
+          p.wildValue.shape,
+          p.wildValue.number,
+          p.wildValue.color,
+          false // Not a wildcard anymore
+        );
+        // Store mapping for hand removal
+        cardMapping.set(card, originalCard);
+      }
+      return {
+        card,
+        position: p.position,
+      };
+    });
 
-    const result = placeCards(placements);
+    const result = placeCards(placements, cardMapping);
     if (result.success) {
       setSelectedCards([]);
       setPendingPlacements([]);
@@ -182,80 +346,227 @@ function AppContent() {
         settings={settings}
       />
 
-      {currentPlayer && (
-        <PlayerHand
-          cards={currentPlayer.hand}
-          onCardSelect={handleCardSelect}
-          selectedCards={selectedCards}
-          onSelectionChange={setSelectedCards}
-        />
-      )}
-
-      {/* Preview mode controls - reserved space */}
+      {/* Bottom section: Hand, Preview, Wildcard Selection - horizontal layout */}
       <div style={{
-        minHeight: '80px',
-        padding: '1rem',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        visibility: pendingPlacements.length > 0 && selectedCards.length > 0 ? 'visible' : 'hidden',
+        gap: '1rem',
+        padding: '1rem',
+        flexWrap: 'wrap',
+        alignItems: 'stretch',
       }}>
-        <div style={{
+        {/* Player Hand */}
+        <div style={{ 
+          flex: '1 1 300px', 
+          minWidth: '200px', 
+          visibility: currentPlayer ? 'visible' : 'hidden',
           display: 'flex',
-          gap: '1rem',
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
+          flexDirection: 'column',
         }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            color: 'var(--text-primary)',
-            marginRight: '1rem'
-          }}>
-            <span>Preview: {pendingPlacements.length} of {selectedCards.length} cards placed</span>
-            {nextCardIndex < selectedCards.length && (
-              <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-                (Next: {selectedCards[nextCardIndex].getEffectiveShape()} {selectedCards[nextCardIndex].getEffectiveNumber()} {selectedCards[nextCardIndex].getEffectiveColor()})
-              </span>
-            )}
-          </div>
-          {pendingPlacements.length === selectedCards.length && (
-            <button
-              onClick={handleConfirmTurn}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#61BB46',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-              }}
-            >
-              Confirm Turn
-            </button>
+          {currentPlayer && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <PlayerHand
+                cards={currentPlayer.hand}
+                onCardSelect={handleCardSelect}
+                selectedCards={selectedCards}
+                onSelectionChange={setSelectedCards}
+              />
+            </div>
           )}
-          <button
-            onClick={handleCancelPreview}
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: 'var(--bg-tertiary)',
+        </div>
+
+        {/* Preview and Confirm Turn */}
+        <div style={{
+          flex: '1 1 300px',
+          minWidth: '200px',
+          visibility: pendingPlacements.length > 0 && selectedCards.length > 0 ? 'visible' : 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            <h3 style={{
               color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              fontSize: '1rem',
-              cursor: 'pointer',
-            }}
-          >
-            Cancel
-          </button>
+              marginBottom: '1rem',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+            }}>
+              Preview Turn
+            </h3>
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1rem',
+                color: 'var(--text-primary)',
+                flexWrap: 'wrap',
+              }}>
+                <span>{pendingPlacements.length} of {selectedCards.length} cards placed</span>
+                {nextCardIndex < selectedCards.length && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    fontSize: '0.9rem',
+                  }}>
+                    <span style={{ opacity: 0.8 }}>Next:</span>
+                    <div style={{ transform: 'scale(0.5)', transformOrigin: 'left center' }}>
+                      <CardComponent card={selectedCards[nextCardIndex]} />
+                    </div>
+                  </div>
+                )}
+              </div>
+              {pendingPlacements.length === selectedCards.length && (
+                <button
+                  onClick={handleConfirmTurn}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: '#61BB46',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Confirm Turn
+                </button>
+              )}
+              <button
+                onClick={handleCancelPreview}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Wildcard Value Selection - always rendered but hidden */}
+        <div style={{
+          flex: '1 1 300px',
+          minWidth: '200px',
+          visibility: (() => {
+            const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
+            if (!wildcardPlacement) return 'hidden';
+            const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
+            return validValues.length > 0 ? 'visible' : 'hidden';
+          })(),
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {(() => {
+            const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
+            if (!wildcardPlacement) return null;
+            
+            const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
+            if (validValues.length === 0) return null;
+            
+            return (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+              }}>
+                <h3 style={{
+                  color: 'var(--text-primary)',
+                  marginBottom: '1rem',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                }}>
+                  Select Wildcard Value
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                }}>
+                  {validValues.map((value: WildValue, idx: number) => {
+                    const isSelected = wildcardPlacement.wildValue && 
+                      wildcardPlacement.wildValue.shape === value.shape &&
+                      wildcardPlacement.wildValue.number === value.number &&
+                      wildcardPlacement.wildValue.color === value.color;
+                    
+                    // Create a temporary card with this value for display
+                    const tempCard = new Card(value.shape, value.number, value.color, false);
+                    
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          const updated = pendingPlacements.map(p => 
+                            p === wildcardPlacement 
+                              ? { ...p, wildValue: value }
+                              : p
+                          );
+                          setPendingPlacements(updated);
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          position: 'relative',
+                          opacity: isSelected ? 1 : 0.7,
+                          transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                          transition: 'all 0.2s ease',
+                          border: isSelected ? '3px solid #61BB46' : '3px solid transparent',
+                          borderRadius: '8px',
+                          padding: '2px',
+                        }}
+                      >
+                        <CardComponent card={tempCard} />
+                        {isSelected && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            width: '24px',
+                            height: '24px',
+                            backgroundColor: '#61BB46',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                            border: '2px solid white',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                          }}>
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

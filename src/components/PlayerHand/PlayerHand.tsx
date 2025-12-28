@@ -48,11 +48,9 @@ export function PlayerHand({
           />
         ))}
       </div>
-      {selectedCards.length > 0 && (
-        <div className={styles.selectionInfo}>
-          {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
-        </div>
-      )}
+      <div className={styles.selectionInfo} style={{ visibility: selectedCards.length > 0 ? 'visible' : 'hidden' }}>
+        {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
+      </div>
     </div>
   );
 }
