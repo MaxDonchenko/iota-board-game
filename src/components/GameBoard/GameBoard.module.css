@@ -1,19 +1,19 @@
 .gameBoard {
-  padding: 2rem;
+  padding: 1rem;
   overflow: auto;
   flex: 1;
 }
 
 .grid {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   justify-content: center;
   align-items: center;
 }
 
 .cell {
-  width: 90px;
-  height: 130px;
+  width: 64px;
+  height: 64px;
   border: 1px dashed var(--border-color);
   border-radius: 4px;
   display: flex;
@@ -38,5 +38,17 @@
   background: var(--bg-tertiary);
   border-color: var(--text-primary);
   border-width: 2px;
+}
+
+.cell.starter {
+  border-color: var(--text-primary);
+  border-width: 2px;
+  border-style: solid;
+}
+
+.cell.starter:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+  border-width: 3px;
 }
 

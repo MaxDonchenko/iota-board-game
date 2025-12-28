@@ -6,8 +6,10 @@ export class Deck {
   cards: Card[] = [];
   drawPile: Card[] = [];
   discardPile: Card[] = [];
+  gameMode: GameMode = 'full';
 
   constructor(gameMode: GameMode = 'full') {
+    this.gameMode = gameMode;
     this.createDeck(gameMode);
     this.shuffle();
   }

@@ -1,2 +1,2 @@
-import '@testing-library/jest-dom';
+// Vitest setup - no additional setup needed for pure unit tests
 

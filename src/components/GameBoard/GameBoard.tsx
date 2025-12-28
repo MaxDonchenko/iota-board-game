@@ -17,6 +17,16 @@ export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }
 
   // Get grid bounds
   const getBounds = () => {
+    // Handle empty grid
+    if (!grid || !grid.positions || grid.positions.size === 0) {
+      return {
+        minX: -2,
+        maxX: 2,
+        minY: -2,
+        maxY: 2,
+      };
+    }
+
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
     
     for (const key of grid.positions.keys()) {
@@ -55,11 +65,13 @@ export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }
       const card = grid.getCard(x, y);
       const isHovered = hoveredCell?.x === x && hoveredCell?.y === y;
       const hasCard = card !== undefined;
+      const starterPosition = grid.getStarterPosition();
+      const isStarter = starterPosition?.x === x && starterPosition?.y === y;
       
       cells.push(
         <div
           key={`${x},${y}`}
-          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''}`}
+          className={`${styles.cell} ${hasCard ? styles.occupied : ''} ${isHovered ? styles.hovered : ''} ${isStarter ? styles.starter : ''}`}
           onClick={() => handleCellClick(x, y)}
           onMouseEnter={() => setHoveredCell({ x, y })}
           onMouseLeave={() => setHoveredCell(null)}

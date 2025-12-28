@@ -84,9 +84,11 @@ describe('Scoring', () => {
       },
     ];
     
+    // When playing 4 cards that form a lot, both lot multiplier and all-4 multiplier apply
     const result = Scoring.calculateTurnScore(lines, 4, false);
     expect(result.lots).toBe(1);
-    expect(result.finalScore).toBe(20); // (1+2+3+4) * 2 = 20
+    expect(result.playedAllFour).toBe(true);
+    expect(result.finalScore).toBe(40); // (1+2+3+4) * 2 (lot) * 2 (all 4) = 40
   });
 
   it('should double again for playing all 4 cards', () => {

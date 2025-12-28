@@ -11,10 +11,22 @@ const meta: Meta = {
 export default meta;
 
 function UseCaseStory({ useCaseName }: { useCaseName: string }) {
-  const useCase = Object.values(useCases).find(uc => uc.name === useCaseName);
+  // Look up by key (e.g., "AllFourCards") instead of name property
+  const useCase = useCases[useCaseName as keyof typeof useCases];
   
   if (!useCase) {
     return <div>Use case not found: {useCaseName}</div>;
+  }
+
+  // Check if gameState has a grid
+  if (!useCase.gameState || !useCase.gameState.grid) {
+    return (
+      <div style={{ padding: '1rem' }}>
+        <h3>{useCase.name}</h3>
+        <p>{useCase.description}</p>
+        <p style={{ color: 'orange' }}>Use case not yet implemented - gameState missing grid</p>
+      </div>
+    );
   }
 
   return (

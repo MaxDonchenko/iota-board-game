@@ -49,15 +49,15 @@ describe('Deck', () => {
     expect(deck.cards.length).toBe(initialCount - 1);
   });
 
-  it('should return null when draw pile is empty', () => {
+  it('should return undefined when draw pile is empty', () => {
     const deck = new Deck('full');
-    // Draw all cards
-    while (deck.cards.length > 0) {
+    // Draw all cards from draw pile
+    while (deck.drawPile.length > 0) {
       deck.drawCard();
     }
     
     const card = deck.drawCard();
-    expect(card).toBeNull();
+    expect(card).toBeUndefined();
   });
 
   it('should have correct number of wild cards in full mode', () => {

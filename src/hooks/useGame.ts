@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GameStateManager } from '@/game/GameState';
 import { Validation } from '@/game/Validation';
 import { Scoring } from '@/game/Scoring';
 import { WildCardManager } from '@/game/WildCard';
+import { generateGameId, saveGameToStorage, loadGameFromStorage } from '@/utils/gamePersistence';
 import type { GameState, Player, GameSettings } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
@@ -18,14 +19,52 @@ interface UseGameReturn {
 
 export function useGame(): UseGameReturn {
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
+
+  // Load game from URL on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameIdFromUrl = urlParams.get('game');
+    
+    if (gameIdFromUrl) {
+      const loadedState = loadGameFromStorage(gameIdFromUrl);
+      if (loadedState) {
+        setGameState(loadedState);
+        setGameId(gameIdFromUrl);
+        return;
+      }
+    }
+    
+    // Clear invalid game ID from URL
+    if (gameIdFromUrl) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // Save game to storage whenever it changes
+  useEffect(() => {
+    if (gameState && gameId) {
+      saveGameToStorage(gameState, gameId);
+    }
+  }, [gameState, gameId]);
 
   const startGame = useCallback((
     playerNames: string[],
     gameMode: 'short' | 'full',
     settings: GameSettings
   ) => {
+    const newGameId = generateGameId();
     const newState = GameStateManager.createInitialState(playerNames, gameMode, settings);
     setGameState(newState);
+    setGameId(newGameId);
+    
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('game', newGameId);
+    window.history.pushState({}, '', url);
+    
+    // Save to storage
+    saveGameToStorage(newState, newGameId);
   }, []);
 
   const placeCards = useCallback((placements: Placement[]) => {
@@ -179,7 +218,16 @@ export function useGame(): UseGameReturn {
 
   const resetGame = useCallback(() => {
     setGameState(null);
-  }, []);
+    setGameId(null);
+    
+    // Clear URL
+    window.history.replaceState({}, '', window.location.pathname);
+    
+    // Clear from storage
+    if (gameId) {
+      localStorage.removeItem(`iota-game-${gameId}`);
+    }
+  }, [gameId]);
 
   return {
     gameState,
