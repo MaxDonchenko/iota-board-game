@@ -5,13 +5,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:gh": "tsc && GITHUB_PAGES=true vite build",
     "preview": "vite preview",
+    "deploy": "npm run build:gh && gh-pages -d dist",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "build-storybook:gh": "GITHUB_PAGES=true storybook build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
@@ -37,7 +40,8 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
-    "vitest": "^1.0.4"
+    "vitest": "^1.0.4",
+    "gh-pages": "^6.1.0"
   }
 }
 

@@ -104,6 +104,19 @@ Dev mode with hard-coded use cases for debugging:
 npm run storybook
 ```
 
+## Deployment
+
+Deploy to GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+## Links
+
+- 🎮 [Play the Game](https://MaxDonchenko.github.io/iota-board-game/)
+- 📚 [View Storybook](https://MaxDonchenko.github.io/iota-board-game/storybook/)
+
 ## Technology Stack
 
 - **React 18** - UI framework

@@ -9,6 +9,12 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  viteFinal: async (config) => {
+    if (process.env.GITHUB_PAGES === 'true') {
+      config.base = '/iota-board-game/storybook/';
+    }
+    return config;
+  },
 };
 
 export default config;
