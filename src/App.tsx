@@ -288,6 +288,19 @@ function AppContent() {
   const handleDiscardSelected = () => {
     if (selectedCards.length === 0) return;
     
+    // Check if any selected card is a wildcard
+    const hasWildcard = selectedCards.some(card => card.isWild);
+    
+    if (hasWildcard) {
+      const confirmed = window.confirm(
+        'Warning: You are about to discard a wildcard, which is a rare and valuable card.\n\n' +
+        'Are you sure you want to proceed?'
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+    
     const result = discardCards(selectedCards);
     if (result.success) {
       setSelectedCards([]);
