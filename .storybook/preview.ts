@@ -13,6 +13,27 @@ const preview: Preview = {
       },
     },
   },
+  decorators: [
+    (Story, context) => {
+      // Sync Storybook theme with game theme
+      const storybookTheme = (context.globals.theme || 'light') as 'light' | 'dark';
+      document.documentElement.setAttribute('data-theme', storybookTheme);
+
+      return Story();
+    },
+  ],
+  globalTypes: {
+    theme: {
+      description: 'Global theme for components',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: ['light', 'dark'],
+        dynamicTitle: true,
+      },
+    },
+  },
 };
 
 export default preview;

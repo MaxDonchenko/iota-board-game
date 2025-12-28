@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider } from '../context/ThemeContext';
+import React, { useEffect } from 'react';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
+import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { useCases } from '../dev/gameUseCases';
 
 const meta: Meta = {
@@ -9,6 +11,35 @@ const meta: Meta = {
 };
 
 export default meta;
+
+function ThemeSync({ children }: { children: React.ReactNode }) {
+  const { updateSettings } = useTheme();
+  
+  useEffect(() => {
+    // Sync with Storybook's theme from data-theme attribute
+    const observer = new MutationObserver(() => {
+      const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
+      if (theme) {
+        updateSettings({ theme });
+      }
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    
+    // Initial sync
+    const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
+    if (theme) {
+      updateSettings({ theme });
+    }
+    
+    return () => observer.disconnect();
+  }, [updateSettings]);
+  
+  return <>{children}</>;
+}
 
 function UseCaseStory({ useCaseName }: { useCaseName: string }) {
   // Look up by key (e.g., "AllFourCards") instead of name property
@@ -29,16 +60,30 @@ function UseCaseStory({ useCaseName }: { useCaseName: string }) {
     );
   }
 
+  const currentPlayer = useCase.gameState.players[useCase.gameState.currentPlayerIndex];
+  const showHand = useCaseName === 'WildCardRecycling' || useCaseName === 'AllFourCards';
+
   return (
-    <div style={{ padding: '1rem' }}>
-      <h3>{useCase.name}</h3>
-      <p>{useCase.description}</p>
-      <GameBoard
-        grid={useCase.gameState.grid}
-        selectedCards={[]}
-        onPlaceCard={() => {}}
-      />
-    </div>
+    <ThemeSync>
+      <div style={{ padding: '1rem' }}>
+        <h3>{useCase.name}</h3>
+        <p>{useCase.description}</p>
+        <GameBoard
+          grid={useCase.gameState.grid}
+          selectedCards={[]}
+          onPlaceCard={() => {}}
+        />
+        {showHand && currentPlayer && (
+          <div style={{ marginTop: '2rem' }}>
+            <h4>Player Hand:</h4>
+            <PlayerHand
+              cards={currentPlayer.hand}
+              onCardSelect={() => {}}
+            />
+          </div>
+        )}
+      </div>
+    </ThemeSync>
   );
 }
 

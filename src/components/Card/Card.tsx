@@ -12,11 +12,14 @@ interface CardProps {
 
 export function Card({ card, onClick, selected, className = '' }: CardProps) {
   const { settings } = useTheme();
-  const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients);
+  const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
 
   const shapeSymbol = getShapeSymbol(card.getEffectiveShape());
   const numberDisplay = card.getEffectiveNumber();
   const isWild = card.isWild;
+
+  // Dark mode: black text, Light mode: white text
+  const textColor = settings.theme === 'dark' ? '#000000' : '#FFFFFF';
 
   return (
     <div
@@ -24,7 +27,7 @@ export function Card({ card, onClick, selected, className = '' }: CardProps) {
       onClick={onClick}
       style={{
         background: colorStyle,
-        color: getContrastColor(card.getEffectiveColor()),
+        color: textColor,
       }}
     >
       {isWild && <div className={styles.wildBadge}>WILD</div>}
@@ -47,13 +50,5 @@ function getShapeSymbol(shape: string): string {
     default:
       return '?';
   }
-}
-
-function getContrastColor(color: string): string {
-  // Return white or black based on color for contrast
-  if (color === 'Yellow' || color === 'Green') {
-    return '#000000';
-  }
-  return '#FFFFFF';
 }
 

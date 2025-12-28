@@ -1,6 +1,8 @@
+import type { GameState } from '@/types/Game.types';
+
 export interface UseCase {
   name: string;
   description: string;
-  gameState: unknown; // Will be GameState when imported
+  gameState: GameState;
 }
 

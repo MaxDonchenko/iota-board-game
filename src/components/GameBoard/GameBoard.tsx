@@ -87,8 +87,8 @@ export function GameBoard({ grid, onCellClick, selectedCards = [], onPlaceCard }
       <div
         className={styles.grid}
         style={{
-          gridTemplateColumns: `repeat(${width}, 1fr)`,
-          gridTemplateRows: `repeat(${height}, 1fr)`,
+          gridTemplateColumns: `repeat(${width}, 64px)`,
+          gridTemplateRows: `repeat(${height}, 64px)`,
         }}
       >
         {cells}
