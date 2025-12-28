@@ -3,6 +3,16 @@ import '../src/styles/index.css';
 import '../src/styles/themes.css';
 import '../src/styles/card-animations.css';
 
+// Override Storybook's fixed background to respect theme
+const style = document.createElement('style');
+style.textContent = `
+  .sb-show-main {
+    background: var(--bg-primary) !important;
+    transition: background-color 0.3s ease !important;
+  }
+`;
+document.head.appendChild(style);
+
 const preview: Preview = {
   parameters: {
     actions: { argTypesRegex: '^on[A-Z].*' },

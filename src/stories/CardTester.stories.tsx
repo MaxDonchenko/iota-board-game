@@ -25,9 +25,9 @@ function CardTesterContent() {
   grid.setStarterCard(0, 0, card);
 
   return (
-    <div style={{ padding: '1rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)' }}>
-      <h3 style={{ color: 'var(--text-primary)' }}>Card Tester</h3>
-      <p style={{ color: 'var(--text-primary)' }}>Adjust the controls below to test different card combinations.</p>
+    <div style={{ padding: '1rem' }}>
+      <h3>Card Tester</h3>
+      <p>Adjust the controls below to test different card combinations.</p>
       
       <div style={{ 
         display: 'grid', 
@@ -121,14 +121,14 @@ function CardTesterContent() {
       </div>
 
       <div style={{ marginBottom: '1rem' }}>
-        <h4 style={{ color: 'var(--text-primary)' }}>Card Preview:</h4>
+        <h4>Card Preview:</h4>
         <div style={{ display: 'inline-block', marginTop: '0.5rem' }}>
           <Card card={card} />
         </div>
       </div>
 
       <div>
-        <h4 style={{ color: 'var(--text-primary)' }}>Card on Board (as Starter):</h4>
+        <h4>Card on Board (as Starter):</h4>
         <GameBoard
           grid={grid}
           selectedCards={[]}
@@ -144,7 +144,7 @@ function CardTesterContent() {
         fontSize: '0.9rem',
         color: 'var(--text-primary)'
       }}>
-        <strong style={{ color: 'var(--text-primary)' }}>Card Details:</strong>
+        <strong>Card Details:</strong>
         <ul style={{ marginTop: '0.5rem', marginBottom: 0, color: 'var(--text-primary)' }}>
           <li>Shape: {card.getEffectiveShape()}</li>
           <li>Number: {card.getEffectiveNumber()}</li>

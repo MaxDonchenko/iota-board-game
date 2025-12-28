@@ -33,7 +33,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    document.documentElement.setAttribute('data-theme', settings.theme);
+    // Only update data-theme if it's different to avoid triggering observers unnecessarily
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme !== settings.theme) {
+      document.documentElement.setAttribute('data-theme', settings.theme);
+    }
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<GameSettings>) => {

@@ -13,13 +13,14 @@ const meta: Meta = {
 export default meta;
 
 function ThemeSync({ children }: { children: React.ReactNode }) {
-  const { updateSettings } = useTheme();
+  const { settings, updateSettings } = useTheme();
   
   useEffect(() => {
     // Sync with Storybook's theme from data-theme attribute
     const observer = new MutationObserver(() => {
       const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
-      if (theme) {
+      // Only update if theme actually changed to avoid infinite loop
+      if (theme && theme !== settings.theme) {
         updateSettings({ theme });
       }
     });
@@ -29,14 +30,14 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
       attributeFilter: ['data-theme'],
     });
     
-    // Initial sync
+    // Initial sync - only if different
     const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
-    if (theme) {
+    if (theme && theme !== settings.theme) {
       updateSettings({ theme });
     }
     
     return () => observer.disconnect();
-  }, [updateSettings]);
+  }, [settings.theme, updateSettings]);
   
   return <>{children}</>;
 }
