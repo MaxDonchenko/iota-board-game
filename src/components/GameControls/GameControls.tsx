@@ -22,14 +22,21 @@ export function GameControls({
     <div className={styles.controls}>
       <div className={styles.turnInfo}>
         <h3>Current Turn: {currentPlayer.name}</h3>
-        <p>Phase: {gameState.turnPhase}</p>
+        <p>{gameState.turnPhase === 'cardPlacement' ? 'Place your cards' : gameState.turnPhase === 'wildCardRecycle' ? 'Recycle wildcard' : gameState.turnPhase}</p>
       </div>
       <div className={styles.actions}>
         {gameState.turnPhase === 'wildCardRecycle' && onRecycleWildCard && (
           <WildCardRecycleButton onClick={onRecycleWildCard} />
         )}
         <PassButton onClick={onPass} />
-        <button onClick={onNewGame} className={styles.newGameButton}>
+        <button 
+          onClick={() => {
+            if (window.confirm('Are you sure you want to start a new game? This will end the current game.')) {
+              onNewGame();
+            }
+          }} 
+          className={styles.newGameButton}
+        >
           New Game
         </button>
       </div>

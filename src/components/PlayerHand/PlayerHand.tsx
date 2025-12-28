@@ -8,6 +8,7 @@ interface PlayerHandProps {
   maxSelection?: number;
   selectedCards?: CardType[];
   onSelectionChange?: (selected: CardType[]) => void;
+  onResetSelection?: () => void;
 }
 
 export function PlayerHand({ 
@@ -15,7 +16,8 @@ export function PlayerHand({
   onCardSelect, 
   maxSelection = 4,
   selectedCards = [],
-  onSelectionChange
+  onSelectionChange,
+  onResetSelection
 }: PlayerHandProps) {
   const isSelected = (card: CardType) => selectedCards.includes(card);
 
@@ -49,7 +51,16 @@ export function PlayerHand({
         ))}
       </div>
       <div className={styles.selectionInfo} style={{ visibility: selectedCards.length > 0 ? 'visible' : 'hidden' }}>
-        {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
+        <span>{selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected</span>
+        {onResetSelection && (
+          <button 
+            onClick={onResetSelection}
+            className={styles.resetButton}
+            style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+          >
+            Reset
+          </button>
+        )}
       </div>
     </div>
   );

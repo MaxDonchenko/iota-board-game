@@ -1,0 +1,22 @@
+.overview {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.stat {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.label {
+  opacity: 0.7;
+}
+
+.value {
+  font-weight: 600;
+}
+

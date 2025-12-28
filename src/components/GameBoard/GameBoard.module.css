@@ -39,31 +39,31 @@
 .cell.hovered {
   background: var(--bg-tertiary);
   border-color: var(--text-primary);
-  border-width: 2px;
+  border-width: 1px;
 }
 
 .cell.starter {
   border-color: var(--text-primary);
-  border-width: 2px;
+  border-width: 1px;
   border-style: solid;
 }
 
 .cell.starter:hover {
   background: var(--bg-tertiary);
   border-color: var(--text-primary);
-  border-width: 3px;
+  border-width: 2px;
 }
 
 .cell.preview {
   border-style: dashed;
   border-color: #61BB46;
-  border-width: 2px;
+  border-width: 1px;
   opacity: 0.8;
 }
 
 .cell.preview:hover {
   opacity: 1;
-  border-width: 3px;
+  border-width: 2px;
 }
 
 .cell.notAllowed {

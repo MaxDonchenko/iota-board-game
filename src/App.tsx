@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { GameSetup } from './components/GameSetup/GameSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { PlayerHand } from './components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
 import { GameControls } from './components/GameControls/GameControls';
-import { Settings } from './components/Settings/Settings';
+import { SettingsDialog } from './components/Settings/SettingsDialog';
+import { GameOverview } from './components/GameOverview/GameOverview';
 import { Card as CardComponent } from './components/Card/Card';
 import { EqualWidthContainer } from './components/Layout/EqualWidthContainer';
 import { useGame } from './hooks/useGame';
@@ -24,6 +25,8 @@ function AppContent() {
   const { settings } = useTheme();
   const { gameState, startGame, placeCards, passTurn, discardCards, resetGame } = useGame();
   const [showSettings, setShowSettings] = useState(false);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const [gameStartTime, setGameStartTime] = useState<Date | undefined>();
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>>([]);
   const [nextCardIndex, setNextCardIndex] = useState(0);
@@ -65,6 +68,7 @@ function AppContent() {
 
   const handleStartGame = (playerNames: string[], gameMode: GameMode) => {
     startGame(playerNames, gameMode, settings);
+    setGameStartTime(new Date());
     setSelectedCards([]);
     setPendingPlacements([]);
   };
@@ -311,14 +315,6 @@ function AppContent() {
     }
   };
 
-  if (showSettings) {
-    return (
-      <div>
-        <button onClick={() => setShowSettings(false)}>Back to Game</button>
-        <Settings />
-      </div>
-    );
-  }
 
   if (!gameState) {
     return (
@@ -365,11 +361,18 @@ function AppContent() {
           />
         </div>
         <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
-          <div style={{ textAlign: 'right', padding: '1rem' }}>
-            <button onClick={() => setShowSettings(true)}>Settings</button>
+          <div style={{ textAlign: 'right', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
+            {gameState && <GameOverview gameState={gameState} gameStartTime={gameStartTime} />}
+            <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>Settings</button>
           </div>
         </div>
       </EqualWidthContainer>
+
+      <SettingsDialog 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)}
+        buttonRef={settingsButtonRef}
+      />
 
       <GameBoard
         grid={gameState.grid}
@@ -395,6 +398,11 @@ function AppContent() {
                 onCardSelect={handleCardSelect}
                 selectedCards={selectedCards}
                 onSelectionChange={setSelectedCards}
+                onResetSelection={() => {
+                  setSelectedCards([]);
+                  setPendingPlacements([]);
+                  setNextCardIndex(0);
+                }}
               />
             </div>
           )}

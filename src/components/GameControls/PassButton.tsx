@@ -6,7 +6,14 @@ interface PassButtonProps {
 
 export function PassButton({ onClick }: PassButtonProps) {
   return (
-    <button onClick={onClick} className={styles.passButton}>
+    <button 
+      onClick={() => {
+        if (window.confirm('Are you sure you want to pass your turn?')) {
+          onClick();
+        }
+      }} 
+      className={styles.passButton}
+    >
       Pass
     </button>
   );

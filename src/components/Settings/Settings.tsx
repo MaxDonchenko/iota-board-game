@@ -1,10 +1,12 @@
 import { ThemeToggle } from './ThemeToggle';
 import { GameModeSelector } from './GameModeSelector';
 import { useTheme } from '@/context/ThemeContext';
+import { Card } from '../Card/Card';
+import { Card as CardClass } from '@/game/Card';
 import styles from './Settings.module.css';
 
 export function Settings() {
-  const { settings, toggleGradients, toggleShowInvalidPlacements } = useTheme();
+  const { settings, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant } = useTheme();
 
   return (
     <div className={styles.settings}>
@@ -46,6 +48,34 @@ export function Settings() {
 
       <div className={styles.section}>
         <GameModeSelector />
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.label} style={{ cursor: 'default' }}>Wildcard Style</div>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
+          <div 
+            onClick={() => setWildcardVariant('v1')}
+            style={{ 
+              cursor: 'pointer',
+              border: settings.wildcardVariant === 'v1' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px'
+            }}
+          >
+            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="v1" />
+          </div>
+          <div 
+            onClick={() => setWildcardVariant('v2')}
+            style={{ 
+              cursor: 'pointer',
+              border: settings.wildcardVariant === 'v2' ? '2px solid var(--text-primary)' : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px'
+            }}
+          >
+            <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="v2" />
+          </div>
+        </div>
       </div>
     </div>
   );

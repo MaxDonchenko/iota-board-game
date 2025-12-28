@@ -14,9 +14,6 @@ export function ThemeToggle() {
       >
         {settings.theme === 'light' ? '🌙 Dark' : '☀️ Light'}
       </button>
-      <p className={styles.description}>
-        Current theme: {settings.theme === 'light' ? 'Light' : 'Dark'}
-      </p>
     </div>
   );
 }

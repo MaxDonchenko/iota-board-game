@@ -13,7 +13,7 @@
 }
 
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .label {
@@ -35,5 +35,17 @@
   margin-top: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.radio {
+  cursor: pointer;
 }
 

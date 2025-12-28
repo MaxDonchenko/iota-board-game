@@ -7,6 +7,7 @@ interface ThemeContextType {
   toggleTheme: () => void;
   toggleGradients: () => void;
   toggleShowInvalidPlacements: () => void;
+  setWildcardVariant: (variant: 'v1' | 'v2') => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   useGradients: true,
   gameMode: 'full',
   showInvalidPlacements: true,
+  wildcardVariant: 'v1',
 };
 
 const STORAGE_KEY = 'iota-game-settings';
@@ -67,8 +69,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const setWildcardVariant = (variant: 'v1' | 'v2') => {
+    setSettings(prev => ({
+      ...prev,
+      wildcardVariant: variant,
+    }));
+  };
+
   return (
-    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements }}>
+    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant }}>
       {children}
     </ThemeContext.Provider>
   );

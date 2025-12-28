@@ -18,6 +18,7 @@ export interface GameSettings {
   useGradients: boolean;
   gameMode: GameMode;
   showInvalidPlacements: boolean;
+  wildcardVariant: 'v1' | 'v2';
 }
 
 export interface GameState {
