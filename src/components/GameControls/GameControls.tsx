@@ -1,6 +1,6 @@
 import { PassButton } from './PassButton';
 import { WildCardRecycleButton } from './WildCardRecycleButton';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import { ColorUtils } from '@/utils/colors';
 import type { GameState } from '@/types/Game.types';
 import styles from './GameControls.module.css';
@@ -18,7 +18,7 @@ export function GameControls({
   onRecycleWildCard,
   onNewGame,
 }: GameControlsProps) {
-  const { settings } = useTheme();
+  const { settings } = useSettings();
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const redColor = ColorUtils.getSolidColor('Red', settings.theme);
 

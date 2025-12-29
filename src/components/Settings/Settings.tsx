@@ -1,6 +1,6 @@
 import { ThemeToggle } from './ThemeToggle';
 import { GameModeSelector } from './GameModeSelector';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Card } from '../Card/Card';
 import { Card as CardClass } from '@/game/Card';
 import styles from './Settings.module.css';
@@ -12,7 +12,7 @@ export function Settings() {
     toggleShowInvalidPlacements,
     setWildcardVariant,
     setCardVariant,
-  } = useTheme();
+  } = useSettings();
 
   return (
     <div className={styles.settings}>

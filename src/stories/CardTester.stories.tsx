@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { SettingsProvider } from '../context/SettingsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { Card } from '../components/Card/Card';
@@ -190,8 +191,10 @@ function CardTesterContent() {
 
 export const CardTester: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <CardTesterContent />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <CardTesterContent />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };

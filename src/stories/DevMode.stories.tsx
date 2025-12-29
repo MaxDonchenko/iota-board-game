@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { SettingsProvider } from '../context/SettingsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { useGame } from '../hooks/useGame';
-import { useTheme } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from '../components/ScoreDisplay/ScoreDisplay';
@@ -18,8 +18,7 @@ const meta: Meta = {
 export default meta;
 
 function DevModeContent() {
-  const { settings } = useTheme();
-  const { gameState, startGame, placeCards, passTurn, resetGame } = useGame();
+  const { gameState, placeCards, passTurn, resetGame } = useGame();
   const [selectedUseCase, setSelectedUseCase] = useState<string>('');
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<
@@ -125,8 +124,10 @@ function DevModeContent() {
 
 export const DevModeSelector: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <DevModeContent />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <DevModeContent />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { Grid } from '../game/Grid';
 import { Card } from '../game/Card';
+import { SettingsProvider } from '../context/SettingsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 
 const meta: Meta<typeof GameBoard> = {
@@ -9,9 +10,11 @@ const meta: Meta<typeof GameBoard> = {
   component: GameBoard,
   decorators: [
     (Story) => (
-      <ThemeProvider>
-        <Story />
-      </ThemeProvider>
+      <SettingsProvider>
+        <ThemeProvider>
+          <Story />
+        </ThemeProvider>
+      </SettingsProvider>
     ),
   ],
 };

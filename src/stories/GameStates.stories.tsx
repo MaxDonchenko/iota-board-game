@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
-import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { SettingsProvider, useSettings } from '../context/SettingsContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from '../components/ScoreDisplay/ScoreDisplay';
@@ -21,7 +22,7 @@ const meta: Meta = {
 export default meta;
 
 function ThemeSync({ children }: { children: React.ReactNode }) {
-  const { settings, updateSettings } = useTheme();
+  const { settings, updateSettings } = useSettings();
 
   React.useEffect(() => {
     const observer = new MutationObserver(() => {

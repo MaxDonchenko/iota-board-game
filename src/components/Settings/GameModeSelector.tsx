@@ -1,8 +1,8 @@
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import styles from './GameModeSelector.module.css';
 
 export function GameModeSelector() {
-  const { settings, updateSettings } = useTheme();
+  const { settings, updateSettings } = useSettings();
 
   return (
     <div className={styles.gameModeSelector}>

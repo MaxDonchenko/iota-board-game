@@ -1,4 +1,4 @@
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import { ColorUtils } from '@/utils/colors';
 import styles from './Card.module.css';
 import type { Card as CardType } from '@/game/Card';
@@ -22,7 +22,7 @@ export function Card({
   wildcardVariant,
   cardVariant,
 }: CardProps) {
-  const { settings: contextSettings } = useTheme();
+  const { settings: contextSettings } = useSettings();
   const settings = {
     ...contextSettings,
     ...(wildcardVariant && { wildcardVariant }),

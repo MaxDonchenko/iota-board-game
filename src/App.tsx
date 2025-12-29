@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { GameSetup } from './components/GameSetup/GameSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { PlayerHand } from './components/PlayerHand/PlayerHand';
@@ -21,7 +22,7 @@ import './styles/themes.css';
 import './styles/card-animations.css';
 
 function AppContent() {
-  const { settings } = useTheme();
+  const { settings } = useSettings();
   const { gameState, startGame, placeCards, passTurn, discardCards, resetGame } = useGame();
   const [showSettings, setShowSettings] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
@@ -800,9 +801,11 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SettingsProvider>
   );
 }
 

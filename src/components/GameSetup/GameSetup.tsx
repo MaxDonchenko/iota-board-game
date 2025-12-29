@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 import type { GameMode } from '@/types/Game.types';
 import styles from './GameSetup.module.css';
 
@@ -8,7 +8,7 @@ interface GameSetupProps {
 }
 
 export function GameSetup({ onStartGame }: GameSetupProps) {
-  const { settings } = useTheme();
+  const { settings } = useSettings();
   const [playerCount, setPlayerCount] = useState(2);
   const [playerNames, setPlayerNames] = useState<string[]>(['Player 1', 'Player 2']);
   const [gameMode, setGameMode] = useState<GameMode>(settings.gameMode);

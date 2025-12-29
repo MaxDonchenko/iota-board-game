@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState, useEffect } from 'react';
-import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { SettingsProvider, useSettings } from '../context/SettingsContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import { Card } from '../components/Card/Card';
 import { Card as CardClass } from '../game/Card';
 import type { Color, Shape } from '../types/Card.types';
@@ -12,7 +13,7 @@ const meta: Meta = {
 export default meta;
 
 function CardVariantsContent() {
-  const { settings, setWildcardVariant, setCardVariant, updateSettings } = useTheme();
+  const { settings, setWildcardVariant, setCardVariant, updateSettings } = useSettings();
 
   // Sync Storybook theme with ThemeContext
   useEffect(() => {
@@ -218,8 +219,10 @@ function CardVariantsContent() {
 
 export const CardVariants: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <CardVariantsContent />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <CardVariantsContent />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };

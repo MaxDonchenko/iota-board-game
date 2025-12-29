@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useEffect } from 'react';
-import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { SettingsProvider, useSettings } from '../context/SettingsContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { useCases } from '../dev/gameUseCases';
@@ -12,7 +13,7 @@ const meta: Meta = {
 export default meta;
 
 function ThemeSync({ children }: { children: React.ReactNode }) {
-  const { settings, updateSettings } = useTheme();
+  const { settings, updateSettings } = useSettings();
 
   useEffect(() => {
     // Sync with Storybook's theme from data-theme attribute
@@ -82,73 +83,91 @@ function UseCaseStory({ useCaseName }: { useCaseName: string }) {
 
 export const BasicLinePlacement: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="BasicLinePlacement" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="BasicLinePlacement" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const LotCreation: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="LotCreation" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="LotCreation" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const WildCardPlacement: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="WildCardPlacement" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="WildCardPlacement" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const WildCardRecycling: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="WildCardRecycling" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="WildCardRecycling" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const MultiLineScoring: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="MultiLineScoring" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="MultiLineScoring" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const AllFourCards: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="AllFourCards" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="AllFourCards" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const FinalTurn: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="FinalTurn" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="FinalTurn" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const ComplexGrid: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="ComplexGrid" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="ComplexGrid" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const ImpossiblePlacement: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <UseCaseStory useCaseName="ImpossiblePlacement" />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="ImpossiblePlacement" />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
