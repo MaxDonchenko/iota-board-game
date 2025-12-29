@@ -39,7 +39,6 @@ export function PlayerHand({
 
   return (
     <div className={styles.hand}>
-      <h3 className={styles.title}>Your Hand</h3>
       <div className={styles.cards}>
         {cards.map((card, index) => (
           <Card
@@ -47,6 +46,7 @@ export function PlayerHand({
             card={card}
             onClick={() => handleCardClick(card)}
             selected={isSelected(card)}
+            dataTestId={`hand-card-${index}`}
           />
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { GameSetup } from './components/GameSetup/GameSetup';
@@ -12,322 +12,62 @@ import { Card as CardComponent } from './components/Card/Card';
 import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
 import type { Coordinate } from './types/Grid.types';
-import type { Card as CardType } from './game/Card';
-import type { WildValue, Shape, Color } from './types/Card.types';
 import { Card } from './game/Card';
-import { Grid } from './game/Grid';
-import { Validation } from './game/Validation';
+import type { Card as CardType } from './game/Card';
+import type { WildValue } from './types/Card.types';
+
 import './styles/index.css';
 import './styles/themes.css';
 import './styles/card-animations.css';
 
 function AppContent() {
   const { settings } = useSettings();
-  const { gameState, startGame, placeCards, passTurn, discardCards, resetGame } = useGame();
+  const {
+    gameState,
+    startGame,
+    resetGame,
+
+    // UI selection / preview helpers
+    selectedCards,
+    pendingPlacements,
+    nextCardIndex,
+    setSelectedCards,
+    placePreview,
+    confirmTurn,
+    cancelPreview,
+    discardSelected,
+    passTurnAndClear,
+    resetSelection,
+    getValidWildcardValues,
+    setWildcardValueAtIndex,
+  } = useGame();
+
   const [showSettings, setShowSettings] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
-  const [gameStartTime, setGameStartTime] = useState<Date | undefined>();
-  const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
-  const [pendingPlacements, setPendingPlacements] = useState<
-    Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>
-  >([]);
-  const [nextCardIndex, setNextCardIndex] = useState(0);
-
-  // Clear selections when turn changes
-  useEffect(() => {
-    if (gameState) {
-      setSelectedCards([]);
-      setPendingPlacements([]);
-      setNextCardIndex(0);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState?.currentPlayerIndex]);
-
-  // Clear pending placements when all cards are deselected
-  useEffect(() => {
-    if (selectedCards.length === 0 && pendingPlacements.length > 0) {
-      setPendingPlacements([]);
-      setNextCardIndex(0);
-      return;
-    }
-
-    // Remove placements for cards that are no longer selected
-    const placementsToKeep = pendingPlacements.filter((p) => selectedCards.includes(p.card));
-    if (placementsToKeep.length !== pendingPlacements.length) {
-      setPendingPlacements(placementsToKeep);
-      // Recalculate nextCardIndex to point to first unplaced card
-      let newNextCardIndex = 0;
-      for (let i = 0; i < selectedCards.length; i++) {
-        const isPlaced = placementsToKeep.some((p) => p.card === selectedCards[i]);
-        if (!isPlaced) {
-          newNextCardIndex = i;
-          break;
-        }
-        newNextCardIndex = i + 1;
-      }
-      setNextCardIndex(Math.min(newNextCardIndex, selectedCards.length));
-    }
-  }, [selectedCards, pendingPlacements]);
 
   const handleStartGame = (playerNames: string[], gameMode: GameMode) => {
     startGame(playerNames, gameMode, settings);
-    setGameStartTime(new Date());
-    setSelectedCards([]);
-    setPendingPlacements([]);
+    resetSelection();
   };
-
-  const handleCardSelect = (card: CardType) => {
-    if (selectedCards.includes(card)) {
-      // Deselecting a card - just remove it from selection
-      // The useEffect will handle cleaning up pending placements
-      setSelectedCards(selectedCards.filter((c) => c !== card));
-    } else if (selectedCards.length < 4) {
-      setSelectedCards([...selectedCards, card]);
-    }
-  };
-
-  // Helper to get complete line for wildcard validation
-  const getCompleteLineForWildcard = useCallback(
-    (
-      position: Coordinate,
-      direction: 'horizontal' | 'vertical',
-      grid: Grid,
-      wildCard: CardType
-    ): { cards: CardType[]; positions: Coordinate[] } | null => {
-      const allCards = new Map<string, CardType>();
-
-      // Add existing cards
-      for (const [key, card] of grid.positions.entries()) {
-        allCards.set(key, card);
-      }
-
-      // Add the wildcard at this position
-      allCards.set(`${position.x},${position.y}`, wildCard);
-
-      const positions: Coordinate[] = [position];
-      const cards: CardType[] = [wildCard];
-
-      if (direction === 'horizontal') {
-        let leftX = position.x - 1;
-        while (allCards.has(`${leftX},${position.y}`)) {
-          const card = allCards.get(`${leftX},${position.y}`);
-          if (card) {
-            positions.unshift({ x: leftX, y: position.y });
-            cards.unshift(card);
-          }
-          leftX--;
-        }
-
-        let rightX = position.x + 1;
-        while (allCards.has(`${rightX},${position.y}`)) {
-          const card = allCards.get(`${rightX},${position.y}`);
-          if (card) {
-            positions.push({ x: rightX, y: position.y });
-            cards.push(card);
-          }
-          rightX++;
-        }
-      } else {
-        let upY = position.y - 1;
-        while (allCards.has(`${position.x},${upY}`)) {
-          const card = allCards.get(`${position.x},${upY}`);
-          if (card) {
-            positions.unshift({ x: position.x, y: upY });
-            cards.unshift(card);
-          }
-          upY--;
-        }
-
-        let downY = position.y + 1;
-        while (allCards.has(`${position.x},${downY}`)) {
-          const card = allCards.get(`${position.x},${downY}`);
-          if (card) {
-            positions.push({ x: position.x, y: downY });
-            cards.push(card);
-          }
-          downY++;
-        }
-      }
-
-      return { cards, positions };
-    },
-    []
-  );
-
-  // Find all valid wildcard values for a placed wildcard
-  const getValidWildcardValues = useCallback(
-    (wildCard: CardType, position: Coordinate): WildValue[] => {
-      if (!gameState || !wildCard.isWild || wildCard.wildValue) {
-        return [];
-      }
-
-      // Create temporary grid with pending placements
-      const tempGrid = new Grid();
-      for (const [key, card] of gameState.grid.positions.entries()) {
-        const [x, y] = key.split(',').map(Number);
-        tempGrid.addCard(x, y, card);
-      }
-
-      // Add other pending placements (excluding this wildcard)
-      for (const placement of pendingPlacements) {
-        if (placement.position.x !== position.x || placement.position.y !== position.y) {
-          const card = placement.card;
-          if (card.wildValue) {
-            const cardWithValue = new Card(
-              card.shape,
-              card.number,
-              card.color,
-              true,
-              card.wildValue
-            );
-            tempGrid.addCard(placement.position.x, placement.position.y, cardWithValue);
-          } else {
-            tempGrid.addCard(placement.position.x, placement.position.y, card);
-          }
-        }
-      }
-
-      // Get lines this wildcard would be part of
-      const hLine = getCompleteLineForWildcard(position, 'horizontal', tempGrid, wildCard);
-      const vLine = getCompleteLineForWildcard(position, 'vertical', tempGrid, wildCard);
-
-      const validValues: WildValue[] = [];
-      const shapes: Shape[] = ['Square', 'Circle', 'Triangle', 'Plus'];
-      const numbers: Array<1 | 2 | 3 | 4> = [1, 2, 3, 4];
-      const colors: Color[] = ['Red', 'Blue', 'Green', 'Yellow'];
-
-      // Try all combinations
-      for (const shape of shapes) {
-        for (const number of numbers) {
-          for (const color of colors) {
-            const testValue: WildValue = { shape, number, color };
-            const testCard = new Card(shape, number, color, true, testValue);
-
-            // Check if this value works for all lines
-            let isValid = true;
-
-            if (hLine && hLine.cards.length >= 2) {
-              const testHLine = hLine.cards
-                .filter((c) => c !== undefined && c !== null)
-                .map((c) => (c && c.isWild && !c.wildValue ? testCard : c)) as CardType[];
-              const hResult = Validation.validateLineRules(testHLine);
-              if (!hResult.isValid) {
-                isValid = false;
-              }
-            }
-
-            if (isValid && vLine && vLine.cards.length >= 2) {
-              const testVLine = vLine.cards
-                .filter((c) => c !== undefined && c !== null)
-                .map((c) => (c && c.isWild && !c.wildValue ? testCard : c)) as CardType[];
-              const vResult = Validation.validateLineRules(testVLine);
-              if (!vResult.isValid) {
-                isValid = false;
-              }
-            }
-
-            if (isValid) {
-              validValues.push(testValue);
-            }
-          }
-        }
-      }
-
-      return validValues;
-    },
-    [gameState, pendingPlacements, getCompleteLineForWildcard]
-  );
 
   const handlePlaceCard = (position: Coordinate) => {
-    if (!gameState || selectedCards.length === 0) return;
-
-    // Get the next card to place
-    if (nextCardIndex >= selectedCards.length) {
-      return; // All cards already placed in preview
-    }
-
-    const card = selectedCards[nextCardIndex];
-    const newPlacements = [...pendingPlacements, { card, position }];
-    setPendingPlacements(newPlacements);
-    setNextCardIndex(nextCardIndex + 1);
+    placePreview(position);
   };
 
   const handleConfirmTurn = () => {
-    if (!gameState || pendingPlacements.length === 0) return;
-
-    // Replace wildcards with regular cards using selected values
-    // Store mapping of new cards to original cards for hand removal
-    const cardMapping = new Map<Card, Card>();
-    const placements = pendingPlacements.map((p) => {
-      let card = p.card;
-      const originalCard = p.card;
-
-      // If it's a wildcard with a selected value, replace it with a regular card
-      if (card.isWild && p.wildValue) {
-        card = new Card(
-          p.wildValue.shape,
-          p.wildValue.number,
-          p.wildValue.color,
-          false // Not a wildcard anymore
-        );
-        // Store mapping for hand removal
-        cardMapping.set(card, originalCard);
-      }
-      return {
-        card,
-        position: p.position,
-      };
-    });
-
-    const result = placeCards(placements, cardMapping);
-    if (result.success) {
-      setSelectedCards([]);
-      setPendingPlacements([]);
-      setNextCardIndex(0);
-    } else {
-      // Show error and reset
-      alert(result.error || 'Invalid placement');
-      setPendingPlacements([]);
-      setNextCardIndex(0);
-    }
+    confirmTurn();
   };
 
   const handleCancelPreview = () => {
-    setPendingPlacements([]);
-    setNextCardIndex(0);
+    cancelPreview();
   };
 
   const handlePass = () => {
-    passTurn();
-    setSelectedCards([]);
-    setPendingPlacements([]);
-    setNextCardIndex(0);
+    passTurnAndClear();
   };
 
   const handleDiscardSelected = () => {
-    if (selectedCards.length === 0) return;
-
-    // Check if any selected card is a wildcard
-    const hasWildcard = selectedCards.some((card) => card.isWild);
-
-    if (hasWildcard) {
-      const confirmed = window.confirm(
-        'Warning: You are about to discard a wildcard, which is a rare and valuable card.\n\n' +
-          'Are you sure you want to proceed?'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    const result = discardCards(selectedCards);
-    if (result.success) {
-      setSelectedCards([]);
-      setPendingPlacements([]);
-      setNextCardIndex(0);
-    } else {
-      alert(result.error || 'Failed to discard cards');
-    }
+    discardSelected();
   };
 
   if (!gameState) {
@@ -414,10 +154,7 @@ function AppContent() {
               borderRadius: '8px',
             }}
           >
-            <GameOverview
-              gameState={gameState}
-              gameStartTime={gameStartTime ?? gameState.startTime}
-            />
+            <GameOverview gameState={gameState} gameStartTime={gameState?.startTime} />
           </div>
         )}
 
@@ -464,14 +201,9 @@ function AppContent() {
             </h3>
             <PlayerHand
               cards={currentPlayer.hand}
-              onCardSelect={handleCardSelect}
               selectedCards={selectedCards}
-              onSelectionChange={setSelectedCards}
-              onResetSelection={() => {
-                setSelectedCards([]);
-                setPendingPlacements([]);
-                setNextCardIndex(0);
-              }}
+              onSelectionChange={setSelectedCards as (cards: CardType[]) => void}
+              onResetSelection={resetSelection as () => void}
             />
           </div>
         )}
@@ -727,10 +459,8 @@ function AppContent() {
                     <div
                       key={idx}
                       onClick={() => {
-                        const updated = pendingPlacements.map((p) =>
-                          p === wildcardPlacement ? { ...p, wildValue: value } : p
-                        );
-                        setPendingPlacements(updated);
+                        const index = pendingPlacements.findIndex((p) => p === wildcardPlacement);
+                        if (index !== -1) setWildcardValueAtIndex(index, value);
                       }}
                       style={{
                         cursor: 'pointer',

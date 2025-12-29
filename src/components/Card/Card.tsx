@@ -11,6 +11,7 @@ interface CardProps {
   cursor?: 'pointer' | 'not-allowed' | 'default';
   wildcardVariant?: 'modern' | 'original';
   cardVariant?: 'modern' | 'original';
+  dataTestId?: string;
 }
 
 export function Card({
@@ -21,6 +22,7 @@ export function Card({
   cursor,
   wildcardVariant,
   cardVariant,
+  dataTestId,
 }: CardProps) {
   const { settings: contextSettings } = useSettings();
   const settings = {
@@ -40,6 +42,7 @@ export function Card({
             selected ? styles.selected : ''
           } ${className}`}
           onClick={onClick}
+          data-testid={dataTestId}
           style={{
             cursor: cursor || (onClick ? 'pointer' : undefined),
           }}
@@ -149,6 +152,7 @@ export function Card({
           selected ? styles.selected : ''
         } ${className}`}
         onClick={onClick}
+        data-testid={dataTestId}
         style={{
           cursor: cursor || (onClick ? 'pointer' : undefined),
         }}
@@ -201,6 +205,7 @@ export function Card({
           selected ? styles.selected : ''
         } ${className}`}
         onClick={onClick}
+        data-testid={dataTestId}
         style={{
           backgroundColor: textColor,
           cursor: cursor || (onClick ? 'pointer' : undefined),
@@ -226,6 +231,7 @@ export function Card({
     <div
       className={`${styles.card} ${selected ? styles.selected : ''} ${className}`}
       onClick={onClick}
+      data-testid={dataTestId}
       style={{
         background: colorStyle,
         color: textColor,
