@@ -66,7 +66,7 @@ describe('Grid', () => {
       { x: 0, y: 2 },
     ];
 
-    expect(grid.isContinuousLine(positions)).toBe(true);
+    expect(grid.isValidPlacement(positions)).toBe(true);
   });
 
   it('should validate continuous horizontal line', () => {
@@ -77,7 +77,7 @@ describe('Grid', () => {
       { x: 2, y: 0 },
     ];
 
-    expect(grid.isContinuousLine(positions)).toBe(true);
+    expect(grid.isValidPlacement(positions)).toBe(true);
   });
 
   it('should detect non-continuous line', () => {
@@ -87,7 +87,7 @@ describe('Grid', () => {
       { x: 2, y: 0 }, // Gap at x: 1
     ];
 
-    expect(grid.isContinuousLine(positions)).toBe(false);
+    expect(grid.isValidPlacement(positions)).toBe(false);
   });
 
   it('should get line containing position', () => {
