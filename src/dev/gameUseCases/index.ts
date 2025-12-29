@@ -10,7 +10,7 @@ import { impossiblePlacement } from './ImpossiblePlacement';
 import { edgeCaseValidation } from './EdgeCaseValidation';
 import type { UseCase } from './types';
 
-export type UseCaseName = 
+export type UseCaseName =
   | 'BasicLinePlacement'
   | 'LotCreation'
   | 'WildCardPlacement'
@@ -36,4 +36,3 @@ export const useCases: Record<UseCaseName, UseCase> = {
   ImpossiblePlacement: impossiblePlacement,
   EdgeCaseValidation: edgeCaseValidation,
 };
-

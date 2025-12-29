@@ -11,4 +11,3 @@ export function WildCardRecycleButton({ onClick }: WildCardRecycleButtonProps) {
     </button>
   );
 }
-

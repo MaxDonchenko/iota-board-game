@@ -9,14 +9,14 @@ interface PassButtonProps {
 export function PassButton({ onClick }: PassButtonProps) {
   const { settings } = useTheme();
   const blueColor = ColorUtils.getSolidColor('Blue', settings.theme);
-  
+
   return (
-    <button 
+    <button
       onClick={() => {
         if (window.confirm('Are you sure you want to pass your turn?')) {
           onClick();
         }
-      }} 
+      }}
       className={styles.passButton}
       style={{ backgroundColor: blueColor }}
     >
@@ -24,4 +24,3 @@ export function PassButton({ onClick }: PassButtonProps) {
     </button>
   );
 }
-

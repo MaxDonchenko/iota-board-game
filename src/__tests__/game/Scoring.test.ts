@@ -28,7 +28,7 @@ describe('Scoring', () => {
       ],
       direction: 'horizontal',
     };
-    
+
     expect(Scoring.calculateLineScore(line)).toBe(6); // 1 + 2 + 3
   });
 
@@ -50,10 +50,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
       {
-        cards: [
-          new Card('Circle', 1, 'Blue'),
-          new Card('Circle', 2, 'Blue'),
-        ],
+        cards: [new Card('Circle', 1, 'Blue'), new Card('Circle', 2, 'Blue')],
         positions: [
           { x: 0, y: 1 },
           { x: 1, y: 1 },
@@ -61,7 +58,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
     ];
-    
+
     expect(Scoring.detectLots(lines)).toBe(1);
   });
 
@@ -83,7 +80,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
     ];
-    
+
     // When playing 4 cards that form a lot, both lot multiplier and all-4 multiplier apply
     const result = Scoring.calculateTurnScore(lines, 4, false);
     expect(result.lots).toBe(1);
@@ -94,10 +91,7 @@ describe('Scoring', () => {
   it('should double again for playing all 4 cards', () => {
     const lines: Line[] = [
       {
-        cards: [
-          new Card('Square', 1, 'Red'),
-          new Card('Square', 2, 'Red'),
-        ],
+        cards: [new Card('Square', 1, 'Red'), new Card('Square', 2, 'Red')],
         positions: [
           { x: 0, y: 0 },
           { x: 1, y: 0 },
@@ -105,7 +99,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
     ];
-    
+
     const result = Scoring.calculateTurnScore(lines, 4, false);
     expect(result.playedAllFour).toBe(true);
     expect(result.finalScore).toBe(6); // (1+2) * 2 = 6
@@ -114,10 +108,7 @@ describe('Scoring', () => {
   it('should double for final turn', () => {
     const lines: Line[] = [
       {
-        cards: [
-          new Card('Square', 1, 'Red'),
-          new Card('Square', 2, 'Red'),
-        ],
+        cards: [new Card('Square', 1, 'Red'), new Card('Square', 2, 'Red')],
         positions: [
           { x: 0, y: 0 },
           { x: 1, y: 0 },
@@ -125,7 +116,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
     ];
-    
+
     const result = Scoring.calculateTurnScore(lines, 2, true);
     expect(result.isFinalTurn).toBe(true);
     expect(result.finalScore).toBe(6); // (1+2) * 2 = 6
@@ -149,7 +140,7 @@ describe('Scoring', () => {
         direction: 'horizontal',
       },
     ];
-    
+
     // Lot (x2) + All 4 cards (x2) = x4 total
     const result = Scoring.calculateTurnScore(lines, 4, false);
     expect(result.finalScore).toBe(40); // (1+2+3+4) * 2 * 2 = 40
@@ -169,8 +160,7 @@ describe('Scoring', () => {
       ],
       direction: 'horizontal',
     };
-    
+
     expect(Scoring.calculateLineScore(line)).toBe(4); // 1 + 0 + 3
   });
 });
-

@@ -13,7 +13,7 @@ describe('Grid', () => {
     const grid = new Grid();
     const card = new Card('Square', 1, 'Red');
     grid.setStarterCard(0, 0, card);
-    
+
     const starterCard = grid.getStarterCard();
     expect(starterCard).toEqual(card);
   });
@@ -23,7 +23,7 @@ describe('Grid', () => {
     const card = new Card('Square', 1, 'Red');
     grid.setStarterCard(0, 0, card);
     grid.addCard(1, 0, new Card('Square', 2, 'Red'));
-    
+
     const lines = grid.getAllLines();
     expect(lines.length).toBeGreaterThan(0);
   });
@@ -32,9 +32,9 @@ describe('Grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
     grid.addCard(1, 0, new Card('Square', 2, 'Red'));
-    
+
     const lines = grid.getAllLines();
-    const horizontalLine = lines.find(line => line.direction === 'horizontal');
+    const horizontalLine = lines.find((line) => line.direction === 'horizontal');
     expect(horizontalLine).toBeDefined();
   });
 
@@ -42,20 +42,20 @@ describe('Grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
     grid.addCard(0, 1, new Card('Square', 2, 'Red'));
-    
+
     const lines = grid.getAllLines();
-    const verticalLine = lines.find(line => line.direction === 'vertical');
+    const verticalLine = lines.find((line) => line.direction === 'vertical');
     expect(verticalLine).toBeDefined();
   });
 
   it('should get adjacent cells', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
-    
+
     const adjacent = grid.getAdjacentCells(0, 0);
     expect(adjacent.length).toBeGreaterThan(0);
-    expect(adjacent.some(cell => cell.x === 1 && cell.y === 0)).toBe(true);
-    expect(adjacent.some(cell => cell.x === 0 && cell.y === 1)).toBe(true);
+    expect(adjacent.some((cell) => cell.x === 1 && cell.y === 0)).toBe(true);
+    expect(adjacent.some((cell) => cell.x === 0 && cell.y === 1)).toBe(true);
   });
 
   it('should validate continuous vertical line', () => {
@@ -65,7 +65,7 @@ describe('Grid', () => {
       { x: 0, y: 1 },
       { x: 0, y: 2 },
     ];
-    
+
     expect(grid.isContinuousLine(positions)).toBe(true);
   });
 
@@ -76,7 +76,7 @@ describe('Grid', () => {
       { x: 1, y: 0 },
       { x: 2, y: 0 },
     ];
-    
+
     expect(grid.isContinuousLine(positions)).toBe(true);
   });
 
@@ -86,7 +86,7 @@ describe('Grid', () => {
       { x: 0, y: 0 },
       { x: 2, y: 0 }, // Gap at x: 1
     ];
-    
+
     expect(grid.isContinuousLine(positions)).toBe(false);
   });
 
@@ -94,7 +94,7 @@ describe('Grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
     grid.addCard(1, 0, new Card('Square', 2, 'Red'));
-    
+
     const line = grid.getLine(0, 0, 'horizontal');
     expect(line).toBeDefined();
     expect(line?.cards.length).toBe(2);
@@ -103,9 +103,8 @@ describe('Grid', () => {
   it('should return null for line not containing position', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
-    
+
     const line = grid.getLine(5, 5, 'horizontal');
     expect(line).toBeNull();
   });
 });
-

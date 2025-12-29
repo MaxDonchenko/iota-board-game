@@ -28,10 +28,7 @@ const gameState: GameState = {
     {
       id: 'player-0',
       name: 'Player 1',
-      hand: [
-        new Card('Square', 4, 'Red'),
-        new Card('Circle', 1, 'Blue'),
-      ],
+      hand: [new Card('Square', 4, 'Red'), new Card('Circle', 1, 'Blue')],
       score: 0,
     },
     {
@@ -57,7 +54,7 @@ const gameState: GameState = {
 
 export const finalTurn: UseCase = {
   name: 'Final Turn',
-  description: 'Draw pile is empty. This is the final turn - all scores are doubled. Player 2 has no cards left.',
+  description:
+    'Draw pile is empty. This is the final turn - all scores are doubled. Player 2 has no cards left.',
   gameState,
 };
-

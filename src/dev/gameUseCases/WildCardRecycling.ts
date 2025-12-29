@@ -53,7 +53,7 @@ const gameState: GameState = {
 
 export const wildCardRecycling: UseCase = {
   name: 'Wild Card Recycling',
-  description: 'Wild card on grid can be replaced with matching card from hand. Player has Square, 4, Red which matches the wild card\'s value.',
+  description:
+    "Wild card on grid can be replaced with matching card from hand. Player has Square, 4, Red which matches the wild card's value.",
   gameState,
 };
-

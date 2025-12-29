@@ -12,11 +12,8 @@ describe('WildCardManager', () => {
       number: 1,
       color: 'Red',
     });
-    const playerHand = [
-      new Card('Square', 1, 'Red'),
-      new Card('Circle', 2, 'Blue'),
-    ];
-    
+    const playerHand = [new Card('Square', 1, 'Red'), new Card('Circle', 2, 'Blue')];
+
     expect(WildCardManager.canReplaceWild(wildCard, playerHand)).toBe(true);
   });
 
@@ -27,12 +24,9 @@ describe('WildCardManager', () => {
       number: 1,
       color: 'Red',
     });
-    
-    const playerHand = [
-      new Card('Circle', 2, 'Blue'),
-      new Card('Triangle', 3, 'Green'),
-    ];
-    
+
+    const playerHand = [new Card('Circle', 2, 'Blue'), new Card('Triangle', 3, 'Green')];
+
     expect(WildCardManager.canReplaceWild(wildCard, playerHand)).toBe(false);
   });
 
@@ -44,7 +38,7 @@ describe('WildCardManager', () => {
       color: 'Blue',
     };
     card.setWildValue(wildValue);
-    
+
     expect(WildCardManager.getWildValue(card)).toEqual(wildValue);
   });
 
@@ -60,7 +54,7 @@ describe('WildCardManager', () => {
       number: 3,
       color: 'Green',
     };
-    
+
     WildCardManager.setWildValue(card, wildValue);
     expect(card.wildValue).toEqual(wildValue);
   });
@@ -68,7 +62,7 @@ describe('WildCardManager', () => {
   it('should replace wild card on grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
-    
+
     const wildCard = new Card('Square', 1, 'Red', true);
     wildCard.setWildValue({
       shape: 'Square',
@@ -76,7 +70,7 @@ describe('WildCardManager', () => {
       color: 'Red',
     });
     grid.addCard(1, 0, wildCard);
-    
+
     const replacementCard = new Card('Square', 1, 'Red');
     const replacedCard = WildCardManager.replaceWild(
       {
@@ -86,10 +80,9 @@ describe('WildCardManager', () => {
       },
       grid
     );
-    
+
     expect(replacedCard).toEqual(wildCard);
     const cardAtPosition = grid.getCard(1, 0);
     expect(cardAtPosition?.equals(replacementCard)).toBe(true);
   });
 });
-

@@ -12,7 +12,10 @@ import type { WildCardReplacement } from '@/game/WildCard';
 interface UseGameReturn {
   gameState: GameState | null;
   startGame: (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => void;
-  placeCards: (placements: Placement[], cardMapping?: Map<Card, Card>) => { success: boolean; error?: string };
+  placeCards: (
+    placements: Placement[],
+    cardMapping?: Map<Card, Card>
+  ) => { success: boolean; error?: string };
   passTurn: (cardsToTrade?: string[]) => void;
   discardCards: (cards: Card[]) => { success: boolean; error?: string };
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
@@ -27,7 +30,7 @@ export function useGame(): UseGameReturn {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const gameIdFromUrl = urlParams.get('game');
-    
+
     if (gameIdFromUrl) {
       const loadedState = loadGameFromStorage(gameIdFromUrl);
       if (loadedState) {
@@ -36,7 +39,7 @@ export function useGame(): UseGameReturn {
         return;
       }
     }
-    
+
     // Clear invalid game ID from URL
     if (gameIdFromUrl) {
       window.history.replaceState({}, '', window.location.pathname);
@@ -50,125 +53,225 @@ export function useGame(): UseGameReturn {
     }
   }, [gameState, gameId]);
 
-  const startGame = useCallback((
-    playerNames: string[],
-    gameMode: 'short' | 'full',
-    settings: GameSettings
-  ) => {
-    const newGameId = generateGameId();
-    const newState = GameStateManager.createInitialState(playerNames, gameMode, settings);
-    setGameState(newState);
-    setGameId(newGameId);
-    
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.set('game', newGameId);
-    window.history.pushState({}, '', url);
-    
-    // Save to storage
-    saveGameToStorage(newState, newGameId);
-  }, []);
+  const startGame = useCallback(
+    (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => {
+      const newGameId = generateGameId();
+      const newState = GameStateManager.createInitialState(playerNames, gameMode, settings);
+      setGameState(newState);
+      setGameId(newGameId);
 
-  const placeCards = useCallback((placements: Placement[], cardMapping?: Map<Card, Card>) => {
-    if (!gameState) {
-      return { success: false, error: 'No game in progress' };
-    }
+      // Update URL
+      const url = new URL(window.location.href);
+      url.searchParams.set('game', newGameId);
+      window.history.pushState({}, '', url);
 
-    const validation = Validation.validatePlacement(placements, gameState.grid);
-    if (!validation.isValid) {
-      return { success: false, error: validation.error };
-    }
+      // Save to storage
+      saveGameToStorage(newState, newGameId);
+    },
+    []
+  );
 
-    // Place cards on grid
-    for (const placement of placements) {
-      gameState.grid.addCard(placement.position.x, placement.position.y, placement.card);
-    }
-
-    // Calculate score
-    const affectedLines = gameState.grid.getAllLines().filter(line =>
-      line.positions.some(pos =>
-        placements.some(p => p.position.x === pos.x && p.position.y === pos.y)
-      )
-    );
-
-    const scoreResult = Scoring.calculateTurnScore(
-      affectedLines,
-      placements.length,
-      gameState.isFinalTurn
-    );
-
-    // Update player score
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    const newState = GameStateManager.updatePlayerScore(
-      gameState,
-      currentPlayer.id,
-      scoreResult.finalScore
-    );
-
-    // Remove placed cards from hand
-    // For wildcards that were replaced, use the mapping to find original card
-    const updatedPlayers = newState.players.map((p, idx) => {
-      if (idx === gameState.currentPlayerIndex) {
-        return {
-          ...p,
-          hand: p.hand.filter(card => {
-            // Check if this card was placed
-            return !placements.some(pl => {
-              // If there's a mapping, check if this card is the original for a replaced wildcard
-              if (cardMapping && cardMapping.has(pl.card)) {
-                const originalCard = cardMapping.get(pl.card);
-                return originalCard === card;
-              }
-              // For regular cards, match by reference
-              return pl.card === card;
-            });
-          }),
-        };
+  const placeCards = useCallback(
+    (placements: Placement[], cardMapping?: Map<Card, Card>) => {
+      if (!gameState) {
+        return { success: false, error: 'No game in progress' };
       }
-      return p;
-    });
 
-    // Refill hand
-    const finalState = GameStateManager.refillHand(
-      { ...newState, players: updatedPlayers },
-      currentPlayer.id
-    );
+      const validation = Validation.validatePlacement(placements, gameState.grid);
+      if (!validation.isValid) {
+        return { success: false, error: validation.error };
+      }
 
-    // Check game end
-    const isGameEnd = GameStateManager.checkGameEnd(finalState);
-    if (isGameEnd) {
-      setGameState({ ...finalState, phase: 'ended' });
-    } else {
-      setGameState(GameStateManager.nextTurn(finalState));
-    }
+      // Place cards on grid
+      for (const placement of placements) {
+        gameState.grid.addCard(placement.position.x, placement.position.y, placement.card);
+      }
 
-    return { success: true };
-  }, [gameState]);
+      // Calculate score
+      const affectedLines = gameState.grid
+        .getAllLines()
+        .filter((line) =>
+          line.positions.some((pos) =>
+            placements.some((p) => p.position.x === pos.x && p.position.y === pos.y)
+          )
+        );
 
-  const passTurn = useCallback((cardsToTrade: string[] = []) => {
-    if (!gameState) {
-      return;
-    }
-
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    
-    // Trade cards if specified
-    if (cardsToTrade.length > 0) {
-      const cardsToRemove = currentPlayer.hand.filter((_, idx) =>
-        cardsToTrade.includes(idx.toString())
+      const scoreResult = Scoring.calculateTurnScore(
+        affectedLines,
+        placements.length,
+        gameState.isFinalTurn
       );
-      
-      // Return cards to bottom of draw pile
-      for (const card of cardsToRemove) {
-        gameState.deck.addToDrawPile(card);
+
+      // Update player score
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      const newState = GameStateManager.updatePlayerScore(
+        gameState,
+        currentPlayer.id,
+        scoreResult.finalScore
+      );
+
+      // Remove placed cards from hand
+      // For wildcards that were replaced, use the mapping to find original card
+      const updatedPlayers = newState.players.map((p, idx) => {
+        if (idx === gameState.currentPlayerIndex) {
+          return {
+            ...p,
+            hand: p.hand.filter((card) => {
+              // Check if this card was placed
+              return !placements.some((pl) => {
+                // If there's a mapping, check if this card is the original for a replaced wildcard
+                if (cardMapping && cardMapping.has(pl.card)) {
+                  const originalCard = cardMapping.get(pl.card);
+                  return originalCard === card;
+                }
+                // For regular cards, match by reference
+                return pl.card === card;
+              });
+            }),
+          };
+        }
+        return p;
+      });
+
+      // Refill hand
+      const finalState = GameStateManager.refillHand(
+        { ...newState, players: updatedPlayers },
+        currentPlayer.id
+      );
+
+      // Check game end
+      const isGameEnd = GameStateManager.checkGameEnd(finalState);
+      if (isGameEnd) {
+        setGameState({ ...finalState, phase: 'ended' });
+      } else {
+        setGameState(GameStateManager.nextTurn(finalState));
+      }
+
+      return { success: true };
+    },
+    [gameState]
+  );
+
+  const passTurn = useCallback(
+    (cardsToTrade: string[] = []) => {
+      if (!gameState) {
+        return;
+      }
+
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+      // Trade cards if specified
+      if (cardsToTrade.length > 0) {
+        const cardsToRemove = currentPlayer.hand.filter((_, idx) =>
+          cardsToTrade.includes(idx.toString())
+        );
+
+        // Return cards to bottom of draw pile
+        for (const card of cardsToRemove) {
+          gameState.deck.addToDrawPile(card);
+        }
+
+        // Remove from hand
+        const updatedHand = currentPlayer.hand.filter((card) => !cardsToRemove.includes(card));
+
+        // Draw replacements
+        const newCards = gameState.deck.dealCards(cardsToRemove.length);
+
+        const updatedPlayers = gameState.players.map((p, idx) => {
+          if (idx === gameState.currentPlayerIndex) {
+            return { ...p, hand: [...updatedHand, ...newCards] };
+          }
+          return p;
+        });
+
+        setGameState({
+          ...gameState,
+          players: updatedPlayers,
+        });
+      }
+
+      // Move to next turn
+      setGameState(GameStateManager.nextTurn(gameState));
+    },
+    [gameState]
+  );
+
+  const recycleWildCard = useCallback(
+    (replacement: WildCardReplacement) => {
+      if (!gameState) {
+        return { success: false, error: 'No game in progress' };
+      }
+
+      if (
+        !Validation.canReplaceWild(
+          replacement.wildCard,
+          replacement.replacementCard,
+          gameState.grid
+        )
+      ) {
+        return { success: false, error: 'Cannot replace wild card' };
+      }
+
+      try {
+        const wildCard = WildCardManager.replaceWild(replacement, gameState.grid);
+
+        // Add wild card to player's hand
+        const updatedPlayers = gameState.players.map((p, idx) => {
+          if (idx === gameState.currentPlayerIndex) {
+            return { ...p, hand: [...p.hand, wildCard] };
+          }
+          return p;
+        });
+
+        // Remove replacement card from hand
+        const finalPlayers = updatedPlayers.map((p, idx) => {
+          if (idx === gameState.currentPlayerIndex) {
+            return {
+              ...p,
+              hand: p.hand.filter((c) => c !== replacement.replacementCard),
+            };
+          }
+          return p;
+        });
+
+        setGameState({
+          ...gameState,
+          players: finalPlayers,
+        });
+
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+    },
+    [gameState]
+  );
+
+  const discardCards = useCallback(
+    (cards: Card[]) => {
+      if (!gameState) {
+        return { success: false, error: 'No game in progress' };
+      }
+
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+      // Verify all cards are in player's hand
+      const cardsToDiscard = cards.filter((card) => currentPlayer.hand.includes(card));
+      if (cardsToDiscard.length === 0) {
+        return { success: false, error: 'No valid cards to discard' };
+      }
+
+      // Return cards to bottom of draw pile (addToDrawPile adds to the end of the array)
+      for (const card of cardsToDiscard) {
+        gameState.deck.drawPile.unshift(card); // Add to bottom (beginning) of draw pile
       }
 
       // Remove from hand
-      const updatedHand = currentPlayer.hand.filter(card => !cardsToRemove.includes(card));
-      
-      // Draw replacements
-      const newCards = gameState.deck.dealCards(cardsToRemove.length);
-      
+      const updatedHand = currentPlayer.hand.filter((card) => !cardsToDiscard.includes(card));
+
+      // Draw replacements from top (dealCards uses pop, which takes from the end)
+      const newCards = gameState.deck.dealCards(cardsToDiscard.length);
+
       const updatedPlayers = gameState.players.map((p, idx) => {
         if (idx === gameState.currentPlayerIndex) {
           return { ...p, hand: [...updatedHand, ...newCards] };
@@ -176,107 +279,26 @@ export function useGame(): UseGameReturn {
         return p;
       });
 
-      setGameState({
+      // Move to next turn
+      const newState = GameStateManager.nextTurn({
         ...gameState,
         players: updatedPlayers,
       });
-    }
 
-    // Move to next turn
-    setGameState(GameStateManager.nextTurn(gameState));
-  }, [gameState]);
-
-  const recycleWildCard = useCallback((replacement: WildCardReplacement) => {
-    if (!gameState) {
-      return { success: false, error: 'No game in progress' };
-    }
-    
-    if (!Validation.canReplaceWild(replacement.wildCard, replacement.replacementCard, gameState.grid)) {
-      return { success: false, error: 'Cannot replace wild card' };
-    }
-
-    try {
-      const wildCard = WildCardManager.replaceWild(replacement, gameState.grid);
-      
-      // Add wild card to player's hand
-      const updatedPlayers = gameState.players.map((p, idx) => {
-        if (idx === gameState.currentPlayerIndex) {
-          return { ...p, hand: [...p.hand, wildCard] };
-        }
-        return p;
-      });
-
-      // Remove replacement card from hand
-      const finalPlayers = updatedPlayers.map((p, idx) => {
-        if (idx === gameState.currentPlayerIndex) {
-          return {
-            ...p,
-            hand: p.hand.filter(c => c !== replacement.replacementCard),
-          };
-        }
-        return p;
-      });
-
-      setGameState({
-        ...gameState,
-        players: finalPlayers,
-      });
+      setGameState(newState);
 
       return { success: true };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
-  }, [gameState]);
-
-  const discardCards = useCallback((cards: Card[]) => {
-    if (!gameState) {
-      return { success: false, error: 'No game in progress' };
-    }
-
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    
-    // Verify all cards are in player's hand
-    const cardsToDiscard = cards.filter(card => currentPlayer.hand.includes(card));
-    if (cardsToDiscard.length === 0) {
-      return { success: false, error: 'No valid cards to discard' };
-    }
-
-    // Return cards to bottom of draw pile (addToDrawPile adds to the end of the array)
-    for (const card of cardsToDiscard) {
-      gameState.deck.drawPile.unshift(card); // Add to bottom (beginning) of draw pile
-    }
-
-    // Remove from hand
-    const updatedHand = currentPlayer.hand.filter(card => !cardsToDiscard.includes(card));
-    
-    // Draw replacements from top (dealCards uses pop, which takes from the end)
-    const newCards = gameState.deck.dealCards(cardsToDiscard.length);
-    
-    const updatedPlayers = gameState.players.map((p, idx) => {
-      if (idx === gameState.currentPlayerIndex) {
-        return { ...p, hand: [...updatedHand, ...newCards] };
-      }
-      return p;
-    });
-
-    // Move to next turn
-    const newState = GameStateManager.nextTurn({
-      ...gameState,
-      players: updatedPlayers,
-    });
-
-    setGameState(newState);
-
-    return { success: true };
-  }, [gameState]);
+    },
+    [gameState]
+  );
 
   const resetGame = useCallback(() => {
     setGameState(null);
     setGameId(null);
-    
+
     // Clear URL
     window.history.replaceState({}, '', window.location.pathname);
-    
+
     // Clear from storage
     if (gameId) {
       localStorage.removeItem(`iota-game-${gameId}`);
@@ -293,4 +315,3 @@ export function useGame(): UseGameReturn {
     resetGame,
   };
 }
-

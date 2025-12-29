@@ -50,7 +50,7 @@ export class Grid {
       { x, y: y + 1 },
       { x, y: y - 1 },
     ];
-    return adjacent.filter(pos => !this.hasCard(pos.x, pos.y));
+    return adjacent.filter((pos) => !this.hasCard(pos.x, pos.y));
   }
 
   getOccupiedAdjacentCells(x: number, y: number): Coordinate[] {
@@ -60,7 +60,7 @@ export class Grid {
       { x, y: y + 1 },
       { x, y: y - 1 },
     ];
-    return adjacent.filter(pos => this.hasCard(pos.x, pos.y));
+    return adjacent.filter((pos) => this.hasCard(pos.x, pos.y));
   }
 
   isContinuousLine(positions: Coordinate[]): boolean {
@@ -75,9 +75,7 @@ export class Grid {
     });
 
     // Check if horizontal line
-    const isHorizontal = sorted.every((pos, i) => 
-      i === 0 || pos.x === sorted[0].x
-    );
+    const isHorizontal = sorted.every((pos, i) => i === 0 || pos.x === sorted[0].x);
     if (isHorizontal) {
       for (let i = 1; i < sorted.length; i++) {
         if (sorted[i].y !== sorted[i - 1].y + 1) {
@@ -88,9 +86,7 @@ export class Grid {
     }
 
     // Check if vertical line
-    const isVertical = sorted.every((pos, i) => 
-      i === 0 || pos.y === sorted[0].y
-    );
+    const isVertical = sorted.every((pos, i) => i === 0 || pos.y === sorted[0].y);
     if (isVertical) {
       for (let i = 1; i < sorted.length; i++) {
         if (sorted[i].x !== sorted[i - 1].x + 1) {
@@ -177,14 +173,14 @@ export class Grid {
       if (!card) continue;
 
       const pos = this.parseKey(key);
-      
+
       // Check horizontal line
       const hKey = `h-${key}`;
       if (!processed.has(hKey)) {
         const hLine = this.getLine(pos.x, pos.y, 'horizontal');
         if (hLine && hLine.cards.length >= 2) {
           lines.push(hLine);
-          hLine.positions.forEach(p => processed.add(`h-${this.getKey(p.x, p.y)}`));
+          hLine.positions.forEach((p) => processed.add(`h-${this.getKey(p.x, p.y)}`));
         }
       }
 
@@ -194,7 +190,7 @@ export class Grid {
         const vLine = this.getLine(pos.x, pos.y, 'vertical');
         if (vLine && vLine.cards.length >= 2) {
           lines.push(vLine);
-          vLine.positions.forEach(p => processed.add(`v-${this.getKey(p.x, p.y)}`));
+          vLine.positions.forEach((p) => processed.add(`v-${this.getKey(p.x, p.y)}`));
         }
       }
     }
@@ -217,9 +213,7 @@ export class Grid {
       return true; // First card placement
     }
 
-    return positions.some(pos => 
-      this.getOccupiedAdjacentCells(pos.x, pos.y).length > 0
-    );
+    return positions.some((pos) => this.getOccupiedAdjacentCells(pos.x, pos.y).length > 0);
   }
 
   clear(): void {
@@ -228,4 +222,3 @@ export class Grid {
     this.starterPosition = undefined;
   }
 }
-

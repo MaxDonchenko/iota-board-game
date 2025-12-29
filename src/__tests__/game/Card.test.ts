@@ -36,9 +36,8 @@ describe('Card', () => {
     const card1 = new Card('Square', 1, 'Red');
     const card2 = new Card('Square', 1, 'Red');
     const card3 = new Card('Circle', 1, 'Red');
-    
+
     expect(card1.equals(card2)).toBe(true);
     expect(card1.equals(card3)).toBe(false);
   });
 });
-

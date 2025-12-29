@@ -61,7 +61,11 @@ export class ColorUtils {
     return color in COLOR_HEX_MAP_LIGHT;
   }
 
-  static getGradient(color: GameColor, useGradient: boolean, theme: 'light' | 'dark' = 'light'): string {
+  static getGradient(
+    color: GameColor,
+    useGradient: boolean,
+    theme: 'light' | 'dark' = 'light'
+  ): string {
     if (useGradient) {
       return theme === 'dark' ? COLOR_GRADIENT_MAP_DARK[color] : COLOR_GRADIENT_MAP_LIGHT[color];
     }
@@ -72,4 +76,3 @@ export class ColorUtils {
     return theme === 'dark' ? COLOR_SOLID_MAP_DARK[color] : COLOR_SOLID_MAP_LIGHT[color];
   }
 }
-

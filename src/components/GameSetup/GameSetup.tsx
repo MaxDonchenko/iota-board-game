@@ -29,7 +29,7 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
   };
 
   const handleStart = () => {
-    if (playerNames.every(name => name.trim().length > 0)) {
+    if (playerNames.every((name) => name.trim().length > 0)) {
       onStartGame(playerNames, gameMode);
     }
   };
@@ -37,11 +37,11 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
   return (
     <div className={styles.setup}>
       <h2 className={styles.title}>Game Setup</h2>
-      
+
       <div className={styles.section}>
         <label className={styles.label}>Number of Players (2-4)</label>
         <div className={styles.buttonGroup}>
-          {[2, 3, 4].map(count => (
+          {[2, 3, 4].map((count) => (
             <button
               key={count}
               onClick={() => handlePlayerCountChange(count)}
@@ -91,4 +91,3 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
     </div>
   );
 }
-

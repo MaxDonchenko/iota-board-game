@@ -16,20 +16,20 @@ describe('Deck', () => {
   it('should shuffle the deck', () => {
     const deck1 = new Deck('full');
     const deck2 = new Deck('full');
-    
-    const originalOrder1 = deck1.cards.map(c => c.toString());
-    const originalOrder2 = deck2.cards.map(c => c.toString());
-    
+
+    const originalOrder1 = deck1.cards.map((c) => c.toString());
+    const originalOrder2 = deck2.cards.map((c) => c.toString());
+
     deck1.shuffle();
     deck2.shuffle();
-    
-    const shuffledOrder1 = deck1.cards.map(c => c.toString());
-    const shuffledOrder2 = deck2.cards.map(c => c.toString());
-    
+
+    const shuffledOrder1 = deck1.cards.map((c) => c.toString());
+    const shuffledOrder2 = deck2.cards.map((c) => c.toString());
+
     // At least one deck should be shuffled (very unlikely both are in same order)
     const isShuffled1 = originalOrder1.join(',') !== shuffledOrder1.join(',');
     const isShuffled2 = originalOrder2.join(',') !== shuffledOrder2.join(',');
-    
+
     expect(isShuffled1 || isShuffled2).toBe(true);
   });
 
@@ -44,7 +44,7 @@ describe('Deck', () => {
     const deck = new Deck('full');
     const initialCount = deck.cards.length;
     const card = deck.drawCard();
-    
+
     expect(card).toBeInstanceOf(Card);
     expect(deck.cards.length).toBe(initialCount - 1);
   });
@@ -55,21 +55,20 @@ describe('Deck', () => {
     while (deck.drawPile.length > 0) {
       deck.drawCard();
     }
-    
+
     const card = deck.drawCard();
     expect(card).toBeUndefined();
   });
 
   it('should have correct number of wild cards in full mode', () => {
     const deck = new Deck('full');
-    const wildCards = deck.cards.filter(c => c.isWild);
+    const wildCards = deck.cards.filter((c) => c.isWild);
     expect(wildCards.length).toBe(2);
   });
 
   it('should have correct number of wild cards in short mode', () => {
     const deck = new Deck('short');
-    const wildCards = deck.cards.filter(c => c.isWild);
+    const wildCards = deck.cards.filter((c) => c.isWild);
     expect(wildCards.length).toBe(1);
   });
 });
-

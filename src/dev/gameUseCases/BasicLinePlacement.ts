@@ -47,7 +47,7 @@ const gameState: GameState = {
 
 export const basicLinePlacement: UseCase = {
   name: 'Basic Line Placement',
-  description: 'Simple 2-card line: starter card and one adjacent card (both same shape, same color, different numbers)',
+  description:
+    'Simple 2-card line: starter card and one adjacent card (both same shape, same color, different numbers)',
   gameState,
 };
-

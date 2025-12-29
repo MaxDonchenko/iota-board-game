@@ -7,4 +7,3 @@ export interface WildValue {
   number: Number;
   color: Color;
 }
-

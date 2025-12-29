@@ -16,7 +16,7 @@ For more information about the official game, please visit [Game review page](ht
 ## Features
 
 - **Full Game Implementation**: Complete IOTA card game logic with all rules
-- **Two Game Modes**: 
+- **Two Game Modes**:
   - Short mode: 32 cards + 1 wild card
   - Full mode: 64 cards + 2 wild cards
 - **Light/Dark Theme**: Toggle between light and dark modes
@@ -29,15 +29,19 @@ For more information about the official game, please visit [Game review page](ht
 ## Game Rules
 
 ### Objective
+
 Score the most points by adding cards to the grid to form valid lines.
 
 ### Card Properties
+
 Each card has three properties:
+
 - **Shape**: Square, Triangle, Circle, Plus
 - **Number**: 1, 2, 3, 4
 - **Color**: Red, Blue, Green, Yellow
 
 ### Line Rules
+
 - A line consists of 2, 3, or 4 cards
 - Cards must be in a single straight row or column
 - Maximum line length: 4 cards
@@ -46,6 +50,7 @@ Each card has three properties:
   - **All different**
 
 ### Scoring
+
 - Add face values of all cards in every line created or extended
 - A card counts once per line it belongs to (cards in two lines scored twice)
 - **Lots** (4-card lines): Double your turn's score for each lot
@@ -53,12 +58,14 @@ Each card has three properties:
 - **Final turn**: Score is doubled when draw pile is empty and you play your last card
 
 ### Wild Cards
+
 - Wild cards have a face value of 0
 - Can represent any card combination
 - Must represent the same card in all lines it belongs to
 - Can be recycled: Replace a wild card on the grid with a matching real card from your hand
 
 ### Game End
+
 The game ends when the draw pile is empty and one player plays their last card.
 
 ## Installation
@@ -89,6 +96,7 @@ npm run preview
 ## Testing
 
 Unit tests are written for all game logic modules:
+
 - Card system
 - Deck management
 - Grid system
@@ -97,6 +105,7 @@ Unit tests are written for all game logic modules:
 - Wild card management
 
 Run tests with:
+
 ```bash
 npm test
 ```
@@ -150,4 +159,3 @@ This project is not affiliated with, endorsed by, or associated with Gamewright 
 ## License
 
 This project is for educational purposes only. Please respect Gamewright Games' copyright and intellectual property rights.
-

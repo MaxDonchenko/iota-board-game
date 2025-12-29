@@ -27,18 +27,27 @@ function CardTesterContent() {
     <div style={{ padding: '1rem' }}>
       <h3>Card Tester</h3>
       <p>Adjust the controls below to test different card combinations.</p>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem',
-        padding: '1rem',
-        backgroundColor: 'var(--bg-secondary)',
-        borderRadius: '8px'
-      }}>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+          marginBottom: '2rem',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
+        }}
+      >
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+            }}
+          >
             Shape:
           </label>
           <select
@@ -61,7 +70,14 @@ function CardTesterContent() {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+            }}
+          >
             Number:
           </label>
           <select
@@ -84,7 +100,14 @@ function CardTesterContent() {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+            }}
+          >
             Color:
           </label>
           <select
@@ -107,7 +130,14 @@ function CardTesterContent() {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+            }}
+          >
             <input
               type="checkbox"
               checked={isWild}
@@ -128,21 +158,19 @@ function CardTesterContent() {
 
       <div>
         <h4>Card on Board (as Starter):</h4>
-        <GameBoard
-          grid={grid}
-          selectedCards={[]}
-          onPlaceCard={() => {}}
-        />
+        <GameBoard grid={grid} selectedCards={[]} onPlaceCard={() => {}} />
       </div>
 
-      <div style={{ 
-        marginTop: '1rem', 
-        padding: '1rem', 
-        backgroundColor: 'var(--bg-secondary)',
-        borderRadius: '8px',
-        fontSize: '0.9rem',
-        color: 'var(--text-primary)'
-      }}>
+      <div
+        style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          color: 'var(--text-primary)',
+        }}
+      >
         <strong>Card Details:</strong>
         <ul style={{ marginTop: '0.5rem', marginBottom: 0, color: 'var(--text-primary)' }}>
           <li>Shape: {card.getEffectiveShape()}</li>
@@ -150,7 +178,9 @@ function CardTesterContent() {
           <li>Color: {card.getEffectiveColor()}</li>
           <li>Is Wild: {card.isWild ? 'Yes' : 'No'}</li>
           {card.isWild && card.wildValue && (
-            <li>Wild Value: {card.wildValue.shape}, {card.wildValue.number}, {card.wildValue.color}</li>
+            <li>
+              Wild Value: {card.wildValue.shape}, {card.wildValue.number}, {card.wildValue.color}
+            </li>
           )}
         </ul>
       </div>
@@ -165,4 +195,3 @@ export const CardTester: StoryObj = {
     </ThemeProvider>
   ),
 };
-

@@ -55,7 +55,7 @@ const gameState: GameState = {
 
 export const edgeCaseValidation: UseCase = {
   name: 'Edge Case Validation',
-  description: 'Various edge cases: horizontal line uses "all same number" pattern (1-1-1), vertical line uses sequential numbers (1-2-3). Demonstrates different valid line patterns.',
+  description:
+    'Various edge cases: horizontal line uses "all same number" pattern (1-1-1), vertical line uses sequential numbers (1-2-3). Demonstrates different valid line patterns.',
   gameState,
 };
-

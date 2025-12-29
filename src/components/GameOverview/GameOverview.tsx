@@ -11,17 +11,17 @@ export function GameOverview({ gameState, gameStartTime }: GameOverviewProps) {
   const cardsPlayed = gameState.grid.positions.size;
   const cardsInDeck = gameState.deck.drawPile.length;
   const [currentTime, setCurrentTime] = useState(new Date());
-  
+
   useEffect(() => {
     if (!gameStartTime || gameState.phase === 'ended') return;
-    
+
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, [gameStartTime, gameState.phase]);
-  
+
   const formatDuration = (startTime?: Date) => {
     if (!startTime) return 'N/A';
     const now = currentTime;
@@ -48,4 +48,3 @@ export function GameOverview({ gameState, gameStartTime }: GameOverviewProps) {
     </div>
   );
 }
-

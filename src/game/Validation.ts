@@ -24,9 +24,12 @@ export class Validation {
     }
 
     // Check if positions are valid (continuous line, adjacent to grid)
-    const positions = placements.map(p => p.position);
+    const positions = placements.map((p) => p.position);
     if (!grid.isValidPlacement(positions)) {
-      return { isValid: false, error: 'Cards must form a continuous line adjacent to existing cards' };
+      return {
+        isValid: false,
+        error: 'Cards must form a continuous line adjacent to existing cards',
+      };
     }
 
     // Check if any position already has a card
@@ -77,26 +80,26 @@ export class Validation {
     }
 
     // Check each property: all same OR all different
-    const shapes = cards.map(c => c.getEffectiveShape());
-    const numbers = cards.map(c => c.getEffectiveNumber());
-    const colors = cards.map(c => c.getEffectiveColor());
+    const shapes = cards.map((c) => c.getEffectiveShape());
+    const numbers = cards.map((c) => c.getEffectiveNumber());
+    const colors = cards.map((c) => c.getEffectiveColor());
 
     // Check shapes
-    const allSameShape = shapes.every(s => s === shapes[0]);
+    const allSameShape = shapes.every((s) => s === shapes[0]);
     const allDifferentShape = new Set(shapes).size === shapes.length;
     if (!allSameShape && !allDifferentShape) {
       return { isValid: false, error: 'Shapes must be all the same or all different' };
     }
 
     // Check numbers
-    const allSameNumber = numbers.every(n => n === numbers[0]);
+    const allSameNumber = numbers.every((n) => n === numbers[0]);
     const allDifferentNumber = new Set(numbers).size === numbers.length;
     if (!allSameNumber && !allDifferentNumber) {
       return { isValid: false, error: 'Numbers must be all the same or all different' };
     }
 
     // Check colors
-    const allSameColor = colors.every(c => c === colors[0]);
+    const allSameColor = colors.every((c) => c === colors[0]);
     const allDifferentColor = new Set(colors).size === colors.length;
     if (!allSameColor && !allDifferentColor) {
       return { isValid: false, error: 'Colors must be all the same or all different' };
@@ -111,11 +114,11 @@ export class Validation {
 
   static validateWildCardConsistency(placements: Placement[], grid: Grid): ValidationResult {
     // Find all wild cards being placed
-    const wildPlacements = placements.filter(p => p.card.isWild);
+    const wildPlacements = placements.filter((p) => p.card.isWild);
 
     for (const wildPlacement of wildPlacements) {
       const wildCard = wildPlacement.card;
-      
+
       // If wild card doesn't have a value set, we need to determine it from context
       if (!wildCard.wildValue) {
         // This will be set during placement based on line constraints
@@ -124,16 +127,16 @@ export class Validation {
 
       // Check all lines this wild card will belong to
       const affectedLines = this.getAffectedLines(wildPlacement.position, grid, placements);
-      
+
       for (const line of affectedLines) {
         // Verify wild card value is consistent with line rules
         if (!wildCard.wildValue) {
           continue; // Skip if wild value not set yet
         }
-        
+
         const lineCards = [...line.cards];
         // Replace wild card in line with its effective values
-        const effectiveCards = lineCards.map(c => {
+        const effectiveCards = lineCards.map((c) => {
           if (c === wildCard) {
             return new Card(
               wildCard.wildValue!.shape,
@@ -162,12 +165,12 @@ export class Validation {
   ): Line | null {
     // Create a temporary map of all cards including new placements
     const allCards = new Map<string, Card>();
-    
+
     // Add existing cards
     for (const [key, card] of grid.positions.entries()) {
       allCards.set(key, card);
     }
-    
+
     // Add new placements
     for (const placement of newPlacements) {
       const key = `${placement.position.x},${placement.position.y}`;
@@ -241,7 +244,7 @@ export class Validation {
     newPlacements: Placement[]
   ): Line[] {
     const lines: Line[] = [];
-    
+
     // Check horizontal line
     const hLine = this.getCompleteLine(position, 'horizontal', grid, newPlacements);
     if (hLine) {
@@ -271,9 +274,10 @@ export class Validation {
       return false;
     }
 
-    return wildCard.wildValue.shape === replacementCard.shape &&
-           wildCard.wildValue.number === replacementCard.number &&
-           wildCard.wildValue.color === replacementCard.color;
+    return (
+      wildCard.wildValue.shape === replacementCard.shape &&
+      wildCard.wildValue.number === replacementCard.number &&
+      wildCard.wildValue.color === replacementCard.color
+    );
   }
 }
-

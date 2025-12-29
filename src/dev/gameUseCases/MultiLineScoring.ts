@@ -55,7 +55,7 @@ const gameState: GameState = {
 
 export const multiLineScoring: UseCase = {
   name: 'Multi-Line Scoring',
-  description: 'Card at (0,0) is part of both horizontal line (Square 1,2,3 Red) and vertical line (Square, Circle, Triangle - all 1, different colors: Red, Blue, Green). Cards in multiple lines score for each line.',
+  description:
+    'Card at (0,0) is part of both horizontal line (Square 1,2,3 Red) and vertical line (Square, Circle, Triangle - all 1, different colors: Red, Blue, Green). Cards in multiple lines score for each line.',
   gameState,
 };
-

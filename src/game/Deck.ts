@@ -16,7 +16,7 @@ export class Deck {
 
   private createDeck(gameMode: GameMode): void {
     this.cards = [];
-    
+
     if (gameMode === 'full') {
       // Full mode: 64 cards (4 shapes × 4 numbers × 4 colors)
       for (const shape of SHAPES) {
@@ -28,7 +28,7 @@ export class Deck {
       }
     } else {
       // Short mode: 32 cards (4 shapes × 4 numbers × 2 colors)
-      const shortColors: typeof COLORS[number][] = ['Red', 'Blue'];
+      const shortColors: (typeof COLORS)[number][] = ['Red', 'Blue'];
       for (const shape of SHAPES) {
         for (const number of NUMBERS) {
           for (const color of shortColors) {
@@ -90,4 +90,3 @@ export class Deck {
     return this.drawPile.length;
   }
 }
-

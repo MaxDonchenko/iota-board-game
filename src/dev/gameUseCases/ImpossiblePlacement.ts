@@ -52,7 +52,7 @@ const gameState: GameState = {
 
 export const impossiblePlacement: UseCase = {
   name: 'Impossible Placement',
-  description: 'Grid has gaps at (1,0) and (0,1) that cannot be filled. Any card placed there would violate line rules - it would need to match conflicting patterns in both horizontal and vertical lines.',
+  description:
+    'Grid has gaps at (1,0) and (0,1) that cannot be filled. Any card placed there would violate line rules - it would need to match conflicting patterns in both horizontal and vertical lines.',
   gameState,
 };
-

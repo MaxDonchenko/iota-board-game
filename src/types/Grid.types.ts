@@ -14,4 +14,3 @@ export interface Line {
   positions: Coordinate[];
   direction: Direction;
 }
-

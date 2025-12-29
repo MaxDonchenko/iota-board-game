@@ -64,7 +64,7 @@ const gameState: GameState = {
 
 export const complexGrid: UseCase = {
   name: 'Complex Grid',
-  description: 'Multiple intersecting lines: horizontal lines at y=0 (Red) and y=2 (Blue), vertical lines at x=0 (mixed colors), x=2 (all number 3), and x=3 (red-yellow-green-blue). Cards can be part of multiple lines.',
+  description:
+    'Multiple intersecting lines: horizontal lines at y=0 (Red) and y=2 (Blue), vertical lines at x=0 (mixed colors), x=2 (all number 3), and x=3 (red-yellow-green-blue). Cards can be part of multiple lines.',
   gameState,
 };
-

@@ -53,7 +53,7 @@ const gameState: GameState = {
 
 export const wildCardPlacement: UseCase = {
   name: 'Wild Card Placement',
-  description: 'Wild card placed in a valid line. The wild card acts as Square, 4, Red to complete the line of same shape and color.',
+  description:
+    'Wild card placed in a valid line. The wild card acts as Square, 4, Red to complete the line of same shape and color.',
   gameState,
 };
-

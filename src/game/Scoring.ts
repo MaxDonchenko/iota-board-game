@@ -15,11 +15,7 @@ export class Scoring {
     return card.getValue();
   }
 
-  static calculateTurnScore(
-    lines: Line[],
-    cardsPlayed: number,
-    isFinalTurn: boolean
-  ): ScoreResult {
+  static calculateTurnScore(lines: Line[], cardsPlayed: number, isFinalTurn: boolean): ScoreResult {
     // Calculate base score: sum of card values in each line
     let baseScore = 0;
     for (const line of lines) {
@@ -46,7 +42,7 @@ export class Scoring {
   }
 
   static detectLots(lines: Line[]): number {
-    return lines.filter(line => line.cards.length === 4).length;
+    return lines.filter((line) => line.cards.length === 4).length;
   }
 
   static applyDoubling(
@@ -79,4 +75,3 @@ export class Scoring {
     return line.cards.reduce((sum, card) => sum + this.getCardValue(card), 0);
   }
 }
-

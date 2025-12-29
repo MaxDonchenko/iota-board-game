@@ -56,7 +56,7 @@
 
 .cell.preview {
   border-style: dashed;
-  border-color: #61BB46;
+  border-color: #61bb46;
   border-width: 1px;
   opacity: 0.8;
 }
@@ -80,4 +80,3 @@
   background-color: rgba(238, 29, 36, 0.15);
   border-color: rgba(238, 29, 36, 0.6);
 }
-

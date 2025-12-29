@@ -7,13 +7,13 @@ interface EqualWidthContainerProps {
   className?: string;
 }
 
-export function EqualWidthContainer({ 
-  children, 
+export function EqualWidthContainer({
+  children,
   itemCount,
-  className = '' 
+  className = '',
 }: EqualWidthContainerProps) {
   return (
-    <div 
+    <div
       className={`${styles.container} ${className}`}
       style={{ '--item-count': itemCount } as React.CSSProperties}
     >
@@ -21,4 +21,3 @@ export function EqualWidthContainer({
     </div>
   );
 }
-

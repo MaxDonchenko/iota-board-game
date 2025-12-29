@@ -1,10 +1,8 @@
 .recycleButton {
-  background: #FF9800;
+  background: #ff9800;
   color: white;
 }
 
 .recycleButton:hover {
-  background: #F57C00;
+  background: #f57c00;
 }
-
-

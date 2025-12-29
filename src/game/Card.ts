@@ -7,13 +7,7 @@ export class Card {
   isWild: boolean;
   wildValue?: WildValue;
 
-  constructor(
-    shape: Shape,
-    number: Number,
-    color: Color,
-    isWild = false,
-    wildValue?: WildValue
-  ) {
+  constructor(shape: Shape, number: Number, color: Color, isWild = false, wildValue?: WildValue) {
     this.shape = shape;
     this.number = number;
     this.color = color;
@@ -23,23 +17,27 @@ export class Card {
 
   equals(other: Card): boolean {
     if (this.isWild && other.isWild) {
-      return this.wildValue?.shape === other.wildValue?.shape &&
-             this.wildValue?.number === other.wildValue?.number &&
-             this.wildValue?.color === other.wildValue?.color;
+      return (
+        this.wildValue?.shape === other.wildValue?.shape &&
+        this.wildValue?.number === other.wildValue?.number &&
+        this.wildValue?.color === other.wildValue?.color
+      );
     }
     if (this.isWild && this.wildValue) {
-      return this.wildValue.shape === other.shape &&
-             this.wildValue.number === other.number &&
-             this.wildValue.color === other.color;
+      return (
+        this.wildValue.shape === other.shape &&
+        this.wildValue.number === other.number &&
+        this.wildValue.color === other.color
+      );
     }
     if (other.isWild && other.wildValue) {
-      return other.wildValue.shape === this.shape &&
-             other.wildValue.number === this.number &&
-             other.wildValue.color === this.color;
+      return (
+        other.wildValue.shape === this.shape &&
+        other.wildValue.number === this.number &&
+        other.wildValue.color === this.color
+      );
     }
-    return this.shape === other.shape &&
-           this.number === other.number &&
-           this.color === other.color;
+    return this.shape === other.shape && this.number === other.number && this.color === other.color;
   }
 
   toString(): string {
@@ -67,9 +65,11 @@ export class Card {
     if (!this.isWild || !this.wildValue) {
       return false;
     }
-    return this.wildValue.shape === other.shape &&
-           this.wildValue.number === other.number &&
-           this.wildValue.color === other.color;
+    return (
+      this.wildValue.shape === other.shape &&
+      this.wildValue.number === other.number &&
+      this.wildValue.color === other.color
+    );
   }
 
   getEffectiveValue(): Shape | Number | Color {
@@ -104,4 +104,3 @@ export class Card {
     return this.color;
   }
 }
-

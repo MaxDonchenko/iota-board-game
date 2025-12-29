@@ -15,7 +15,7 @@ export function SettingsDialog({ isOpen, onClose, buttonRef }: SettingsDialogPro
     if (isOpen && buttonRef.current && dialogRef.current) {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const dialog = dialogRef.current;
-      
+
       // Position dialog below the button, aligned to the right
       dialog.style.top = `${buttonRect.bottom + 8}px`;
       dialog.style.right = `${window.innerWidth - buttonRect.right}px`;
@@ -51,4 +51,3 @@ export function SettingsDialog({ isOpen, onClose, buttonRef }: SettingsDialogPro
     </>
   );
 }
-

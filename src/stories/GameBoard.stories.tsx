@@ -60,11 +60,7 @@ export const WithSelectedCards: Story = {
       grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
       return grid;
     })(),
-    selectedCards: [
-      new Card('Square', 2, 'Red'),
-      new Card('Square', 3, 'Blue'),
-    ],
+    selectedCards: [new Card('Square', 2, 'Red'), new Card('Square', 3, 'Blue')],
     onPlaceCard: () => {},
   },
 };
-

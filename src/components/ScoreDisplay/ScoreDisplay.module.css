@@ -50,7 +50,7 @@
   left: 0;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, #61BB46, #4a9e35);
+  background: linear-gradient(90deg, #61bb46, #4a9e35);
   transition: width 0.3s ease;
   min-width: 2px;
 }
@@ -75,4 +75,3 @@
   text-align: center;
   font-weight: bold;
 }
-

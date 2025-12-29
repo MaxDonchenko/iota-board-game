@@ -13,7 +13,7 @@ export default meta;
 
 function ThemeSync({ children }: { children: React.ReactNode }) {
   const { settings, updateSettings } = useTheme();
-  
+
   useEffect(() => {
     // Sync with Storybook's theme from data-theme attribute
     const observer = new MutationObserver(() => {
@@ -23,28 +23,28 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
         updateSettings({ theme });
       }
     });
-    
+
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme'],
     });
-    
+
     // Initial sync - only if different
     const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
     if (theme && theme !== settings.theme) {
       updateSettings({ theme });
     }
-    
+
     return () => observer.disconnect();
   }, [settings.theme, updateSettings]);
-  
+
   return <>{children}</>;
 }
 
 function UseCaseStory({ useCaseName }: { useCaseName: string }) {
   // Look up by key (e.g., "AllFourCards") instead of name property
   const useCase = useCases[useCaseName as keyof typeof useCases];
-  
+
   if (!useCase) {
     return <div>Use case not found: {useCaseName}</div>;
   }
@@ -68,18 +68,11 @@ function UseCaseStory({ useCaseName }: { useCaseName: string }) {
       <div style={{ padding: '1rem' }}>
         <h3>{useCase.name}</h3>
         <p>{useCase.description}</p>
-        <GameBoard
-          grid={useCase.gameState.grid}
-          selectedCards={[]}
-          onPlaceCard={() => {}}
-        />
+        <GameBoard grid={useCase.gameState.grid} selectedCards={[]} onPlaceCard={() => {}} />
         {showHand && currentPlayer && (
           <div style={{ marginTop: '2rem' }}>
             <h4>Player Hand:</h4>
-            <PlayerHand
-              cards={currentPlayer.hand}
-              onCardSelect={() => {}}
-            />
+            <PlayerHand cards={currentPlayer.hand} onCardSelect={() => {}} />
           </div>
         )}
       </div>
@@ -166,4 +159,3 @@ export const EdgeCaseValidation: StoryObj = {
     </ThemeProvider>
   ),
 };
-

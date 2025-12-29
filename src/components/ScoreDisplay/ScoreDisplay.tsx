@@ -6,7 +6,7 @@ interface ScoreDisplayProps {
 }
 
 export function ScoreDisplay({ gameState }: ScoreDisplayProps) {
-  const maxScore = Math.max(...gameState.players.map(p => p.score), 1);
+  const maxScore = Math.max(...gameState.players.map((p) => p.score), 1);
 
   return (
     <div className={styles.scoreDisplay}>
@@ -23,20 +23,14 @@ export function ScoreDisplay({ gameState }: ScoreDisplayProps) {
             >
               <span className={styles.playerName}>{player.name}</span>
               <div className={styles.scoreBarWrapper}>
-                <div 
-                  className={styles.scoreBar}
-                  style={{ width: `${scorePercentage}%` }}
-                />
+                <div className={styles.scoreBar} style={{ width: `${scorePercentage}%` }} />
                 <span className={styles.score}>{player.score}</span>
               </div>
             </div>
           );
         })}
       </div>
-      {gameState.isFinalTurn && (
-        <div className={styles.finalTurn}>Final Turn - Score Doubled!</div>
-      )}
+      {gameState.isFinalTurn && <div className={styles.finalTurn}>Final Turn - Score Doubled!</div>}
     </div>
   );
 }
-

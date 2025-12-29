@@ -12,29 +12,35 @@ interface UseCardSelectionReturn {
 export function useCardSelection(maxSelection = 4): UseCardSelectionReturn {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
 
-  const selectCard = useCallback((card: Card) => {
-    setSelectedCards(prev => {
-      if (prev.includes(card)) {
-        return prev;
-      }
-      if (prev.length >= maxSelection) {
-        return prev;
-      }
-      return [...prev, card];
-    });
-  }, [maxSelection]);
+  const selectCard = useCallback(
+    (card: Card) => {
+      setSelectedCards((prev) => {
+        if (prev.includes(card)) {
+          return prev;
+        }
+        if (prev.length >= maxSelection) {
+          return prev;
+        }
+        return [...prev, card];
+      });
+    },
+    [maxSelection]
+  );
 
   const deselectCard = useCallback((card: Card) => {
-    setSelectedCards(prev => prev.filter(c => c !== card));
+    setSelectedCards((prev) => prev.filter((c) => c !== card));
   }, []);
 
   const clearSelection = useCallback(() => {
     setSelectedCards([]);
   }, []);
 
-  const isSelected = useCallback((card: Card) => {
-    return selectedCards.includes(card);
-  }, [selectedCards]);
+  const isSelected = useCallback(
+    (card: Card) => {
+      return selectedCards.includes(card);
+    },
+    [selectedCards]
+  );
 
   return {
     selectedCards,
@@ -44,4 +50,3 @@ export function useCardSelection(maxSelection = 4): UseCardSelectionReturn {
     isSelected,
   };
 }
-

@@ -61,46 +61,56 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<GameSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+    setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
   const toggleTheme = () => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       theme: prev.theme === 'light' ? 'dark' : 'light',
     }));
   };
 
   const toggleGradients = () => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       useGradients: !prev.useGradients,
     }));
   };
 
   const toggleShowInvalidPlacements = () => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       showInvalidPlacements: !prev.showInvalidPlacements,
     }));
   };
 
   const setWildcardVariant = (variant: 'modern' | 'original') => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       wildcardVariant: variant,
     }));
   };
 
   const setCardVariant = (variant: 'modern' | 'original') => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       cardVariant: variant,
     }));
   };
 
   return (
-    <ThemeContext.Provider value={{ settings, updateSettings, toggleTheme, toggleGradients, toggleShowInvalidPlacements, setWildcardVariant, setCardVariant }}>
+    <ThemeContext.Provider
+      value={{
+        settings,
+        updateSettings,
+        toggleTheme,
+        toggleGradients,
+        toggleShowInvalidPlacements,
+        setWildcardVariant,
+        setCardVariant,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -113,4 +123,3 @@ export function useTheme() {
   }
   return context;
 }
-

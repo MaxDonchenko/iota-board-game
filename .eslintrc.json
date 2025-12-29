@@ -6,7 +6,14 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended"
   ],
-  "ignorePatterns": ["dist", ".eslintrc.json", "**/__tests__/**", "**/stories/**", "**/dev/**", "vite.config.ts"],
+  "ignorePatterns": [
+    "dist",
+    ".eslintrc.json",
+    "**/__tests__/**",
+    "**/stories/**",
+    "**/dev/**",
+    "vite.config.ts"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
@@ -36,4 +43,3 @@
     ]
   }
 }
-

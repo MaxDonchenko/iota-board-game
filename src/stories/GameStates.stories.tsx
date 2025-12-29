@@ -22,7 +22,7 @@ export default meta;
 
 function ThemeSync({ children }: { children: React.ReactNode }) {
   const { settings, updateSettings } = useTheme();
-  
+
   React.useEffect(() => {
     const observer = new MutationObserver(() => {
       const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
@@ -30,20 +30,20 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
         updateSettings({ theme });
       }
     });
-    
+
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme'],
     });
-    
+
     const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
     if (theme && theme !== settings.theme) {
       updateSettings({ theme });
     }
-    
+
     return () => observer.disconnect();
   }, [settings.theme, updateSettings]);
-  
+
   return <>{children}</>;
 }
 
@@ -51,18 +51,18 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
 function WildcardConfirmationStory() {
   const grid = new Grid();
   const deck = new Deck('full');
-  
+
   // Place starter card
   const starterCard = new CardClass('Square', 1, 'Red');
   grid.setStarterCard(0, 0, starterCard);
-  
+
   // Create a line where wildcard can be placed
   grid.addCard(1, 0, new CardClass('Square', 2, 'Red'));
   grid.addCard(2, 0, new CardClass('Square', 3, 'Red'));
-  
+
   const wildcard = new CardClass('Square', 1, 'Red', true);
   const [selectedWildValue, setSelectedWildValue] = useState<WildValue | null>(null);
-  
+
   // Valid values for the wildcard at position (3, 0)
   const validValues: WildValue[] = [
     { shape: 'Square', number: 4, color: 'Red' },
@@ -70,47 +70,62 @@ function WildcardConfirmationStory() {
     { shape: 'Triangle', number: 1, color: 'Red' },
     { shape: 'Plus', number: 1, color: 'Red' },
   ];
-  
+
   return (
     <ThemeSync>
       <div style={{ padding: '2rem' }}>
-        <h2 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Wildcard Confirmation</h2>
+        <h2 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+          Wildcard Confirmation
+        </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          When placing a wildcard, you must select which card value it represents. 
-          Here are the valid options for a wildcard placed at position (3, 0) in a line of Red Squares.
+          When placing a wildcard, you must select which card value it represents. Here are the
+          valid options for a wildcard placed at position (3, 0) in a line of Red Squares.
         </p>
-        
+
         <div style={{ marginBottom: '2rem' }}>
           <GameBoard
             grid={grid}
             selectedCards={[wildcard]}
-            pendingPlacements={[{ card: wildcard, position: { x: 3, y: 0 }, wildValue: selectedWildValue || undefined }]}
+            pendingPlacements={[
+              {
+                card: wildcard,
+                position: { x: 3, y: 0 },
+                wildValue: selectedWildValue || undefined,
+              },
+            ]}
             nextCardIndex={0}
             onPlaceCard={() => {}}
           />
         </div>
-        
-        <div style={{
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-        }}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Select Wildcard Value:</h3>
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}>
+
+        <div
+          style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+            marginBottom: '2rem',
+          }}
+        >
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+            Select Wildcard Value:
+          </h3>
+          <div
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
             {validValues.map((value, idx) => {
-              const isSelected = selectedWildValue && 
+              const isSelected =
+                selectedWildValue &&
                 selectedWildValue.shape === value.shape &&
                 selectedWildValue.number === value.number &&
                 selectedWildValue.color === value.color;
-              
+
               const tempCard = new CardClass(value.shape, value.number, value.color, false);
-              
+
               return (
                 <div
                   key={idx}
@@ -128,23 +143,25 @@ function WildcardConfirmationStory() {
                 >
                   <Card card={tempCard} />
                   {isSelected && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '-8px',
-                      right: '-8px',
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#61BB46',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '16px',
-                      border: '2px solid white',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    }}>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: '#61BB46',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        border: '2px solid white',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                      }}
+                    >
                       ✓
                     </div>
                   )}
@@ -162,18 +179,18 @@ function WildcardConfirmationStory() {
 function GameEndedStory() {
   const grid = new Grid();
   const deck = new Deck('full');
-  
+
   const starterCard = new CardClass('Square', 1, 'Red');
   grid.setStarterCard(0, 0, starterCard);
-  
+
   // Create a filled grid
   for (let x = 0; x < 4; x++) {
     for (let y = 0; y < 4; y++) {
       if (x === 0 && y === 0) continue;
-      grid.addCard(x, y, new CardClass('Square', ((x + y) % 4) + 1 as 1 | 2 | 3 | 4, 'Red'));
+      grid.addCard(x, y, new CardClass('Square', (((x + y) % 4) + 1) as 1 | 2 | 3 | 4, 'Red'));
     }
   }
-  
+
   const gameState: GameState = {
     phase: 'ended',
     currentPlayerIndex: 0,
@@ -195,7 +212,7 @@ function GameEndedStory() {
       cardVariant: 'modern',
     },
   };
-  
+
   return (
     <ThemeSync>
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -215,34 +232,31 @@ function GameEndedStory() {
 function FinalTurnStory() {
   const grid = new Grid();
   const deck = new Deck('full');
-  
+
   const starterCard = new CardClass('Square', 1, 'Red');
   grid.setStarterCard(0, 0, starterCard);
-  
+
   // Create a mostly filled grid
   for (let x = 0; x < 3; x++) {
     for (let y = 0; y < 3; y++) {
       if (x === 0 && y === 0) continue;
-      grid.addCard(x, y, new CardClass('Square', ((x + y) % 4) + 1 as 1 | 2 | 3 | 4, 'Red'));
+      grid.addCard(x, y, new CardClass('Square', (((x + y) % 4) + 1) as 1 | 2 | 3 | 4, 'Red'));
     }
   }
-  
+
   // Empty deck to trigger final turn
   deck.drawPile = [];
-  
+
   const gameState: GameState = {
     phase: 'playing',
     currentPlayerIndex: 0,
     turnPhase: 'cardPlacement',
     players: [
-      { 
-        id: 'player-0', 
-        name: 'Player 1', 
-        hand: [
-          new CardClass('Square', 4, 'Red'),
-          new CardClass('Circle', 1, 'Blue'),
-        ], 
-        score: 25 
+      {
+        id: 'player-0',
+        name: 'Player 1',
+        hand: [new CardClass('Square', 4, 'Red'), new CardClass('Circle', 1, 'Blue')],
+        score: 25,
       },
       { id: 'player-1', name: 'Player 2', hand: [], score: 18 },
     ],
@@ -259,7 +273,7 @@ function FinalTurnStory() {
       cardVariant: 'modern',
     },
   };
-  
+
   return (
     <ThemeSync>
       <div style={{ padding: '2rem' }}>
@@ -268,33 +282,28 @@ function FinalTurnStory() {
           The draw pile is empty. This is the final turn - scores will be doubled!
         </p>
         {gameState.isFinalTurn && (
-          <div style={{
-            padding: '1rem',
-            backgroundColor: '#FFC55B',
-            color: '#000',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            fontWeight: 'bold',
-          }}>
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: '#FFC55B',
+              color: '#000',
+              borderRadius: '8px',
+              marginBottom: '2rem',
+              fontWeight: 'bold',
+            }}
+          >
             Final Turn - Score Doubled!
           </div>
         )}
         <div style={{ marginBottom: '2rem' }}>
-          <GameBoard
-            grid={grid}
-            selectedCards={[]}
-            onPlaceCard={() => {}}
-          />
+          <GameBoard grid={grid} selectedCards={[]} onPlaceCard={() => {}} />
         </div>
         <div style={{ marginBottom: '2rem' }}>
           <ScoreDisplay gameState={gameState} />
         </div>
         <div>
           <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Player Hand:</h3>
-          <PlayerHand
-            cards={gameState.players[0].hand}
-            onCardSelect={() => {}}
-          />
+          <PlayerHand cards={gameState.players[0].hand} onCardSelect={() => {}} />
         </div>
       </div>
     </ThemeSync>
@@ -305,28 +314,28 @@ function FinalTurnStory() {
 function WildcardRecycleStory() {
   const grid = new Grid();
   const deck = new Deck('full');
-  
+
   const starterCard = new CardClass('Square', 1, 'Red');
   grid.setStarterCard(0, 0, starterCard);
-  
+
   // Place a wildcard on the grid
   const wildcard = new CardClass('Square', 1, 'Red', true);
   wildcard.wildValue = { shape: 'Square', number: 2, color: 'Red' };
   grid.addCard(1, 0, wildcard);
-  
+
   const gameState: GameState = {
     phase: 'playing',
     currentPlayerIndex: 0,
     turnPhase: 'wildCardRecycle',
     players: [
-      { 
-        id: 'player-0', 
-        name: 'Player 1', 
+      {
+        id: 'player-0',
+        name: 'Player 1',
         hand: [
           new CardClass('Square', 2, 'Red'), // Matching card to replace wildcard
           new CardClass('Circle', 1, 'Blue'),
-        ], 
-        score: 15 
+        ],
+        score: 15,
       },
     ],
     grid,
@@ -342,34 +351,25 @@ function WildcardRecycleStory() {
       cardVariant: 'modern',
     },
   };
-  
+
   return (
     <ThemeSync>
       <div style={{ padding: '2rem' }}>
-        <h2 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Wildcard Recycle Phase</h2>
+        <h2 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+          Wildcard Recycle Phase
+        </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
           You can replace a wildcard on the board with a matching real card from your hand.
         </p>
         <div style={{ marginBottom: '2rem' }}>
-          <GameControls
-            gameState={gameState}
-            onPass={() => {}}
-            onNewGame={() => {}}
-          />
+          <GameControls gameState={gameState} onPass={() => {}} onNewGame={() => {}} />
         </div>
         <div style={{ marginBottom: '2rem' }}>
-          <GameBoard
-            grid={grid}
-            selectedCards={[]}
-            onPlaceCard={() => {}}
-          />
+          <GameBoard grid={grid} selectedCards={[]} onPlaceCard={() => {}} />
         </div>
         <div>
           <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Your Hand:</h3>
-          <PlayerHand
-            cards={gameState.players[0].hand}
-            onCardSelect={() => {}}
-          />
+          <PlayerHand cards={gameState.players[0].hand} onCardSelect={() => {}} />
         </div>
       </div>
     </ThemeSync>
@@ -407,4 +407,3 @@ export const WildcardRecycle: StoryObj = {
     </ThemeProvider>
   ),
 };
-

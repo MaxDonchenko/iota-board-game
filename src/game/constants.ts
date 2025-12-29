@@ -30,4 +30,3 @@ export const WILD_CARD_COUNTS = {
 export const LOT_MULTIPLIER = 2 as const;
 export const ALL_FOUR_MULTIPLIER = 2 as const;
 export const FINAL_TURN_MULTIPLIER = 2 as const;
-

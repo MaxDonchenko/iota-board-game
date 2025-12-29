@@ -49,7 +49,7 @@ const gameState: GameState = {
 
 export const lotCreation: UseCase = {
   name: 'Lot Creation',
-  description: 'A 4-card line (lot) - all same shape (Square), same color (Red), different numbers (1,2,3,4). Lots score double points.',
+  description:
+    'A 4-card line (lot) - all same shape (Square), same color (Red), different numbers (1,2,3,4). Lots score double points.',
   gameState,
 };
-

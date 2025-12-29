@@ -19,7 +19,7 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(true);
   });
 
@@ -37,7 +37,7 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(true);
   });
 
@@ -55,7 +55,7 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(false);
   });
 
@@ -73,7 +73,7 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(true);
   });
 
@@ -93,7 +93,7 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(true);
   });
 
@@ -115,21 +115,21 @@ describe('Validation', () => {
       ],
       direction: 'horizontal' as const,
     };
-    
+
     expect(Validation.validateLine(line)).toBe(false);
   });
 
   it('should validate placement connected to grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
-    
+
     const placements: Placement[] = [
       {
         card: new Card('Square', 2, 'Red'),
         position: { x: 1, y: 0 },
       },
     ];
-    
+
     const result = Validation.validatePlacement(placements, grid);
     expect(result.isValid).toBe(true);
   });
@@ -137,16 +137,15 @@ describe('Validation', () => {
   it('should reject placement not connected to grid', () => {
     const grid = new Grid();
     grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
-    
+
     const placements: Placement[] = [
       {
         card: new Card('Square', 2, 'Red'),
         position: { x: 5, y: 5 }, // Not adjacent
       },
     ];
-    
+
     const result = Validation.validatePlacement(placements, grid);
     expect(result.isValid).toBe(false);
   });
 });
-

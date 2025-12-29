@@ -16,7 +16,7 @@
 }
 
 .card.valid-placement {
-  border: 2px solid #4CAF50;
+  border: 2px solid #4caf50;
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -26,7 +26,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -35,7 +36,8 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   25% {
@@ -45,4 +47,3 @@
     transform: translateX(5px);
   }
 }
-

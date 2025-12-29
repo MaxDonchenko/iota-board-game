@@ -35,15 +35,14 @@ export class GameStateManager {
       isFinalTurn: false,
       gameMode,
       settings,
+      startTime: new Date(),
     };
   }
 
   static updatePlayerScore(state: GameState, playerId: string, score: number): GameState {
     return {
       ...state,
-      players: state.players.map(p =>
-        p.id === playerId ? { ...p, score: p.score + score } : p
-      ),
+      players: state.players.map((p) => (p.id === playerId ? { ...p, score: p.score + score } : p)),
     };
   }
 
@@ -57,7 +56,7 @@ export class GameStateManager {
   }
 
   static refillHand(state: GameState, playerId: string): GameState {
-    const player = state.players.find(p => p.id === playerId);
+    const player = state.players.find((p) => p.id === playerId);
     if (!player) {
       return state;
     }
@@ -67,7 +66,7 @@ export class GameStateManager {
       const newCards = state.deck.dealCards(cardsNeeded);
       return {
         ...state,
-        players: state.players.map(p =>
+        players: state.players.map((p) =>
           p.id === playerId ? { ...p, hand: [...p.hand, ...newCards] } : p
         ),
       };
@@ -77,8 +76,7 @@ export class GameStateManager {
   }
 
   static checkGameEnd(state: GameState): boolean {
-    return state.deck.isEmpty() && 
-           state.players.some(p => p.hand.length === 0);
+    return state.deck.isEmpty() && state.players.some((p) => p.hand.length === 0);
   }
 
   static setFinalTurn(state: GameState): GameState {
@@ -88,4 +86,3 @@ export class GameStateManager {
     };
   }
 }
-

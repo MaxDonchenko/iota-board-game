@@ -48,4 +48,3 @@ describe('ColorUtils', () => {
     expect(darkGradient).toBe('#FF5D64');
   });
 });
-

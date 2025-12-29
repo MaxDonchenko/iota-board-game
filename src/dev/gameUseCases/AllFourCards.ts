@@ -58,4 +58,3 @@ export const allFourCards: UseCase = {
   description: 'Player has 4 cards ready to play in one turn (all 4 cards bonus applies)',
   gameState,
 };
-

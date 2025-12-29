@@ -5,4 +5,3 @@ export interface UseCase {
   description: string;
   gameState: GameState;
 }
-

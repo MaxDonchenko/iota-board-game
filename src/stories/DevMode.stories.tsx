@@ -22,11 +22,13 @@ function DevModeContent() {
   const { gameState, startGame, placeCards, passTurn, resetGame } = useGame();
   const [selectedUseCase, setSelectedUseCase] = useState<string>('');
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
-  const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate }>>([]);
+  const [pendingPlacements, setPendingPlacements] = useState<
+    Array<{ card: CardType; position: Coordinate }>
+  >([]);
   const [nextCardIndex, setNextCardIndex] = useState(0);
 
   const handleLoadUseCase = (useCaseName: string) => {
-    const useCase = Object.values(useCases).find(uc => uc.name === useCaseName);
+    const useCase = Object.values(useCases).find((uc) => uc.name === useCaseName);
     if (useCase) {
       // In a real implementation, you'd load the game state
       // For now, we'll just show the use case name
@@ -36,7 +38,7 @@ function DevModeContent() {
 
   const handleCardSelect = (card: CardType) => {
     if (selectedCards.includes(card)) {
-      setSelectedCards(selectedCards.filter(c => c !== card));
+      setSelectedCards(selectedCards.filter((c) => c !== card));
     } else if (selectedCards.length < 4) {
       setSelectedCards([...selectedCards, card]);
     }
@@ -51,7 +53,7 @@ function DevModeContent() {
     setNextCardIndex(nextCardIndex + 1);
 
     if (newPlacements.length === selectedCards.length) {
-      const placements = newPlacements.map(p => ({
+      const placements = newPlacements.map((p) => ({
         card: p.card,
         position: p.position,
       }));
@@ -78,7 +80,7 @@ function DevModeContent() {
         style={{ marginBottom: '1rem', padding: '0.5rem' }}
       >
         <option value="">Select a use case...</option>
-        {Object.values(useCases).map(useCase => (
+        {Object.values(useCases).map((useCase) => (
           <option key={useCase.name} value={useCase.name}>
             {useCase.name} - {useCase.description}
           </option>
@@ -128,4 +130,3 @@ export const DevModeSelector: StoryObj = {
     </ThemeProvider>
   ),
 };
-

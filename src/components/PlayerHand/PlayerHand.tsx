@@ -11,20 +11,20 @@ interface PlayerHandProps {
   onResetSelection?: () => void;
 }
 
-export function PlayerHand({ 
-  cards, 
-  onCardSelect, 
+export function PlayerHand({
+  cards,
+  onCardSelect,
   maxSelection = 4,
   selectedCards = [],
   onSelectionChange,
-  onResetSelection
+  onResetSelection,
 }: PlayerHandProps) {
   const isSelected = (card: CardType) => selectedCards.includes(card);
 
   const handleCardClick = (card: CardType) => {
     if (isSelected(card)) {
       // Deselect
-      const newSelection = selectedCards.filter(c => c !== card);
+      const newSelection = selectedCards.filter((c) => c !== card);
       onSelectionChange?.(newSelection);
       onCardSelect?.(card);
     } else {
@@ -50,10 +50,15 @@ export function PlayerHand({
           />
         ))}
       </div>
-      <div className={styles.selectionInfo} style={{ visibility: selectedCards.length > 0 ? 'visible' : 'hidden' }}>
-        <span>{selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected</span>
+      <div
+        className={styles.selectionInfo}
+        style={{ visibility: selectedCards.length > 0 ? 'visible' : 'hidden' }}
+      >
+        <span>
+          {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
+        </span>
         {onResetSelection && (
-          <button 
+          <button
             onClick={onResetSelection}
             className={styles.resetButton}
             style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
@@ -65,4 +70,3 @@ export function PlayerHand({
     </div>
   );
 }
-
