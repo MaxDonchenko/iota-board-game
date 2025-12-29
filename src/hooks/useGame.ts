@@ -132,23 +132,23 @@ export function useGame(): UseGameReturn {
 
   // Sync gameId to URL search params
   useEffect(() => {
-    // Only sync game ID for game-related paths
-    if (!pathname.includes('/game') && !pathname.includes('/setup')) {
-      return;
-    }
-
     const url = new URL(window.location.href);
     const idInUrl = url.searchParams.get('game');
 
-    if (gameId && idInUrl !== gameId) {
-      url.searchParams.set('game', gameId);
-      window.history.replaceState({}, '', url.toString());
-    } else if (!gameId && idInUrl && gameState) {
-      // If we have state but no ID (shouldn't happen), or we explicitly cleared it
-      url.searchParams.delete('game');
-      window.history.replaceState({}, '', url.toString());
+    // Only sync game ID for game paths
+    if (pathname.includes('/game')) {
+      if (gameId && idInUrl !== gameId) {
+        url.searchParams.set('game', gameId);
+        window.history.replaceState({}, '', url.toString());
+      }
+    } else {
+      // Remove game ID from URL if we're not on the game page
+      if (idInUrl) {
+        url.searchParams.delete('game');
+        window.history.replaceState({}, '', url.toString());
+      }
     }
-  }, [gameId, gameState, pathname]);
+  }, [gameId, pathname]);
 
   // Save game to storage whenever it changes
   useEffect(() => {
