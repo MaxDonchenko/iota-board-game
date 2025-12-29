@@ -1,5 +1,4 @@
 .controls {
-  padding: 1rem;
   background: var(--bg-secondary);
   border-radius: 8px;
   margin: 0;
@@ -27,11 +26,17 @@
 }
 
 .newGameButton {
-  background: #f44336;
   color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
 .newGameButton:hover {
-  background: #d32f2f;
+  opacity: 0.9;
 }
 

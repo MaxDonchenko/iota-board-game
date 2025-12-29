@@ -26,15 +26,29 @@ const STORAGE_KEY = 'iota-game-settings';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<GameSettings>(() => {
+    // Get initial theme from device preference
+    const getInitialTheme = (): 'light' | 'dark' => {
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return prefersDark ? 'dark' : 'light';
+      }
+      return 'light';
+    };
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored);
+        // If theme was never set by user, use device preference
+        if (!parsed.theme) {
+          parsed.theme = getInitialTheme();
+        }
+        return { ...DEFAULT_SETTINGS, ...parsed };
       } catch {
-        return DEFAULT_SETTINGS;
+        return { ...DEFAULT_SETTINGS, theme: getInitialTheme() };
       }
     }
-    return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, theme: getInitialTheme() };
   });
 
   useEffect(() => {

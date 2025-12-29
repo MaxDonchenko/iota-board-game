@@ -11,13 +11,13 @@ const deck = new Deck('full');
 const starterCard = new Card('Square', 1, 'Red');
 grid.setStarterCard(0, 0, starterCard);
 
-// Create a line with all different properties (all different pattern)
-grid.addCard(1, 0, new Card('Circle', 2, 'Blue')); // Different shape, number, color
-grid.addCard(2, 0, new Card('Triangle', 3, 'Green')); // Different shape, number, color
+// Create a horizontal line with all same number (1-1-1 pattern)
+grid.addCard(1, 0, new Card('Circle', 1, 'Blue')); // Same number, different shape and color
+grid.addCard(2, 0, new Card('Triangle', 1, 'Green')); // Same number, different shape and color
 
-// Create a vertical line with all same pattern
-grid.addCard(0, 1, new Card('Square', 1, 'Red')); // Same shape, number, color as starter
-grid.addCard(0, 2, new Card('Square', 1, 'Red')); // Same shape, number, color
+// Create a vertical line with sequential numbers (1-2-3 pattern)
+grid.addCard(0, 1, new Card('Square', 2, 'Red')); // Sequential number
+grid.addCard(0, 2, new Card('Square', 3, 'Red')); // Sequential number
 
 // Edge case: Line with mixed patterns that would be invalid
 // (This demonstrates what NOT to do - the grid shows valid placements)
@@ -55,7 +55,7 @@ const gameState: GameState = {
 
 export const edgeCaseValidation: UseCase = {
   name: 'Edge Case Validation',
-  description: 'Various edge cases: horizontal line uses "all different" pattern (different shape, number, color), vertical line uses "all same" pattern. Demonstrates different valid line patterns.',
+  description: 'Various edge cases: horizontal line uses "all same number" pattern (1-1-1), vertical line uses sequential numbers (1-2-3). Demonstrates different valid line patterns.',
   gameState,
 };
 

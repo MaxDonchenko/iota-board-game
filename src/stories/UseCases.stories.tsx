@@ -7,7 +7,6 @@ import { useCases } from '../dev/gameUseCases';
 
 const meta: Meta = {
   title: 'DevMode/UseCases',
-  tags: ['autodocs'],
 };
 
 export default meta;

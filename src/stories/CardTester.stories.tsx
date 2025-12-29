@@ -9,7 +9,6 @@ import type { Color } from '../types/Card.types';
 
 const meta: Meta = {
   title: 'DevMode/CardTester',
-  tags: ['autodocs'],
 };
 
 export default meta;

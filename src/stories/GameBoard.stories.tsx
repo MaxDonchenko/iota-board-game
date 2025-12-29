@@ -14,7 +14,6 @@ const meta: Meta<typeof GameBoard> = {
       </ThemeProvider>
     ),
   ],
-  tags: ['autodocs'],
 };
 
 export default meta;

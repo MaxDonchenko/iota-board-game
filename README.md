@@ -2,11 +2,16 @@
 
 A digital implementation of the IOTA card game built with React, TypeScript, and Vite.
 
+## Links
+
+- 🎮 [Play the Game](https://MaxDonchenko.github.io/iota-board-game/)
+- 📚 [View Storybook](https://MaxDonchenko.github.io/iota-board-game/storybook/)
+
 ## About IOTA
 
 **IOTA is a card game by Gamewright Games.** This implementation is created for educational and personal use purposes. The game rules and mechanics are based on the official IOTA card game published by Gamewright Games.
 
-For more information about the official game, please visit [Gamewright Games](https://www.gamewright.com/).
+For more information about the official game, please visit [Game review page](https://www.theboardgamefamily.com/2013/02/iota-card-game-review/). Rules of the game can be found [here](https://cdn.1j1ju.com/medias/0e/e4/7f-iota-rulebook.pdf).
 
 ## Features
 
@@ -111,11 +116,6 @@ Deploy to GitHub Pages:
 ```bash
 npm run deploy
 ```
-
-## Links
-
-- 🎮 [Play the Game](https://MaxDonchenko.github.io/iota-board-game/)
-- 📚 [View Storybook](https://MaxDonchenko.github.io/iota-board-game/storybook/)
 
 ## Technology Stack
 

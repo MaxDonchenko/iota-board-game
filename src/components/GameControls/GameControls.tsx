@@ -1,5 +1,7 @@
 import { PassButton } from './PassButton';
 import { WildCardRecycleButton } from './WildCardRecycleButton';
+import { useTheme } from '@/context/ThemeContext';
+import { ColorUtils } from '@/utils/colors';
 import type { GameState } from '@/types/Game.types';
 import styles from './GameControls.module.css';
 
@@ -16,7 +18,9 @@ export function GameControls({
   onRecycleWildCard,
   onNewGame,
 }: GameControlsProps) {
+  const { settings } = useTheme();
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const redColor = ColorUtils.getSolidColor('Red', settings.theme);
 
   return (
     <div className={styles.controls}>
@@ -36,6 +40,7 @@ export function GameControls({
             }
           }} 
           className={styles.newGameButton}
+          style={{ backgroundColor: redColor }}
         >
           New Game
         </button>

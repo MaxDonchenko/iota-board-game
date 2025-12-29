@@ -8,7 +8,6 @@ import { GameControls } from './components/GameControls/GameControls';
 import { SettingsDialog } from './components/Settings/SettingsDialog';
 import { GameOverview } from './components/GameOverview/GameOverview';
 import { Card as CardComponent } from './components/Card/Card';
-import { EqualWidthContainer } from './components/Layout/EqualWidthContainer';
 import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
 import type { Coordinate } from './types/Grid.types';
@@ -319,8 +318,13 @@ function AppContent() {
   if (!gameState) {
     return (
       <div>
-        <div style={{ textAlign: 'right', padding: '1rem' }}>
-          <button onClick={() => setShowSettings(true)}>Settings</button>
+        <div style={{ textAlign: 'right', padding: '1rem', position: 'relative' }}>
+          <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>Settings</button>
+          <SettingsDialog 
+            isOpen={showSettings} 
+            onClose={() => setShowSettings(false)}
+            buttonRef={settingsButtonRef}
+          />
         </div>
         <GameSetup onStartGame={handleStartGame} />
       </div>
@@ -347,26 +351,18 @@ function AppContent() {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Top section: Scores, Current Player, Settings */}
-      <EqualWidthContainer itemCount={3}>
-        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column' }}>
-          <ScoreDisplay gameState={gameState} />
-        </div>
-        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column' }}>
-          <GameControls
-            gameState={gameState}
-            onPass={handlePass}
-            onNewGame={resetGame}
-          />
-        </div>
-        <div style={{ visibility: 'visible', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
-          <div style={{ textAlign: 'right', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
-            {gameState && <GameOverview gameState={gameState} gameStartTime={gameStartTime} />}
-            <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>Settings</button>
-          </div>
-        </div>
-      </EqualWidthContainer>
+    <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
+      {/* Settings button - top right corner */}
+      <div style={{ 
+        position: 'fixed', 
+        top: '1rem', 
+        right: '1rem', 
+        zIndex: 1000 
+      }}>
+        <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>
+          Settings
+        </button>
+      </div>
 
       <SettingsDialog 
         isOpen={showSettings} 
@@ -374,54 +370,87 @@ function AppContent() {
         buttonRef={settingsButtonRef}
       />
 
-      <GameBoard
-        grid={gameState.grid}
-        selectedCards={selectedCards}
-        pendingPlacements={pendingPlacements}
-        nextCardIndex={nextCardIndex}
-        onPlaceCard={handlePlaceCard}
-        settings={settings}
-      />
+      {/* Left Sidebar */}
+      <div style={{ 
+        width: '400px', 
+        minWidth: '400px',
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: '1rem',
+        padding: '1rem',
+        backgroundColor: 'var(--bg-primary)',
+        overflowY: 'auto',
+        maxHeight: '100vh',
+      }}>
+        {/* Game Params */}
+        {gameState && (
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+          }}>
+            <GameOverview gameState={gameState} gameStartTime={gameStartTime} />
+          </div>
+        )}
 
-      {/* Bottom section: Hand, Place Cards, Discard, Wildcard Selection - horizontal layout */}
-      <EqualWidthContainer itemCount={4}>
-        {/* Player Hand */}
-        <div style={{ 
-          visibility: currentPlayer ? 'visible' : 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
+        {/* Current Turn / Game Controls */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
         }}>
-          {currentPlayer && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <PlayerHand
-                cards={currentPlayer.hand}
-                onCardSelect={handleCardSelect}
-                selectedCards={selectedCards}
-                onSelectionChange={setSelectedCards}
-                onResetSelection={() => {
-                  setSelectedCards([]);
-                  setPendingPlacements([]);
-                  setNextCardIndex(0);
-                }}
-              />
-            </div>
-          )}
+          <GameControls
+            gameState={gameState}
+            onPass={handlePass}
+            onNewGame={resetGame}
+          />
         </div>
 
-        {/* Option A: Place Cards */}
+        {/* Scores */}
         <div style={{
-          visibility: selectedCards.length > 0 ? 'visible' : 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
         }}>
+          <ScoreDisplay gameState={gameState} />
+        </div>
+
+        {/* Player Hand - always visible */}
+        {currentPlayer && (
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+          }}>
+            <h3 style={{ 
+              color: 'var(--text-primary)', 
+              marginBottom: '1rem',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+            }}>
+              Your Hand
+            </h3>
+            <PlayerHand
+              cards={currentPlayer.hand}
+              onCardSelect={handleCardSelect}
+              selectedCards={selectedCards}
+              onSelectionChange={setSelectedCards}
+              onResetSelection={() => {
+                setSelectedCards([]);
+                setPendingPlacements([]);
+                setNextCardIndex(0);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Option A: Place Cards */}
+        {selectedCards.length > 0 && (
           <div style={{
             padding: '1rem',
             backgroundColor: 'var(--bg-secondary)',
             borderRadius: '8px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
           }}>
             <h3 style={{
               color: 'var(--text-primary)',
@@ -520,22 +549,15 @@ function AppContent() {
               </div>
             )}
           </div>
-        </div>
+        )}
 
         {/* Option B: Discard */}
-        <div style={{
-          visibility: selectedCards.length > 0 && pendingPlacements.length === 0 ? 'visible' : 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
+        {selectedCards.length > 0 && pendingPlacements.length === 0 && (
           <div style={{
             padding: '1rem',
             backgroundColor: 'var(--bg-secondary)',
             borderRadius: '8px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
           }}>
             <h3 style={{
               color: 'var(--text-primary)',
@@ -580,125 +602,129 @@ function AppContent() {
               </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Wildcard Value Selection - always rendered but hidden */}
-        <div style={{
-          visibility: (() => {
-            const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
-            if (!wildcardPlacement) return 'hidden';
-            const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
-            return validValues.length > 0 ? 'visible' : 'hidden';
-          })(),
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          {(() => {
-            const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
-            if (!wildcardPlacement) return null;
-            
-            const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
-            if (validValues.length === 0) return null;
-            
-            return (
-              <div style={{
-                padding: '1rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
+        {/* Wildcard Value Selection */}
+        {(() => {
+          const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
+          if (!wildcardPlacement) return null;
+          
+          const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
+          if (validValues.length === 0) return null;
+          
+          return (
+            <div style={{
+              padding: '1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            }}>
+              <h3 style={{
+                color: 'var(--text-primary)',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
               }}>
-                <h3 style={{
-                  color: 'var(--text-primary)',
-                  marginBottom: '1rem',
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                }}>
-                  Wildcard Value
-                </h3>
-                
-                <div style={{
-                  marginBottom: '1rem',
-                  padding: '0.75rem',
-                  backgroundColor: 'var(--bg-tertiary)',
-                  borderRadius: '6px',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.9rem',
-                }}>
-                  <p style={{ margin: 0 }}>
-                    Choose which card value your wildcard should represent for scoring.
-                  </p>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
-                }}>
-                  {validValues.map((value: WildValue, idx: number) => {
-                    const isSelected = wildcardPlacement.wildValue && 
-                      wildcardPlacement.wildValue.shape === value.shape &&
-                      wildcardPlacement.wildValue.number === value.number &&
-                      wildcardPlacement.wildValue.color === value.color;
-                    
-                    // Create a temporary card with this value for display
-                    const tempCard = new Card(value.shape, value.number, value.color, false);
-                    
-                    return (
-                      <div
-                        key={idx}
-                        onClick={() => {
-                          const updated = pendingPlacements.map(p => 
-                            p === wildcardPlacement 
-                              ? { ...p, wildValue: value }
-                              : p
-                          );
-                          setPendingPlacements(updated);
-                        }}
-                        style={{
-                          cursor: 'pointer',
-                          position: 'relative',
-                          opacity: isSelected ? 1 : 0.7,
-                          transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                          transition: 'all 0.2s ease',
-                          border: isSelected ? '3px solid #61BB46' : '3px solid transparent',
-                          borderRadius: '8px',
-                          padding: '2px',
-                        }}
-                      >
-                        <CardComponent card={tempCard} />
-                        {isSelected && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '-8px',
-                            right: '-8px',
-                            width: '24px',
-                            height: '24px',
-                            backgroundColor: '#61BB46',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            fontSize: '16px',
-                            border: '2px solid white',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                          }}>
-                            ✓
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                Wildcard Value
+              </h3>
+              
+              <div style={{
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderRadius: '6px',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+              }}>
+                <p style={{ margin: 0 }}>
+                  Choose which card value your wildcard should represent for scoring.
+                </p>
               </div>
-            );
-          })()}
-        </div>
-      </EqualWidthContainer>
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}>
+                {validValues.map((value: WildValue, idx: number) => {
+                  const isSelected = wildcardPlacement.wildValue && 
+                    wildcardPlacement.wildValue.shape === value.shape &&
+                    wildcardPlacement.wildValue.number === value.number &&
+                    wildcardPlacement.wildValue.color === value.color;
+                  
+                  // Create a temporary card with this value for display
+                  const tempCard = new Card(value.shape, value.number, value.color, false);
+                  
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        const updated = pendingPlacements.map(p => 
+                          p === wildcardPlacement 
+                            ? { ...p, wildValue: value }
+                            : p
+                        );
+                        setPendingPlacements(updated);
+                      }}
+                      style={{
+                        cursor: 'pointer',
+                        position: 'relative',
+                        opacity: isSelected ? 1 : 0.7,
+                        transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                        transition: 'all 0.2s ease',
+                        border: isSelected ? '3px solid #61BB46' : '3px solid transparent',
+                        borderRadius: '8px',
+                        padding: '2px',
+                      }}
+                    >
+                      <CardComponent card={tempCard} />
+                      {isSelected && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          width: '24px',
+                          height: '24px',
+                          backgroundColor: '#61BB46',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '16px',
+                          border: '2px solid white',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                        }}>
+                          ✓
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Right side: Game Board */}
+      <div style={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        padding: '1rem',
+        overflow: 'auto',
+      }}>
+        <GameBoard
+          grid={gameState.grid}
+          selectedCards={selectedCards}
+          pendingPlacements={pendingPlacements}
+          nextCardIndex={nextCardIndex}
+          onPlaceCard={handlePlaceCard}
+          settings={settings}
+        />
+      </div>
     </div>
   );
 }

@@ -7,7 +7,6 @@ import type { Color, Shape } from '../types/Card.types';
 
 const meta: Meta = {
   title: 'DevMode/CardVariants',
-  tags: ['autodocs'],
 };
 
 export default meta;

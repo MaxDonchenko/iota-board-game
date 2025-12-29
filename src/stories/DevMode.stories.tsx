@@ -13,7 +13,6 @@ import type { Coordinate } from '../types/Grid.types';
 
 const meta: Meta = {
   title: 'DevMode/DevModeSelector',
-  tags: ['autodocs'],
 };
 
 export default meta;

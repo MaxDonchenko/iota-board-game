@@ -1,3 +1,5 @@
+import { useTheme } from '@/context/ThemeContext';
+import { ColorUtils } from '@/utils/colors';
 import styles from './PassButton.module.css';
 
 interface PassButtonProps {
@@ -5,6 +7,9 @@ interface PassButtonProps {
 }
 
 export function PassButton({ onClick }: PassButtonProps) {
+  const { settings } = useTheme();
+  const blueColor = ColorUtils.getSolidColor('Blue', settings.theme);
+  
   return (
     <button 
       onClick={() => {
@@ -13,6 +18,7 @@ export function PassButton({ onClick }: PassButtonProps) {
         }
       }} 
       className={styles.passButton}
+      style={{ backgroundColor: blueColor }}
     >
       Pass
     </button>
