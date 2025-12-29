@@ -27,7 +27,9 @@ function AppContent() {
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const [gameStartTime, setGameStartTime] = useState<Date | undefined>();
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
-  const [pendingPlacements, setPendingPlacements] = useState<Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>>([]);
+  const [pendingPlacements, setPendingPlacements] = useState<
+    Array<{ card: CardType; position: Coordinate; wildValue?: WildValue }>
+  >([]);
   const [nextCardIndex, setNextCardIndex] = useState(0);
 
   // Clear selections when turn changes
@@ -47,15 +49,15 @@ function AppContent() {
       setNextCardIndex(0);
       return;
     }
-    
+
     // Remove placements for cards that are no longer selected
-    const placementsToKeep = pendingPlacements.filter(p => selectedCards.includes(p.card));
+    const placementsToKeep = pendingPlacements.filter((p) => selectedCards.includes(p.card));
     if (placementsToKeep.length !== pendingPlacements.length) {
       setPendingPlacements(placementsToKeep);
       // Recalculate nextCardIndex to point to first unplaced card
       let newNextCardIndex = 0;
       for (let i = 0; i < selectedCards.length; i++) {
-        const isPlaced = placementsToKeep.some(p => p.card === selectedCards[i]);
+        const isPlaced = placementsToKeep.some((p) => p.card === selectedCards[i]);
         if (!isPlaced) {
           newNextCardIndex = i;
           break;
@@ -77,151 +79,163 @@ function AppContent() {
     if (selectedCards.includes(card)) {
       // Deselecting a card - just remove it from selection
       // The useEffect will handle cleaning up pending placements
-      setSelectedCards(selectedCards.filter(c => c !== card));
+      setSelectedCards(selectedCards.filter((c) => c !== card));
     } else if (selectedCards.length < 4) {
       setSelectedCards([...selectedCards, card]);
     }
   };
 
   // Helper to get complete line for wildcard validation
-  const getCompleteLineForWildcard = useCallback((
-    position: Coordinate,
-    direction: 'horizontal' | 'vertical',
-    grid: Grid,
-    wildCard: CardType
-  ): { cards: CardType[]; positions: Coordinate[] } | null => {
-    const allCards = new Map<string, CardType>();
-    
-    // Add existing cards
-    for (const [key, card] of grid.positions.entries()) {
-      allCards.set(key, card);
-    }
-    
-    // Add the wildcard at this position
-    allCards.set(`${position.x},${position.y}`, wildCard);
-    
-    const positions: Coordinate[] = [position];
-    const cards: CardType[] = [wildCard];
-    
-    if (direction === 'horizontal') {
-      let leftX = position.x - 1;
-      while (allCards.has(`${leftX},${position.y}`)) {
-        const card = allCards.get(`${leftX},${position.y}`);
-        if (card) {
-          positions.unshift({ x: leftX, y: position.y });
-          cards.unshift(card);
-        }
-        leftX--;
+  const getCompleteLineForWildcard = useCallback(
+    (
+      position: Coordinate,
+      direction: 'horizontal' | 'vertical',
+      grid: Grid,
+      wildCard: CardType
+    ): { cards: CardType[]; positions: Coordinate[] } | null => {
+      const allCards = new Map<string, CardType>();
+
+      // Add existing cards
+      for (const [key, card] of grid.positions.entries()) {
+        allCards.set(key, card);
       }
-      
-      let rightX = position.x + 1;
-      while (allCards.has(`${rightX},${position.y}`)) {
-        const card = allCards.get(`${rightX},${position.y}`);
-        if (card) {
-          positions.push({ x: rightX, y: position.y });
-          cards.push(card);
+
+      // Add the wildcard at this position
+      allCards.set(`${position.x},${position.y}`, wildCard);
+
+      const positions: Coordinate[] = [position];
+      const cards: CardType[] = [wildCard];
+
+      if (direction === 'horizontal') {
+        let leftX = position.x - 1;
+        while (allCards.has(`${leftX},${position.y}`)) {
+          const card = allCards.get(`${leftX},${position.y}`);
+          if (card) {
+            positions.unshift({ x: leftX, y: position.y });
+            cards.unshift(card);
+          }
+          leftX--;
         }
-        rightX++;
-      }
-    } else {
-      let upY = position.y - 1;
-      while (allCards.has(`${position.x},${upY}`)) {
-        const card = allCards.get(`${position.x},${upY}`);
-        if (card) {
-          positions.unshift({ x: position.x, y: upY });
-          cards.unshift(card);
+
+        let rightX = position.x + 1;
+        while (allCards.has(`${rightX},${position.y}`)) {
+          const card = allCards.get(`${rightX},${position.y}`);
+          if (card) {
+            positions.push({ x: rightX, y: position.y });
+            cards.push(card);
+          }
+          rightX++;
         }
-        upY--;
-      }
-      
-      let downY = position.y + 1;
-      while (allCards.has(`${position.x},${downY}`)) {
-        const card = allCards.get(`${position.x},${downY}`);
-        if (card) {
-          positions.push({ x: position.x, y: downY });
-          cards.push(card);
+      } else {
+        let upY = position.y - 1;
+        while (allCards.has(`${position.x},${upY}`)) {
+          const card = allCards.get(`${position.x},${upY}`);
+          if (card) {
+            positions.unshift({ x: position.x, y: upY });
+            cards.unshift(card);
+          }
+          upY--;
         }
-        downY++;
+
+        let downY = position.y + 1;
+        while (allCards.has(`${position.x},${downY}`)) {
+          const card = allCards.get(`${position.x},${downY}`);
+          if (card) {
+            positions.push({ x: position.x, y: downY });
+            cards.push(card);
+          }
+          downY++;
+        }
       }
-    }
-    
-    return { cards, positions };
-  }, []);
+
+      return { cards, positions };
+    },
+    []
+  );
 
   // Find all valid wildcard values for a placed wildcard
-  const getValidWildcardValues = useCallback((wildCard: CardType, position: Coordinate): WildValue[] => {
-    if (!gameState || !wildCard.isWild || wildCard.wildValue) {
-      return [];
-    }
-
-    // Create temporary grid with pending placements
-    const tempGrid = new Grid();
-    for (const [key, card] of gameState.grid.positions.entries()) {
-      const [x, y] = key.split(',').map(Number);
-      tempGrid.addCard(x, y, card);
-    }
-    
-    // Add other pending placements (excluding this wildcard)
-    for (const placement of pendingPlacements) {
-      if (placement.position.x !== position.x || placement.position.y !== position.y) {
-        const card = placement.card;
-        if (card.wildValue) {
-          const cardWithValue = new Card(card.shape, card.number, card.color, true, card.wildValue);
-          tempGrid.addCard(placement.position.x, placement.position.y, cardWithValue);
-        } else {
-          tempGrid.addCard(placement.position.x, placement.position.y, card);
-        }
+  const getValidWildcardValues = useCallback(
+    (wildCard: CardType, position: Coordinate): WildValue[] => {
+      if (!gameState || !wildCard.isWild || wildCard.wildValue) {
+        return [];
       }
-    }
 
-    // Get lines this wildcard would be part of
-    const hLine = getCompleteLineForWildcard(position, 'horizontal', tempGrid, wildCard);
-    const vLine = getCompleteLineForWildcard(position, 'vertical', tempGrid, wildCard);
+      // Create temporary grid with pending placements
+      const tempGrid = new Grid();
+      for (const [key, card] of gameState.grid.positions.entries()) {
+        const [x, y] = key.split(',').map(Number);
+        tempGrid.addCard(x, y, card);
+      }
 
-    const validValues: WildValue[] = [];
-    const shapes: Shape[] = ['Square', 'Circle', 'Triangle', 'Plus'];
-    const numbers: Array<1 | 2 | 3 | 4> = [1, 2, 3, 4];
-    const colors: Color[] = ['Red', 'Blue', 'Green', 'Yellow'];
-
-    // Try all combinations
-    for (const shape of shapes) {
-      for (const number of numbers) {
-        for (const color of colors) {
-          const testValue: WildValue = { shape, number, color };
-          const testCard = new Card(shape, number, color, true, testValue);
-          
-          // Check if this value works for all lines
-          let isValid = true;
-          
-          if (hLine && hLine.cards.length >= 2) {
-            const testHLine = hLine.cards
-              .filter(c => c !== undefined && c !== null)
-              .map(c => (c && c.isWild && !c.wildValue) ? testCard : c) as CardType[];
-            const hResult = Validation.validateLineRules(testHLine);
-            if (!hResult.isValid) {
-              isValid = false;
-            }
-          }
-          
-          if (isValid && vLine && vLine.cards.length >= 2) {
-            const testVLine = vLine.cards
-              .filter(c => c !== undefined && c !== null)
-              .map(c => (c && c.isWild && !c.wildValue) ? testCard : c) as CardType[];
-            const vResult = Validation.validateLineRules(testVLine);
-            if (!vResult.isValid) {
-              isValid = false;
-            }
-          }
-          
-          if (isValid) {
-            validValues.push(testValue);
+      // Add other pending placements (excluding this wildcard)
+      for (const placement of pendingPlacements) {
+        if (placement.position.x !== position.x || placement.position.y !== position.y) {
+          const card = placement.card;
+          if (card.wildValue) {
+            const cardWithValue = new Card(
+              card.shape,
+              card.number,
+              card.color,
+              true,
+              card.wildValue
+            );
+            tempGrid.addCard(placement.position.x, placement.position.y, cardWithValue);
+          } else {
+            tempGrid.addCard(placement.position.x, placement.position.y, card);
           }
         }
       }
-    }
 
-    return validValues;
-  }, [gameState, pendingPlacements, getCompleteLineForWildcard]);
+      // Get lines this wildcard would be part of
+      const hLine = getCompleteLineForWildcard(position, 'horizontal', tempGrid, wildCard);
+      const vLine = getCompleteLineForWildcard(position, 'vertical', tempGrid, wildCard);
+
+      const validValues: WildValue[] = [];
+      const shapes: Shape[] = ['Square', 'Circle', 'Triangle', 'Plus'];
+      const numbers: Array<1 | 2 | 3 | 4> = [1, 2, 3, 4];
+      const colors: Color[] = ['Red', 'Blue', 'Green', 'Yellow'];
+
+      // Try all combinations
+      for (const shape of shapes) {
+        for (const number of numbers) {
+          for (const color of colors) {
+            const testValue: WildValue = { shape, number, color };
+            const testCard = new Card(shape, number, color, true, testValue);
+
+            // Check if this value works for all lines
+            let isValid = true;
+
+            if (hLine && hLine.cards.length >= 2) {
+              const testHLine = hLine.cards
+                .filter((c) => c !== undefined && c !== null)
+                .map((c) => (c && c.isWild && !c.wildValue ? testCard : c)) as CardType[];
+              const hResult = Validation.validateLineRules(testHLine);
+              if (!hResult.isValid) {
+                isValid = false;
+              }
+            }
+
+            if (isValid && vLine && vLine.cards.length >= 2) {
+              const testVLine = vLine.cards
+                .filter((c) => c !== undefined && c !== null)
+                .map((c) => (c && c.isWild && !c.wildValue ? testCard : c)) as CardType[];
+              const vResult = Validation.validateLineRules(testVLine);
+              if (!vResult.isValid) {
+                isValid = false;
+              }
+            }
+
+            if (isValid) {
+              validValues.push(testValue);
+            }
+          }
+        }
+      }
+
+      return validValues;
+    },
+    [gameState, pendingPlacements, getCompleteLineForWildcard]
+  );
 
   const handlePlaceCard = (position: Coordinate) => {
     if (!gameState || selectedCards.length === 0) return;
@@ -243,10 +257,10 @@ function AppContent() {
     // Replace wildcards with regular cards using selected values
     // Store mapping of new cards to original cards for hand removal
     const cardMapping = new Map<Card, Card>();
-    const placements = pendingPlacements.map(p => {
+    const placements = pendingPlacements.map((p) => {
       let card = p.card;
       const originalCard = p.card;
-      
+
       // If it's a wildcard with a selected value, replace it with a regular card
       if (card.isWild && p.wildValue) {
         card = new Card(
@@ -291,20 +305,20 @@ function AppContent() {
 
   const handleDiscardSelected = () => {
     if (selectedCards.length === 0) return;
-    
+
     // Check if any selected card is a wildcard
-    const hasWildcard = selectedCards.some(card => card.isWild);
-    
+    const hasWildcard = selectedCards.some((card) => card.isWild);
+
     if (hasWildcard) {
       const confirmed = window.confirm(
         'Warning: You are about to discard a wildcard, which is a rare and valuable card.\n\n' +
-        'Are you sure you want to proceed?'
+          'Are you sure you want to proceed?'
       );
       if (!confirmed) {
         return;
       }
     }
-    
+
     const result = discardCards(selectedCards);
     if (result.success) {
       setSelectedCards([]);
@@ -315,14 +329,15 @@ function AppContent() {
     }
   };
 
-
   if (!gameState) {
     return (
       <div>
         <div style={{ textAlign: 'right', padding: '1rem', position: 'relative' }}>
-          <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>Settings</button>
-          <SettingsDialog 
-            isOpen={showSettings} 
+          <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>
+            Settings
+          </button>
+          <SettingsDialog
+            isOpen={showSettings}
             onClose={() => setShowSettings(false)}
             buttonRef={settingsButtonRef}
           />
@@ -340,7 +355,9 @@ function AppContent() {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <h1>Game Over!</h1>
-        <h2>Winner: {winner.name} with {winner.score} points</h2>
+        <h2>
+          Winner: {winner.name} with {winner.score} points
+        </h2>
         <ScoreDisplay gameState={gameState} />
         <button onClick={resetGame} style={{ marginTop: '1rem' }}>
           New Game
@@ -354,81 +371,94 @@ function AppContent() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
       {/* Settings button - top right corner */}
-      <div style={{ 
-        position: 'fixed', 
-        top: '1rem', 
-        right: '1rem', 
-        zIndex: 1000 
-      }}>
+      <div
+        style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 1000,
+        }}
+      >
         <button ref={settingsButtonRef} onClick={() => setShowSettings(!showSettings)}>
           Settings
         </button>
       </div>
 
-      <SettingsDialog 
-        isOpen={showSettings} 
+      <SettingsDialog
+        isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         buttonRef={settingsButtonRef}
       />
 
       {/* Left Sidebar */}
-      <div style={{ 
-        width: '400px', 
-        minWidth: '400px',
-        display: 'flex', 
-        flexDirection: 'column',
-        gap: '1rem',
-        padding: '1rem',
-        backgroundColor: 'var(--bg-primary)',
-        overflowY: 'auto',
-        maxHeight: '100vh',
-      }}>
+      <div
+        style={{
+          width: '400px',
+          minWidth: '400px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-primary)',
+          overflowY: 'auto',
+          maxHeight: '100vh',
+        }}
+      >
         {/* Game Params */}
         {gameState && (
-          <div style={{
-            padding: '1rem',
-            backgroundColor: 'var(--bg-secondary)',
-            borderRadius: '8px',
-          }}>
-            <GameOverview gameState={gameState} gameStartTime={gameStartTime} />
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+            }}
+          >
+            <GameOverview
+              gameState={gameState}
+              gameStartTime={gameStartTime ?? gameState.startTime}
+            />
           </div>
         )}
 
         {/* Current Turn / Game Controls */}
-        <div style={{
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '8px',
-        }}>
-          <GameControls
-            gameState={gameState}
-            onPass={handlePass}
-            onNewGame={resetGame}
-          />
+        <div
+          style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+          }}
+        >
+          <GameControls gameState={gameState} onPass={handlePass} onNewGame={resetGame} />
         </div>
 
         {/* Scores */}
-        <div style={{
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '8px',
-        }}>
+        <div
+          style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '8px',
+          }}
+        >
           <ScoreDisplay gameState={gameState} />
         </div>
 
         {/* Player Hand - always visible */}
         {currentPlayer && (
-          <div style={{
-            padding: '1rem',
-            backgroundColor: 'var(--bg-secondary)',
-            borderRadius: '8px',
-          }}>
-            <h3 style={{ 
-              color: 'var(--text-primary)', 
-              marginBottom: '1rem',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-            }}>
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+            }}
+          >
+            <h3
+              style={{
+                color: 'var(--text-primary)',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+              }}
+            >
               Your Hand
             </h3>
             <PlayerHand
@@ -447,60 +477,74 @@ function AppContent() {
 
         {/* Option A: Place Cards */}
         {selectedCards.length > 0 && (
-          <div style={{
-            padding: '1rem',
-            backgroundColor: 'var(--bg-secondary)',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}>
-            <h3 style={{
-              color: 'var(--text-primary)',
-              marginBottom: '1rem',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-            }}>
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            }}
+          >
+            <h3
+              style={{
+                color: 'var(--text-primary)',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+              }}
+            >
               Option A: Place Cards
             </h3>
-            
-            <div style={{
-              marginBottom: '1rem',
-              padding: '0.75rem',
-              backgroundColor: 'var(--bg-tertiary)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.9rem',
-            }}>
+
+            <div
+              style={{
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderRadius: '6px',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+              }}
+            >
               <p style={{ margin: 0 }}>
-                {pendingPlacements.length === 0 
+                {pendingPlacements.length === 0
                   ? 'Place your selected cards on the board to score points.'
                   : 'Place all cards on the board to complete your turn.'}
               </p>
             </div>
-            
+
             {pendingPlacements.length > 0 && (
-              <div style={{
-                marginBottom: '1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                alignItems: 'center',
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem',
-                  color: 'var(--text-primary)',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
-                }}>
-                  <span>{pendingPlacements.length} of {selectedCards.length} cards placed</span>
+              <div
+                style={{
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    color: 'var(--text-primary)',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span>
+                    {pendingPlacements.length} of {selectedCards.length} cards placed
+                  </span>
                   {nextCardIndex < selectedCards.length && (
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.5rem',
-                      fontSize: '0.9rem',
-                    }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.9rem',
+                      }}
+                    >
                       <span style={{ opacity: 0.8 }}>Next:</span>
                       <div style={{ transform: 'scale(0.5)', transformOrigin: 'left center' }}>
                         <CardComponent card={selectedCards[nextCardIndex]} />
@@ -508,14 +552,16 @@ function AppContent() {
                     </div>
                   )}
                 </div>
-                
+
                 {pendingPlacements.length === selectedCards.length && (
-                  <div style={{
-                    display: 'flex',
-                    gap: '0.5rem',
-                    width: '100%',
-                    justifyContent: 'center',
-                  }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      width: '100%',
+                      justifyContent: 'center',
+                    }}
+                  >
                     <button
                       onClick={handleConfirmTurn}
                       style={{
@@ -554,38 +600,46 @@ function AppContent() {
 
         {/* Option B: Discard */}
         {selectedCards.length > 0 && pendingPlacements.length === 0 && (
-          <div style={{
-            padding: '1rem',
-            backgroundColor: 'var(--bg-secondary)',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}>
-            <h3 style={{
-              color: 'var(--text-primary)',
-              marginBottom: '1rem',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-            }}>
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            }}
+          >
+            <h3
+              style={{
+                color: 'var(--text-primary)',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+              }}
+            >
               Option B: Discard
             </h3>
-            
-            <div style={{
-              marginBottom: '1rem',
-              padding: '0.75rem',
-              backgroundColor: 'var(--bg-tertiary)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.9rem',
-            }}>
+
+            <div
+              style={{
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderRadius: '6px',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+              }}
+            >
               <p style={{ margin: 0 }}>
                 Return selected cards to the deck and draw new ones. Your turn will end.
               </p>
             </div>
-            
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
               <button
                 onClick={handleDiscardSelected}
                 style={{
@@ -607,63 +661,73 @@ function AppContent() {
 
         {/* Wildcard Value Selection */}
         {(() => {
-          const wildcardPlacement = pendingPlacements.find(p => p.card.isWild && !p.wildValue);
+          const wildcardPlacement = pendingPlacements.find((p) => p.card.isWild && !p.wildValue);
           if (!wildcardPlacement) return null;
-          
-          const validValues = getValidWildcardValues(wildcardPlacement.card, wildcardPlacement.position);
+
+          const validValues = getValidWildcardValues(
+            wildcardPlacement.card,
+            wildcardPlacement.position
+          );
           if (validValues.length === 0) return null;
-          
+
           return (
-            <div style={{
-              padding: '1rem',
-              backgroundColor: 'var(--bg-secondary)',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            }}>
-              <h3 style={{
-                color: 'var(--text-primary)',
-                marginBottom: '1rem',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-              }}>
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              }}
+            >
+              <h3
+                style={{
+                  color: 'var(--text-primary)',
+                  marginBottom: '1rem',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                }}
+              >
                 Wildcard Value
               </h3>
-              
-              <div style={{
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                backgroundColor: 'var(--bg-tertiary)',
-                borderRadius: '6px',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem',
-              }}>
+
+              <div
+                style={{
+                  marginBottom: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--bg-tertiary)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem',
+                }}
+              >
                 <p style={{ margin: 0 }}>
                   Choose which card value your wildcard should represent for scoring.
                 </p>
               </div>
-              <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                }}
+              >
                 {validValues.map((value: WildValue, idx: number) => {
-                  const isSelected = wildcardPlacement.wildValue && 
+                  const isSelected =
+                    wildcardPlacement.wildValue &&
                     wildcardPlacement.wildValue.shape === value.shape &&
                     wildcardPlacement.wildValue.number === value.number &&
                     wildcardPlacement.wildValue.color === value.color;
-                  
+
                   // Create a temporary card with this value for display
                   const tempCard = new Card(value.shape, value.number, value.color, false);
-                  
+
                   return (
                     <div
                       key={idx}
                       onClick={() => {
-                        const updated = pendingPlacements.map(p => 
-                          p === wildcardPlacement 
-                            ? { ...p, wildValue: value }
-                            : p
+                        const updated = pendingPlacements.map((p) =>
+                          p === wildcardPlacement ? { ...p, wildValue: value } : p
                         );
                         setPendingPlacements(updated);
                       }}
@@ -680,23 +744,25 @@ function AppContent() {
                     >
                       <CardComponent card={tempCard} />
                       {isSelected && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '-8px',
-                          right: '-8px',
-                          width: '24px',
-                          height: '24px',
-                          backgroundColor: '#61BB46',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          fontSize: '16px',
-                          border: '2px solid white',
-                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                        }}>
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            width: '24px',
+                            height: '24px',
+                            backgroundColor: '#61BB46',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                            border: '2px solid white',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                          }}
+                        >
                           ✓
                         </div>
                       )}
@@ -710,13 +776,15 @@ function AppContent() {
       </div>
 
       {/* Right side: Game Board */}
-      <div style={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        padding: '1rem',
-        overflow: 'auto',
-      }}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '1rem',
+          overflow: 'auto',
+        }}
+      >
         <GameBoard
           grid={gameState.grid}
           selectedCards={selectedCards}
@@ -739,4 +807,3 @@ function App() {
 }
 
 export default App;
-

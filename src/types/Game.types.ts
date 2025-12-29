@@ -32,5 +32,5 @@ export interface GameState {
   isFinalTurn: boolean;
   gameMode: GameMode;
   settings: GameSettings;
+  startTime?: Date;
 }
-

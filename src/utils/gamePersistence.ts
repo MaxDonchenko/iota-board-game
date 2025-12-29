@@ -15,6 +15,7 @@ export interface SerializableGameState {
   isFinalTurn: boolean;
   gameMode: string;
   settings: GameSettings;
+  startTime?: string;
 }
 
 interface SerializablePlayer {
@@ -54,11 +55,13 @@ function serializeCard(card: Card): SerializableCard {
     number: card.number,
     color: card.color,
     isWild: card.isWild,
-    wildValue: card.wildValue ? {
-      shape: card.wildValue.shape,
-      number: card.wildValue.number,
-      color: card.wildValue.color,
-    } : undefined,
+    wildValue: card.wildValue
+      ? {
+          shape: card.wildValue.shape,
+          number: card.wildValue.number,
+          color: card.wildValue.color,
+        }
+      : undefined,
   };
 }
 
@@ -85,7 +88,7 @@ function serializeGrid(grid: Grid): SerializableGrid {
     const [x, y] = key.split(',').map(Number);
     positions.push({ x, y, card: serializeCard(card) });
   }
-  
+
   return {
     positions,
     starterCard: grid.starterCard ? serializeCard(grid.starterCard) : undefined,
@@ -126,7 +129,7 @@ export function serializeGameState(gameState: GameState, gameId: string): Serial
     phase: gameState.phase,
     currentPlayerIndex: gameState.currentPlayerIndex,
     turnPhase: gameState.turnPhase,
-    players: gameState.players.map(p => ({
+    players: gameState.players.map((p) => ({
       id: p.id,
       name: p.name,
       hand: p.hand.map(serializeCard),
@@ -137,6 +140,7 @@ export function serializeGameState(gameState: GameState, gameId: string): Serial
     isFinalTurn: gameState.isFinalTurn,
     gameMode: gameState.gameMode,
     settings: gameState.settings,
+    startTime: gameState.startTime ? gameState.startTime.toISOString() : undefined,
   };
 }
 
@@ -145,7 +149,7 @@ export function deserializeGameState(serialized: SerializableGameState): GameSta
     phase: serialized.phase as GamePhase,
     currentPlayerIndex: serialized.currentPlayerIndex,
     turnPhase: serialized.turnPhase as TurnPhase,
-    players: serialized.players.map(p => ({
+    players: serialized.players.map((p) => ({
       id: p.id,
       name: p.name,
       hand: p.hand.map(deserializeCard),
@@ -156,6 +160,7 @@ export function deserializeGameState(serialized: SerializableGameState): GameSta
     isFinalTurn: serialized.isFinalTurn,
     gameMode: serialized.gameMode as 'short' | 'full',
     settings: serialized.settings,
+    startTime: serialized.startTime ? new Date(serialized.startTime) : undefined,
   };
 }
 
@@ -173,7 +178,7 @@ export function loadGameFromStorage(gameId: string): GameState | null {
   if (!stored) {
     return null;
   }
-  
+
   try {
     const serialized = JSON.parse(stored) as SerializableGameState;
     return deserializeGameState(serialized);
@@ -181,4 +186,3 @@ export function loadGameFromStorage(gameId: string): GameState | null {
     return null;
   }
 }
-
