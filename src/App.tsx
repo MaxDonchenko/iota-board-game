@@ -469,15 +469,7 @@ function App() {
       <ThemeProvider>
         <GameProvider>
           <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                  <SettingsHeader />
-                  <Welcome />
-                </>
-              }
-            />
+            <Route path="/" element={<Welcome />} />
             <Route path="/hotseat/setup" element={<HotseatSetupPage />} />
             <Route path="/hotseat/game" element={<GameSession />} />
             <Route
