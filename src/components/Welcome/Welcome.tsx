@@ -55,13 +55,11 @@ export function Welcome() {
               <button className={styles.modeButton}>Play vs AI</button>
             </div>
 
-            <div className={styles.modeCard + ' ' + styles.disabled}>
+            <div className={styles.modeCard} onClick={() => navigate('/multiplayer/setup')}>
               <div className={styles.modeIcon}>🌐</div>
               <h3>Multiplayer</h3>
               <p>Play with anyone, anywhere.</p>
-              <button disabled className={styles.modeButton}>
-                Coming Soon
-              </button>
+              <button className={styles.modeButton}>Play Multiplayer</button>
             </div>
           </div>
         </section>

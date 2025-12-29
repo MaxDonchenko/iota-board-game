@@ -2,8 +2,10 @@ import { useState, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { MultiplayerProvider } from './context/MultiplayerContext';
 import { Welcome } from './components/Welcome/Welcome';
 import { HotseatSetup } from './components/GameSetup/HotseatSetup';
+import { MultiplayerSetup } from './components/MultiplayerSetup/MultiplayerSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { PlayerHand } from './components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
@@ -468,30 +470,33 @@ function App() {
     <SettingsProvider>
       <ThemeProvider>
         <GameProvider>
-          <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/hotseat/setup" element={<HotseatSetupPage />} />
-            <Route path="/hotseat/game" element={<GameSession />} />
-            <Route
-              path="/ai"
-              element={
-                <div>
-                  <SettingsHeader />
-                  AI Mode (Coming Soon)
-                </div>
-              }
-            />
-            <Route
-              path="/multiplayer"
-              element={
-                <div>
-                  <SettingsHeader />
-                  Multiplayer Mode (Coming Soon)
-                </div>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+          <MultiplayerProvider>
+            <Routes>
+              <Route path="/" element={<Welcome />} />
+              <Route path="/hotseat/setup" element={<HotseatSetupPage />} />
+              <Route path="/hotseat/game" element={<GameSession />} />
+              <Route
+                path="/ai"
+                element={
+                  <div>
+                    <SettingsHeader />
+                    AI Mode (Coming Soon)
+                  </div>
+                }
+              />
+              <Route path="/multiplayer/setup/:gameId?" element={<MultiplayerSetup />} />
+              <Route
+                path="/multiplayer/game"
+                element={
+                  <div>
+                    <SettingsHeader />
+                    Multiplayer Game (In Progress)
+                  </div>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </MultiplayerProvider>
         </GameProvider>
       </ThemeProvider>
     </SettingsProvider>
