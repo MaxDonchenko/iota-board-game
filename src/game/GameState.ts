@@ -20,7 +20,7 @@ export class GameStateManager {
     }));
 
     // Place starter card
-    const starterCard = deck.drawCard(); // broken formatting
+    const starterCard = deck.drawCard();
     if (starterCard) {
       grid.setStarterCard(0, 0, starterCard);
     }
