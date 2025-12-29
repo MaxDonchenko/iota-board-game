@@ -440,6 +440,17 @@ export function useGame(): UseGameReturn {
   }, [gameId]);
 
   // ----- UI selection helpers -----
+  // Sync pending placements with selected cards
+  // This handles the case where a user unselects a card that was already placed on the board as a preview
+  useEffect(() => {
+    const validPending = pendingPlacements.filter((p) => selectedCards.includes(p.card));
+    if (validPending.length !== pendingPlacements.length) {
+      setPendingPlacements(validPending);
+      setNextCardIndex(validPending.length);
+    }
+  }, [selectedCards, pendingPlacements]);
+
+  // ----- UI selection helpers -----
   const selectCard = useCallback((card: Card) => {
     // console.log for debug during tests
     console.log('selectCard called', card && card.toString && card.toString());
