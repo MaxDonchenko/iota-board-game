@@ -394,7 +394,6 @@ export function useGame(): UseGameReturn {
   // ----- UI selection helpers -----
   const selectCard = useCallback((card: Card) => {
     // console.log for debug during tests
-    // eslint-disable-next-line no-console
     console.log('selectCard called', card && card.toString && card.toString());
     setSelectedCards((current: Card[]) => {
       if (current.includes(card)) {
