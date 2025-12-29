@@ -19,21 +19,10 @@ export function GameControls({
   onNewGame,
 }: GameControlsProps) {
   const { settings } = useSettings();
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const redColor = ColorUtils.getSolidColor('Red', settings.theme);
 
   return (
     <div className={styles.controls}>
-      <div className={styles.turnInfo}>
-        <h3>Current Turn: {currentPlayer.name}</h3>
-        <p>
-          {gameState.turnPhase === 'cardPlacement'
-            ? 'Place your cards'
-            : gameState.turnPhase === 'wildCardRecycle'
-            ? 'Recycle wildcard'
-            : gameState.turnPhase}
-        </p>
-      </div>
       <div className={styles.actions}>
         {gameState.turnPhase === 'wildCardRecycle' && onRecycleWildCard && (
           <WildCardRecycleButton onClick={onRecycleWildCard} />

@@ -5,7 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: process.env.GITHUB_PAGES === 'true' ? '/iota-board-game/' : '/',
+  base: '/iota-board-game/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

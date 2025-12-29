@@ -175,8 +175,8 @@ function GameSession() {
           padding: '1rem',
           backgroundColor: 'var(--bg-primary)',
           overflowY: 'auto',
-          maxHeight: '100vh',
           borderRight: '1px solid var(--border-color)',
+          scrollbarGutter: 'stable',
         }}
       >
         {isGameOver ? (
@@ -200,11 +200,7 @@ function GameSession() {
                 borderRadius: '8px',
               }}
             >
-              <GameControls
-                gameState={gameState}
-                onPass={passTurnAndClear}
-                onNewGame={handleNewGame}
-              />
+              <ScoreDisplay gameState={gameState} />
             </div>
 
             <div
@@ -214,7 +210,11 @@ function GameSession() {
                 borderRadius: '8px',
               }}
             >
-              <ScoreDisplay gameState={gameState} />
+              <GameControls
+                gameState={gameState}
+                onPass={passTurnAndClear}
+                onNewGame={handleNewGame}
+              />
             </div>
 
             {currentPlayer && (
