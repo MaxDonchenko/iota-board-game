@@ -9,17 +9,11 @@ describe('PlayerHand', () => {
     const c1 = new CardModel('Square', 1, 'Red');
     const c2 = new CardModel('Circle', 2, 'Blue');
 
-    const onCardSelect = vi.fn();
     const onSelectionChange = vi.fn();
 
     const { getByTestId } = render(
       <SettingsProvider>
-        <PlayerHand
-          cards={[c1, c2]}
-          onCardSelect={onCardSelect}
-          selectedCards={[]}
-          onSelectionChange={onSelectionChange}
-        />
+        <PlayerHand cards={[c1, c2]} selectedCards={[]} onSelectionChange={onSelectionChange} />
       </SettingsProvider>
     );
 
@@ -27,6 +21,5 @@ describe('PlayerHand', () => {
     fireEvent.click(card0);
 
     expect(onSelectionChange).toHaveBeenCalled();
-    expect(onCardSelect).toHaveBeenCalledWith(c1);
   });
 });

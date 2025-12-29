@@ -2,15 +2,16 @@
   padding: 1rem;
   overflow: auto;
   flex: 1;
+  display: flex;
 }
 
 .grid {
   display: grid;
   gap: 2px;
-  justify-content: center;
   align-items: center;
   justify-items: center;
   align-content: center;
+  margin: auto;
 }
 
 .cell {
@@ -34,6 +35,10 @@
 .cell.occupied {
   border: none;
   background: transparent;
+}
+
+.disabledCursor {
+  cursor: not-allowed !important;
 }
 
 .cell.hovered {

@@ -4,7 +4,6 @@ import styles from './PlayerHand.module.css';
 
 interface PlayerHandProps {
   cards: CardType[];
-  onCardSelect?: (card: CardType) => void;
   maxSelection?: number;
   selectedCards?: CardType[];
   onSelectionChange?: (selected: CardType[]) => void;
@@ -13,7 +12,6 @@ interface PlayerHandProps {
 
 export function PlayerHand({
   cards,
-  onCardSelect,
   maxSelection = 4,
   selectedCards = [],
   onSelectionChange,
@@ -26,13 +24,11 @@ export function PlayerHand({
       // Deselect
       const newSelection = selectedCards.filter((c) => c !== card);
       onSelectionChange?.(newSelection);
-      onCardSelect?.(card);
     } else {
       // Select (if under max)
       if (selectedCards.length < maxSelection) {
         const newSelection = [...selectedCards, card];
         onSelectionChange?.(newSelection);
-        onCardSelect?.(card);
       }
     }
   };

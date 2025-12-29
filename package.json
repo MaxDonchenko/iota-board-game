@@ -28,10 +28,12 @@
     }
   },
   "dependencies": {
+    "classnames": "^2.5.1",
     "colorjs.io": "^0.5.0",
     "date-fns": "^3.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.11.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.0",
@@ -42,6 +44,7 @@
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",

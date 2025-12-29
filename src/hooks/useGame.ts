@@ -1,11 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { GameStateManager } from '@/game/GameState';
 import { Validation } from '@/game/Validation';
 import { Scoring } from '@/game/Scoring';
 import { WildCardManager } from '@/game/WildCard';
 import { Card } from '@/game/Card';
 import { Grid } from '@/game/Grid';
-import { generateGameId, saveGameToStorage, loadGameFromStorage } from '@/utils/gamePersistence';
+import {
+  generateGameId,
+  saveGameToStorage,
+  loadGameFromStorage,
+  serializeGameState,
+  deserializeGameState,
+  type SerializableGameState,
+} from '@/utils/gamePersistence';
 import type { GameState, GameSettings } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
@@ -45,36 +53,89 @@ interface UseGameReturn {
   resetSelection: () => void;
   getValidWildcardValues: (wildCard: Card, position: Coordinate) => WildValue[];
   setWildcardValueAtIndex: (index: number, value: WildValue) => void;
+
+  // Persistence helpers
+  exportGame: () => string | null;
+  importGame: (json: string) => { success: boolean; error?: string };
 }
 
 export function useGame(): UseGameReturn {
-  const [gameState, setGameState] = useState<GameState | null>(null);
-  const [gameId, setGameId] = useState<string | null>(null);
+  const [gameId, setGameId] = useState<string | null>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('game');
+  });
+
+  const [gameState, setGameState] = useState<GameState | null>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameIdFromUrl = urlParams.get('game');
+    if (gameIdFromUrl) {
+      return loadGameFromStorage(gameIdFromUrl);
+    }
+    return null;
+  });
 
   // UI selection state
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<PreviewPlacement[]>([]);
   const [nextCardIndex, setNextCardIndex] = useState(0);
 
-  // Load game from URL on mount
+  // Load game from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const gameIdFromUrl = urlParams.get('game');
 
-    if (gameIdFromUrl) {
+    if (gameIdFromUrl && gameIdFromUrl !== gameId) {
       const loadedState = loadGameFromStorage(gameIdFromUrl);
       if (loadedState) {
         setGameState(loadedState);
         setGameId(gameIdFromUrl);
-        return;
+      } else {
+        // Clear invalid game ID from URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('game');
+        window.history.replaceState({}, '', url.toString());
       }
     }
+  }, [gameId]); // Runs when gameId changes, but also we want it to run when the user navigates (popstate)
 
-    // Clear invalid game ID from URL
-    if (gameIdFromUrl) {
-      window.history.replaceState({}, '', window.location.pathname);
+  // Also listen to popstate for back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameIdFromUrl = urlParams.get('game');
+      if (gameIdFromUrl && gameIdFromUrl !== gameId) {
+        const loadedState = loadGameFromStorage(gameIdFromUrl);
+        if (loadedState) {
+          setGameState(loadedState);
+          setGameId(gameIdFromUrl);
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [gameId]);
+
+  const { pathname } = useLocation();
+
+  // Sync gameId to URL search params
+  useEffect(() => {
+    // Only sync game ID for game-related paths
+    if (!pathname.includes('/game') && !pathname.includes('/setup')) {
+      return;
     }
-  }, []);
+
+    const url = new URL(window.location.href);
+    const idInUrl = url.searchParams.get('game');
+
+    if (gameId && idInUrl !== gameId) {
+      url.searchParams.set('game', gameId);
+      window.history.replaceState({}, '', url.toString());
+    } else if (!gameId && idInUrl && gameState) {
+      // If we have state but no ID (shouldn't happen), or we explicitly cleared it
+      url.searchParams.delete('game');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [gameId, gameState, pathname]);
 
   // Save game to storage whenever it changes
   useEffect(() => {
@@ -90,12 +151,7 @@ export function useGame(): UseGameReturn {
       setGameState(newState);
       setGameId(newGameId);
 
-      // Update URL
-      const url = new URL(window.location.href);
-      url.searchParams.set('game', newGameId);
-      window.history.pushState({}, '', url);
-
-      // Save to storage
+      // Save to storage immediately
       saveGameToStorage(newState, newGameId);
     },
     []
@@ -577,6 +633,34 @@ export function useGame(): UseGameReturn {
     [gameState, pendingPlacements, getCompleteLineForWildcard]
   );
 
+  const exportGame = useCallback(() => {
+    if (!gameState || !gameId) return null;
+    const serialized = serializeGameState(gameState, gameId);
+    return JSON.stringify(serialized, null, 2);
+  }, [gameState, gameId]);
+
+  const importGame = useCallback((json: string) => {
+    try {
+      const serialized = JSON.parse(json) as SerializableGameState;
+      const loadedState = deserializeGameState(serialized);
+      const confirmedToLoadImportedGame = confirm(
+        'Are you sure you want to load this game? This will overwrite your current game.'
+      );
+      if (!confirmedToLoadImportedGame) return { success: false, error: 'Game load cancelled' };
+      setGameState(loadedState);
+      setGameId(serialized.id);
+
+      // Update URL
+      const url = new URL(window.location.href);
+      url.searchParams.set('game', serialized.id);
+      window.history.pushState({}, '', url);
+
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: 'Invalid game JSON' };
+    }
+  }, []);
+
   return {
     gameState,
     startGame,
@@ -600,5 +684,8 @@ export function useGame(): UseGameReturn {
     resetSelection,
     getValidWildcardValues,
     setWildcardValueAtIndex,
+
+    exportGame,
+    importGame,
   };
 }

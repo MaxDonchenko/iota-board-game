@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import classNames from 'classnames';
 import { useSettings } from '@/context/SettingsContext';
 import type { GameMode } from '@/types/Game.types';
-import styles from './GameSetup.module.css';
+import styles from './HotseatSetup.module.css';
 
-interface GameSetupProps {
+interface HotseatSetupProps {
   onStartGame: (playerNames: string[], gameMode: GameMode) => void;
+  onBack: () => void;
 }
 
-export function GameSetup({ onStartGame }: GameSetupProps) {
+export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const { settings } = useSettings();
   const [playerCount, setPlayerCount] = useState(2);
   const [playerNames, setPlayerNames] = useState<string[]>(['Player 1', 'Player 2']);
@@ -36,7 +38,12 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
 
   return (
     <div className={styles.setup}>
-      <h2 className={styles.title}>Game Setup</h2>
+      <header className={styles.header}>
+        <button onClick={onBack} className={styles.backButton}>
+          ← Back
+        </button>
+        <h2 className={styles.title}>Hotseat Setup</h2>
+      </header>
 
       <div className={styles.section}>
         <label className={styles.label}>Number of Players (2-4)</label>
@@ -45,7 +52,7 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
             <button
               key={count}
               onClick={() => handlePlayerCountChange(count)}
-              className={`${styles.button} ${playerCount === count ? styles.active : ''}`}
+              className={classNames(styles.button, { [styles.active]: playerCount === count })}
             >
               {count}
             </button>
@@ -54,24 +61,24 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
       </div>
 
       <div className={styles.section}>
-        <label className={styles.label}>Game Mode</label>
+        <label className={styles.label}>Deck Size</label>
         <div className={styles.buttonGroup}>
           <button
             onClick={() => setGameMode('short')}
-            className={`${styles.button} ${gameMode === 'short' ? styles.active : ''}`}
+            className={classNames(styles.button, { [styles.active]: gameMode === 'short' })}
           >
             Short (32 cards)
           </button>
           <button
             onClick={() => setGameMode('full')}
-            className={`${styles.button} ${gameMode === 'full' ? styles.active : ''}`}
+            className={classNames(styles.button, { [styles.active]: gameMode === 'full' })}
           >
             Full (64 cards)
           </button>
         </div>
       </div>
 
-      <div className={styles.section}>
+      <div className={classNames(styles.section, styles.namesSection)}>
         <label className={styles.label}>Player Names</label>
         {playerNames.map((name, index) => (
           <input

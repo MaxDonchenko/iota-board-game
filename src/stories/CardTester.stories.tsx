@@ -161,30 +161,6 @@ function CardTesterContent() {
         <h4>Card on Board (as Starter):</h4>
         <GameBoard grid={grid} selectedCards={[]} onPlaceCard={() => {}} />
       </div>
-
-      <div
-        style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderRadius: '8px',
-          fontSize: '0.9rem',
-          color: 'var(--text-primary)',
-        }}
-      >
-        <strong>Card Details:</strong>
-        <ul style={{ marginTop: '0.5rem', marginBottom: 0, color: 'var(--text-primary)' }}>
-          <li>Shape: {card.getEffectiveShape()}</li>
-          <li>Number: {card.getEffectiveNumber()}</li>
-          <li>Color: {card.getEffectiveColor()}</li>
-          <li>Is Wild: {card.isWild ? 'Yes' : 'No'}</li>
-          {card.isWild && card.wildValue && (
-            <li>
-              Wild Value: {card.wildValue.shape}, {card.wildValue.number}, {card.wildValue.color}
-            </li>
-          )}
-        </ul>
-      </div>
     </div>
   );
 }

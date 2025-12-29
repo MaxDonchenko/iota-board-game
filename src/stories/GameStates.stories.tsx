@@ -304,7 +304,7 @@ function FinalTurnStory() {
         </div>
         <div>
           <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Player Hand:</h3>
-          <PlayerHand cards={gameState.players[0].hand} onCardSelect={() => {}} />
+          <PlayerHand cards={gameState.players[0].hand} />
         </div>
       </div>
     </ThemeSync>
@@ -370,7 +370,7 @@ function WildcardRecycleStory() {
         </div>
         <div>
           <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Your Hand:</h3>
-          <PlayerHand cards={gameState.players[0].hand} onCardSelect={() => {}} />
+          <PlayerHand cards={gameState.players[0].hand} />
         </div>
       </div>
     </ThemeSync>
@@ -379,32 +379,40 @@ function WildcardRecycleStory() {
 
 export const WildcardConfirmation: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <WildcardConfirmationStory />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <WildcardConfirmationStory />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const GameEnded: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <GameEndedStory />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <GameEndedStory />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const FinalTurn: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <FinalTurnStory />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <FinalTurnStory />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
 
 export const WildcardRecycle: StoryObj = {
   render: () => (
-    <ThemeProvider>
-      <WildcardRecycleStory />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider>
+        <WildcardRecycleStory />
+      </ThemeProvider>
+    </SettingsProvider>
   ),
 };
