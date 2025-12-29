@@ -105,6 +105,15 @@ export class Validation {
       return { isValid: false, error: 'Colors must be all the same or all different' };
     }
 
+    // Crucial rule: All cards in a line must be unique
+    const cardIdentities = cards.map(
+      (c) => `${c.getEffectiveShape()}-${c.getEffectiveNumber()}-${c.getEffectiveColor()}`
+    );
+    const uniqueIdentities = new Set(cardIdentities);
+    if (uniqueIdentities.size !== cards.length) {
+      return { isValid: false, error: 'All cards in a line must be unique' };
+    }
+
     return { isValid: true };
   }
 

@@ -475,7 +475,13 @@ export function useGame(): UseGameReturn {
       let card = p.card;
       const originalCard = p.card;
       if (card.isWild && p.wildValue) {
-        card = new Card(p.wildValue.shape, p.wildValue.number, p.wildValue.color, false);
+        card = new Card(
+          p.wildValue.shape,
+          p.wildValue.number,
+          p.wildValue.color,
+          true,
+          p.wildValue
+        );
         cardMapping.set(card, originalCard);
       }
       return { card, position: p.position };
@@ -617,18 +623,17 @@ export function useGame(): UseGameReturn {
 
       for (const placement of pendingPlacements) {
         if (placement.position.x !== position.x || placement.position.y !== position.y) {
-          const card = placement.card;
-          if (card.wildValue) {
+          if (placement.wildValue) {
             const cardWithValue = new Card(
-              card.shape,
-              card.number,
-              card.color,
+              placement.wildValue.shape,
+              placement.wildValue.number,
+              placement.wildValue.color,
               true,
-              card.wildValue
+              placement.wildValue
             );
             tempGrid.addCard(placement.position.x, placement.position.y, cardWithValue);
           } else {
-            tempGrid.addCard(placement.position.x, placement.position.y, card);
+            tempGrid.addCard(placement.position.x, placement.position.y, placement.card);
           }
         }
       }

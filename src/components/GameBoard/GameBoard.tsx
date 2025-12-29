@@ -232,7 +232,18 @@ export function GameBoard({
       tempGrid.addCard(x, y, card);
     }
     for (const placement of pendingPlacements) {
-      tempGrid.addCard(placement.position.x, placement.position.y, placement.card);
+      if (placement.wildValue) {
+        const cardWithVal = new CardClass(
+          placement.wildValue.shape,
+          placement.wildValue.number,
+          placement.wildValue.color,
+          true,
+          placement.wildValue
+        );
+        tempGrid.addCard(placement.position.x, placement.position.y, cardWithVal);
+      } else {
+        tempGrid.addCard(placement.position.x, placement.position.y, placement.card);
+      }
     }
 
     for (let y = bounds.minY; y <= bounds.maxY; y++) {
