@@ -26,6 +26,7 @@ import type { WildValue } from './types/Card.types';
 import './styles/index.css';
 import './styles/themes.css';
 import './styles/card-animations.css';
+import styles from './App.module.css';
 
 function SettingsHeader() {
   const [showSettings, setShowSettings] = useState(false);
@@ -119,45 +120,7 @@ function GameSession() {
   const isGameOver = gameState.phase === 'ended';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
-      {/* Top Right Controls */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 1000,
-          display: 'flex',
-          gap: '0.5rem',
-        }}
-      >
-        <button
-          ref={actionsButtonRef}
-          onClick={() => setShowActions(!showActions)}
-          className="settings-button"
-          title="Additional Actions"
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.2rem',
-          }}
-        >
-          ⋮
-        </button>
-        <button
-          ref={settingsButtonRef}
-          onClick={() => setShowSettings(!showSettings)}
-          className="settings-button"
-        >
-          Settings
-        </button>
-      </div>
-
+    <div className={styles.container}>
       <ActionsDialog
         isOpen={showActions}
         onClose={() => setShowActions(false)}
@@ -174,20 +137,27 @@ function GameSession() {
       />
 
       {/* Left Sidebar */}
-      <div
-        style={{
-          width: '400px',
-          minWidth: '400px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          padding: '1rem',
-          backgroundColor: 'var(--bg-primary)',
-          overflowY: 'auto',
-          borderRight: '1px solid var(--border-color)',
-          scrollbarGutter: 'stable',
-        }}
-      >
+      <div className={styles.sidebar}>
+        {/* Controls moved inside sidebar */}
+        <div className={styles.controls}>
+          <button
+            ref={actionsButtonRef}
+            onClick={() => setShowActions(!showActions)}
+            className={styles.settingsButton}
+            title="Additional Actions"
+          >
+            ⋮
+          </button>
+          <button
+            ref={settingsButtonRef}
+            onClick={() => setShowSettings(!showSettings)}
+            className="settings-button"
+            style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+          >
+            Settings
+          </button>
+        </div>
+
         {isGameOver ? (
           <GameOver gameState={gameState} onNewGame={handleNewGame} />
         ) : (
@@ -450,7 +420,7 @@ function GameSession() {
         )}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className={styles.content}>
         <GameBoard
           grid={gameState.grid}
           selectedCards={selectedCards}
