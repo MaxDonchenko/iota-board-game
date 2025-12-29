@@ -157,7 +157,7 @@ export class Validation {
     return { isValid: true };
   }
 
-  private static getCompleteLine(
+  public static getCompleteLine(
     position: Coordinate,
     direction: 'horizontal' | 'vertical',
     grid: Grid,
@@ -238,7 +238,7 @@ export class Validation {
     };
   }
 
-  private static getAffectedLines(
+  public static getAffectedLines(
     position: Coordinate,
     grid: Grid,
     newPlacements: Placement[]

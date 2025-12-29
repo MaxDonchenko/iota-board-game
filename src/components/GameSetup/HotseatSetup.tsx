@@ -1,38 +1,56 @@
 import { useState } from 'react';
 import classNames from 'classnames';
 import { useSettings } from '@/context/SettingsContext';
-import type { GameMode } from '@/types/Game.types';
+import type { GameMode, AIDifficulty } from '@/types/Game.types';
+import type { PlayerConfig } from '@/hooks/useGame';
 import styles from './HotseatSetup.module.css';
 
 interface HotseatSetupProps {
-  onStartGame: (playerNames: string[], gameMode: GameMode) => void;
+  onStartGame: (playerConfigs: PlayerConfig[], gameMode: GameMode) => void;
   onBack: () => void;
 }
 
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const { settings } = useSettings();
   const [playerCount, setPlayerCount] = useState(2);
-  const [playerNames, setPlayerNames] = useState<string[]>(['Player 1', 'Player 2']);
+  const [configs, setConfigs] = useState<PlayerConfig[]>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('vs');
+    if (mode === 'ai') {
+      return [
+        { name: 'Player 1', isAI: false },
+        { name: 'Computer', isAI: true, difficulty: 'medium' },
+      ];
+    }
+    return [
+      { name: 'Player 1', isAI: false },
+      { name: 'Player 2', isAI: false },
+    ];
+  });
   const [gameMode, setGameMode] = useState<GameMode>(settings.gameMode);
 
   const handlePlayerCountChange = (count: number) => {
     setPlayerCount(count);
-    const names: string[] = [];
-    for (let i = 1; i <= count; i++) {
-      names.push(playerNames[i - 1] || `Player ${i}`);
+    const newConfigs = [...configs];
+    if (count > configs.length) {
+      for (let i = configs.length; i < count; i++) {
+        newConfigs.push({ name: `Player ${i + 1}`, isAI: false });
+      }
+    } else {
+      newConfigs.splice(count);
     }
-    setPlayerNames(names);
+    setConfigs(newConfigs);
   };
 
-  const handleNameChange = (index: number, name: string) => {
-    const newNames = [...playerNames];
-    newNames[index] = name;
-    setPlayerNames(newNames);
+  const handleConfigChange = (index: number, updates: Partial<PlayerConfig>) => {
+    const newConfigs = [...configs];
+    newConfigs[index] = { ...newConfigs[index], ...updates };
+    setConfigs(newConfigs);
   };
 
   const handleStart = () => {
-    if (playerNames.every((name) => name.trim().length > 0)) {
-      onStartGame(playerNames, gameMode);
+    if (configs.every((c) => c.name.trim().length > 0)) {
+      onStartGame(configs, gameMode);
     }
   };
 
@@ -42,7 +60,7 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
         <button onClick={onBack} className={styles.backButton}>
           ← Back
         </button>
-        <h2 className={styles.title}>Hotseat Setup</h2>
+        <h2 className={styles.title}>Game Setup</h2>
       </header>
 
       <div className={styles.section}>
@@ -79,17 +97,52 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
       </div>
 
       <div className={classNames(styles.section, styles.namesSection)}>
-        <label className={styles.label}>Player Names</label>
-        {playerNames.map((name, index) => (
-          <input
-            key={index}
-            type="text"
-            value={name}
-            onChange={(e) => handleNameChange(index, e.target.value)}
-            placeholder={`Player ${index + 1}`}
-            className={styles.input}
-          />
-        ))}
+        <label className={styles.label}>Players</label>
+        <div className={styles.playerList}>
+          {configs.map((config, index) => (
+            <div key={index} className={styles.playerRow}>
+              <div className={styles.playerMain}>
+                <input
+                  type="text"
+                  value={config.name}
+                  onChange={(e) => handleConfigChange(index, { name: e.target.value })}
+                  placeholder={`Player ${index + 1}`}
+                  className={styles.input}
+                />
+                <button
+                  type="button"
+                  className={classNames(styles.aiToggle, { [styles.aiActive]: config.isAI })}
+                  onClick={() =>
+                    handleConfigChange(index, {
+                      isAI: !config.isAI,
+                      difficulty: !config.isAI ? 'medium' : undefined,
+                      name: config.isAI ? `Player ${index + 1}` : `Computer ${index + 1}`,
+                    })
+                  }
+                  title={config.isAI ? 'Change to Human' : 'Change to AI'}
+                >
+                  {config.isAI ? '🤖' : '👤'}
+                </button>
+              </div>
+              {config.isAI && (
+                <div className={styles.difficultyGroup}>
+                  {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((diff) => (
+                    <button
+                      key={diff}
+                      type="button"
+                      className={classNames(styles.diffButton, {
+                        [styles.diffActive]: config.difficulty === diff,
+                      })}
+                      onClick={() => handleConfigChange(index, { difficulty: diff })}
+                    >
+                      {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       <button onClick={handleStart} className={styles.startButton}>

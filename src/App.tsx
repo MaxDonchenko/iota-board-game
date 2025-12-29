@@ -13,7 +13,12 @@ import { ActionsDialog } from './components/Actions/ActionsDialog';
 import { GameOverview } from './components/GameOverview/GameOverview';
 import { GameOver } from './components/GameOver/GameOver';
 import { Card as CardComponent } from './components/Card/Card';
-import { GameProvider, useGameContext } from './context/GameContext';
+import {
+  GameProvider,
+  useGameContext,
+  PLAYER_COLORS,
+  type PlayerConfig,
+} from './context/GameContext';
 import type { GameMode } from './types/Game.types';
 import { Card } from './game/Card';
 import type { Card as CardType } from './game/Card';
@@ -417,6 +422,9 @@ function GameSession() {
           nextCardIndex={nextCardIndex}
           onPlaceCard={placePreview}
           settings={settings}
+          lastMovePlacements={gameState.lastMovePlacements}
+          lastMovePlayerIndex={gameState.lastMovePlayerIndex}
+          playerColors={PLAYER_COLORS}
         />
       </div>
     </div>
@@ -428,8 +436,8 @@ function HotseatSetupPage() {
   const { startGame, resetSelection } = useGameContext();
   const { settings } = useSettings();
 
-  const handleStartGame = (playerNames: string[], gameMode: GameMode) => {
-    startGame(playerNames, gameMode, settings);
+  const handleStartGame = (playerConfigs: PlayerConfig[], gameMode: GameMode) => {
+    startGame(playerConfigs, gameMode, settings);
     resetSelection();
     navigate('/hotseat/game');
   };

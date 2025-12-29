@@ -1,16 +1,21 @@
 import type { Card } from '@/game/Card';
 import type { Grid } from '@/game/Grid';
 import type { Deck } from '@/game/Deck';
+import type { Coordinate } from './Grid.types';
 
 export type GamePhase = 'setup' | 'playing' | 'ended';
 export type TurnPhase = 'wildCardRecycle' | 'cardPlacement' | 'pass' | 'scoring';
 export type GameMode = 'short' | 'full';
+export type AIDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface Player {
   id: string;
   name: string;
   hand: Card[];
   score: number;
+  isAI?: boolean;
+  difficulty?: AIDifficulty;
+  color: string;
 }
 
 export interface GameSettings {
@@ -33,4 +38,6 @@ export interface GameState {
   gameMode: GameMode;
   settings: GameSettings;
   startTime?: Date;
+  lastMovePlacements?: { card: Card; position: Coordinate }[];
+  lastMovePlayerIndex?: number | null;
 }

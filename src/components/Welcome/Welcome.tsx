@@ -48,13 +48,11 @@ export function Welcome() {
               <button className={styles.modeButton}>Play Hotseat</button>
             </div>
 
-            <div className={styles.modeCard + ' ' + styles.disabled}>
+            <div className={styles.modeCard} onClick={() => navigate('/hotseat/setup?vs=ai')}>
               <div className={styles.modeIcon}>🤖</div>
               <h3>vs AI</h3>
               <p>Test your skills against the computer.</p>
-              <button disabled className={styles.modeButton}>
-                Coming Soon
-              </button>
+              <button className={styles.modeButton}>Play vs AI</button>
             </div>
 
             <div className={styles.modeCard + ' ' + styles.disabled}>

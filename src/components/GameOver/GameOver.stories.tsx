@@ -18,8 +18,8 @@ type Story = StoryObj<typeof GameOver>;
 const mockGameState: GameState = {
   phase: 'ended',
   players: [
-    { id: '1', name: 'Player 1', score: 124, hand: [] },
-    { id: '2', name: 'Player 2', score: 98, hand: [] },
+    { id: '1', name: 'Player 1', score: 124, hand: [], color: '#61bb46' },
+    { id: '2', name: 'Player 2', score: 98, hand: [], color: '#2b95ff' },
   ],
   grid: new Grid(),
   deck: new Deck('short'),

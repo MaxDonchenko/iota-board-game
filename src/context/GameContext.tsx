@@ -1,5 +1,7 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { useGame } from '../hooks/useGame';
+import { useGame, PLAYER_COLORS, type PlayerConfig } from '../hooks/useGame';
+export { PLAYER_COLORS };
+export type { PlayerConfig };
 
 type GameContextType = ReturnType<typeof useGame>;
 

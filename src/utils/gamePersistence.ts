@@ -1,7 +1,13 @@
 import { Grid } from '@/game/Grid';
 import { Deck } from '@/game/Deck';
 import { Card } from '@/game/Card';
-import type { GameState, GameSettings, GamePhase, TurnPhase } from '@/types/Game.types';
+import type {
+  GameState,
+  GameSettings,
+  GamePhase,
+  TurnPhase,
+  AIDifficulty,
+} from '@/types/Game.types';
 import type { Shape, Number, Color } from '@/types/Card.types';
 
 export interface SerializableGameState {
@@ -16,6 +22,8 @@ export interface SerializableGameState {
   gameMode: string;
   settings: GameSettings;
   startTime?: string;
+  lastMovePlacements?: Array<{ card: SerializableCard; position: { x: number; y: number } }>;
+  lastMovePlayerIndex?: number | null;
 }
 
 interface SerializablePlayer {
@@ -23,6 +31,9 @@ interface SerializablePlayer {
   name: string;
   hand: SerializableCard[];
   score: number;
+  isAI?: boolean;
+  difficulty?: string;
+  color: string;
 }
 
 interface SerializableCard {
@@ -134,6 +145,9 @@ export function serializeGameState(gameState: GameState, gameId: string): Serial
       name: p.name,
       hand: p.hand.map(serializeCard),
       score: p.score,
+      isAI: p.isAI,
+      difficulty: p.difficulty,
+      color: p.color,
     })),
     grid: serializeGrid(gameState.grid),
     deck: serializeDeck(gameState.deck),
@@ -141,6 +155,11 @@ export function serializeGameState(gameState: GameState, gameId: string): Serial
     gameMode: gameState.gameMode,
     settings: gameState.settings,
     startTime: gameState.startTime ? gameState.startTime.toISOString() : undefined,
+    lastMovePlacements: gameState.lastMovePlacements?.map((p) => ({
+      card: serializeCard(p.card),
+      position: p.position,
+    })),
+    lastMovePlayerIndex: gameState.lastMovePlayerIndex,
   };
 }
 
@@ -154,6 +173,9 @@ export function deserializeGameState(serialized: SerializableGameState): GameSta
       name: p.name,
       hand: p.hand.map(deserializeCard),
       score: p.score,
+      isAI: p.isAI,
+      difficulty: p.difficulty as AIDifficulty,
+      color: p.color,
     })),
     grid: deserializeGrid(serialized.grid),
     deck: deserializeDeck(serialized.deck),
@@ -161,6 +183,11 @@ export function deserializeGameState(serialized: SerializableGameState): GameSta
     gameMode: serialized.gameMode as 'short' | 'full',
     settings: serialized.settings,
     startTime: serialized.startTime ? new Date(serialized.startTime) : undefined,
+    lastMovePlacements: serialized.lastMovePlacements?.map((p) => ({
+      card: deserializeCard(p.card),
+      position: p.position,
+    })),
+    lastMovePlayerIndex: serialized.lastMovePlayerIndex,
   };
 }
 

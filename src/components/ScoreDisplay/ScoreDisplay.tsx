@@ -13,23 +13,36 @@ export function ScoreDisplay({ gameState }: ScoreDisplayProps) {
       <h3 className={styles.title}>Scores</h3>
       <div className={styles.scores}>
         {gameState.players.map((player, index) => {
-          const scorePercentage = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
+          const scorePercentage = (player.score / maxScore) * 100;
+          const isCurrent = index === gameState.currentPlayerIndex;
+
           return (
             <div
               key={player.id}
-              className={`${styles.scoreItem} ${
-                index === gameState.currentPlayerIndex ? styles.currentPlayer : ''
-              }`}
+              className={`${styles.scoreItem} ${isCurrent ? styles.currentPlayer : ''}`}
+              style={{ '--player-color': player.color } as React.CSSProperties}
             >
-              <span className={styles.playerName}>{player.name}</span>
+              <div className={styles.playerInfo}>
+                <span className={styles.playerName}>
+                  {player.name} {player.isAI && `(AI: ${player.difficulty})`}
+                </span>
+                {isCurrent && <span className={styles.turnIndicator}>Active Turn</span>}
+              </div>
               <div className={styles.scoreBarWrapper}>
-                <div className={styles.scoreBar} style={{ width: `${scorePercentage}%` }} />
+                <div
+                  className={styles.scoreBar}
+                  style={{
+                    width: `${Math.max(scorePercentage, 2)}%`,
+                    background: `linear-gradient(90deg, var(--player-color) 0%, var(--bg-tertiary) 100%)`,
+                  }}
+                />
                 <span className={styles.score}>{player.score}</span>
               </div>
             </div>
           );
         })}
       </div>
+
       {gameState.isFinalTurn && <div className={styles.finalTurn}>Final Turn - Score Doubled!</div>}
     </div>
   );

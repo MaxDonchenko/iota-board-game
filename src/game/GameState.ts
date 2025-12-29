@@ -1,10 +1,10 @@
 import { Deck } from './Deck';
 import { Grid } from './Grid';
-import type { GameState, Player, GameSettings, GameMode } from '@/types/Game.types';
+import type { GameState, Player, GameSettings, GameMode, AIDifficulty } from '@/types/Game.types';
 
 export class GameStateManager {
   static createInitialState(
-    playerNames: string[],
+    playerConfigs: { name: string; isAI?: boolean; difficulty?: AIDifficulty; color: string }[],
     gameMode: GameMode,
     settings: GameSettings
   ): GameState {
@@ -12,9 +12,12 @@ export class GameStateManager {
     const grid = new Grid();
 
     // Deal cards to players
-    const players: Player[] = playerNames.map((name, index) => ({
+    const players: Player[] = playerConfigs.map((config, index) => ({
       id: `player-${index}`,
-      name,
+      name: config.name,
+      isAI: config.isAI,
+      difficulty: config.difficulty,
+      color: config.color,
       hand: deck.dealCards(4),
       score: 0,
     }));

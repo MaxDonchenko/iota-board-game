@@ -14,11 +14,14 @@ import {
   deserializeGameState,
   type SerializableGameState,
 } from '@/utils/gamePersistence';
-import type { GameState, GameSettings } from '@/types/Game.types';
+import { AIEngine } from '@/ai/AIEngine';
+import type { GameState, GameSettings, AIDifficulty } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
 import type { Coordinate } from '@/types/Grid.types';
 import type { WildValue } from '@/types/Card.types';
+
+export const PLAYER_COLORS = ['#FF4B2B', '#2B95FF', '#61BB46', '#F9A51B'];
 
 interface PreviewPlacement {
   card: Card;
@@ -26,9 +29,19 @@ interface PreviewPlacement {
   wildValue?: WildValue;
 }
 
+export interface PlayerConfig {
+  name: string;
+  isAI?: boolean;
+  difficulty?: AIDifficulty;
+}
+
 interface UseGameReturn {
   gameState: GameState | null;
-  startGame: (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => void;
+  startGame: (
+    playerConfigs: PlayerConfig[],
+    gameMode: 'short' | 'full',
+    settings: GameSettings
+  ) => void;
   placeCards: (
     placements: Placement[],
     cardMapping?: Map<Card, Card>
@@ -145,9 +158,13 @@ export function useGame(): UseGameReturn {
   }, [gameState, gameId]);
 
   const startGame = useCallback(
-    (playerNames: string[], gameMode: 'short' | 'full', settings: GameSettings) => {
+    (playerConfigs: PlayerConfig[], gameMode: 'short' | 'full', settings: GameSettings) => {
       const newGameId = generateGameId();
-      const newState = GameStateManager.createInitialState(playerNames, gameMode, settings);
+      const configs = playerConfigs.map((c, i) => ({
+        ...c,
+        color: PLAYER_COLORS[i % PLAYER_COLORS.length],
+      }));
+      const newState = GameStateManager.createInitialState(configs, gameMode, settings);
       setGameState(newState);
       setGameId(newGameId);
 
@@ -227,11 +244,15 @@ export function useGame(): UseGameReturn {
 
       // Check game end
       const isGameEnd = GameStateManager.checkGameEnd(finalState);
-      if (isGameEnd) {
-        setGameState({ ...finalState, phase: 'ended' });
-      } else {
-        setGameState(GameStateManager.nextTurn(finalState));
-      }
+      const nextPhase = isGameEnd ? 'ended' : finalState.phase;
+      const nextTurnState = isGameEnd ? finalState : GameStateManager.nextTurn(finalState);
+
+      setGameState({
+        ...nextTurnState,
+        phase: nextPhase,
+        lastMovePlacements: placements,
+        lastMovePlayerIndex: gameState.currentPlayerIndex,
+      });
 
       return { success: true };
     },
@@ -277,10 +298,37 @@ export function useGame(): UseGameReturn {
       }
 
       // Move to next turn
-      setGameState(GameStateManager.nextTurn(gameState));
+      const nextState = GameStateManager.nextTurn(gameState);
+      setGameState({
+        ...nextState,
+        lastMovePlacements: [],
+        lastMovePlayerIndex: gameState.currentPlayerIndex,
+      });
     },
     [gameState]
   );
+
+  // Handle AI Turns
+  useEffect(() => {
+    if (gameState && gameState.phase === 'playing') {
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      if (currentPlayer.isAI) {
+        const move = AIEngine.findMove(gameState, currentPlayer.difficulty || 'medium');
+        if (move) {
+          const timer = setTimeout(() => {
+            placeCards(move.placements);
+          }, 1500);
+          return () => clearTimeout(timer);
+        } else {
+          // AI passes if no moves found
+          const timer = setTimeout(() => {
+            passTurn();
+          }, 1500);
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [gameState, passTurn, placeCards]);
 
   const recycleWildCard = useCallback(
     (replacement: WildCardReplacement) => {

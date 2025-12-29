@@ -22,6 +22,9 @@ interface GameBoardProps {
   nextCardIndex?: number;
   onPlaceCard?: (position: Coordinate) => void;
   settings?: GameSettings;
+  lastMovePlacements?: Array<{ card: CardType; position: Coordinate }>;
+  lastMovePlayerIndex?: number | null;
+  playerColors?: string[];
 }
 
 export function GameBoard({
@@ -32,6 +35,9 @@ export function GameBoard({
   nextCardIndex = 0,
   onPlaceCard,
   settings,
+  lastMovePlacements = [],
+  lastMovePlayerIndex = null,
+  playerColors = [],
 }: GameBoardProps) {
   const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
@@ -344,7 +350,17 @@ export function GameBoard({
             [styles.notAllowed]: isNotAllowed,
             [styles.invalidPlacement]: isInvalidPlacement,
             [styles.disabledCursor]: isNotAllowed || isInvalidPlacement,
+            [styles.lastMove]: lastMovePlacements.some(
+              (p) => p.position.x === x && p.position.y === y
+            ),
           })}
+          style={
+            lastMovePlacements.some((p) => p.position.x === x && p.position.y === y) &&
+            lastMovePlayerIndex !== null &&
+            playerColors[lastMovePlayerIndex]
+              ? ({ '--player-color': playerColors[lastMovePlayerIndex] } as React.CSSProperties)
+              : undefined
+          }
           onClick={() => handleCellClick(x, y, hasCard, isNotAllowed, isInvalidPlacement)}
           onMouseEnter={() => setHoveredCell({ x, y })}
           onMouseLeave={() => setHoveredCell(null)}
