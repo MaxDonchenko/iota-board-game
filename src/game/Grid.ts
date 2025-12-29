@@ -63,40 +63,16 @@ export class Grid {
     return adjacent.filter((pos) => this.hasCard(pos.x, pos.y));
   }
 
-  isContinuousLine(positions: Coordinate[]): boolean {
+  isStraightLine(positions: Coordinate[]): boolean {
     if (positions.length <= 1) {
       return true;
     }
 
-    // Check if all positions form a continuous line (horizontal or vertical)
-    const sorted = [...positions].sort((a, b) => {
-      if (a.x !== b.x) return a.x - b.x;
-      return a.y - b.y;
-    });
+    // Check if all positions have same x (vertical) or same y (horizontal)
+    const allSameX = positions.every((pos) => pos.x === positions[0].x);
+    const allSameY = positions.every((pos) => pos.y === positions[0].y);
 
-    // Check if horizontal line
-    const isHorizontal = sorted.every((pos, i) => i === 0 || pos.x === sorted[0].x);
-    if (isHorizontal) {
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i].y !== sorted[i - 1].y + 1) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    // Check if vertical line
-    const isVertical = sorted.every((pos, i) => i === 0 || pos.y === sorted[0].y);
-    if (isVertical) {
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i].x !== sorted[i - 1].x + 1) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    return false;
+    return allSameX || allSameY;
   }
 
   getLine(x: number, y: number, direction: Direction): Line | null {
@@ -203,16 +179,43 @@ export class Grid {
       return false;
     }
 
-    // Check if positions form a continuous line
-    if (!this.isContinuousLine(positions)) {
+    // 1. Must be in a straight line (all same X or all same Y)
+    const allSameX = positions.every((p) => p.x === positions[0].x);
+    const allSameY = positions.every((p) => p.y === positions[0].y);
+    if (!allSameX && !allSameY) {
       return false;
     }
 
-    // Check if at least one position is adjacent to existing cards
-    if (this.positions.size === 0) {
-      return true; // First card placement
+    // 2. The resultant line must be continuous correctly
+    const sorted = [...positions].sort((a, b) => (a.x !== b.x ? a.x - b.x : a.y - b.y));
+    const start = sorted[0];
+    const end = sorted[sorted.length - 1];
+
+    if (allSameX) {
+      for (let y = start.y; y <= end.y; y++) {
+        const isNew = positions.some((p) => p.x === start.x && p.y === y);
+        const isExisting = this.hasCard(start.x, y);
+        if (!isNew && !isExisting) {
+          return false; // Gap found
+        }
+      }
+    } else {
+      for (let x = start.x; x <= end.x; x++) {
+        const isNew = positions.some((p) => p.x === x && p.y === start.y);
+        const isExisting = this.hasCard(x, start.y);
+        if (!isNew && !isExisting) {
+          return false; // Gap found
+        }
+      }
     }
 
+    // 3. Must be connected to the board
+    if (this.positions.size === 0) {
+      return true; // First card of the game
+    }
+
+    // The whole group [start, end] is now known to be continuous (including grid cards).
+    // It's valid if any position in the new placements is adjacent to the EXISTING grid.
     return positions.some((pos) => this.getOccupiedAdjacentCells(pos.x, pos.y).length > 0);
   }
 

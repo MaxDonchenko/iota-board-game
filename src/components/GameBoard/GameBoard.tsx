@@ -118,19 +118,19 @@ export function GameBoard({
   );
 
   const canPlaceWildcard = useCallback(
-    (wildCard: CardType, position: Coordinate, tempGrid: Grid): boolean => {
-      if (tempGrid.positions.size === 0) {
-        return true;
-      }
-
-      if (tempGrid.getOccupiedAdjacentCells(position.x, position.y).length === 0) {
+    (
+      position: Coordinate,
+      allPlacements: Array<{ card: CardType; position: Coordinate }>
+    ): boolean => {
+      // 1. Basic connectivity and straight line check for the whole turn
+      const allPositions = allPlacements.map((p) => p.position);
+      if (!grid.isValidPlacement(allPositions)) {
         return false;
       }
 
-      const hLine = getCompleteLine(position, 'horizontal', tempGrid, [
-        { card: wildCard, position },
-      ]);
-      const vLine = getCompleteLine(position, 'vertical', tempGrid, [{ card: wildCard, position }]);
+      // 2. Affected lines check
+      const hLine = getCompleteLine(position, 'horizontal', grid, allPlacements);
+      const vLine = getCompleteLine(position, 'vertical', grid, allPlacements);
 
       const lines: Array<{ cards: CardType[]; direction: 'horizontal' | 'vertical' }> = [];
       if (hLine && hLine.cards.length >= 2) {
@@ -144,6 +144,7 @@ export function GameBoard({
         return true;
       }
 
+      // 3. Brute force check for at least ONE valid value
       const shapes: Shape[] = ['Square', 'Circle', 'Triangle', 'Plus'];
       const numbers: Number[] = [1, 2, 3, 4];
       const colors: Color[] = ['Red', 'Blue', 'Green', 'Yellow'];
@@ -155,18 +156,17 @@ export function GameBoard({
 
             let worksForAllLines = true;
             for (const line of lines) {
-              const testLineCards = line.cards
-                .filter((c) => c !== undefined && c !== null)
-                .map((c) => {
-                  if (c && c.isWild && !c.wildValue) {
-                    return testCard;
-                  }
-                  return c;
-                }) as CardType[];
+              const testLineCards = line.cards.map((c) => {
+                const isThisWild =
+                  allPlacements.some(
+                    (p) =>
+                      p.card === c && p.position.x === position.x && p.position.y === position.y
+                  ) ||
+                  (c && c.isWild && !c.wildValue);
 
-              if (testLineCards.length < 2) {
-                continue;
-              }
+                if (isThisWild) return testCard;
+                return c;
+              }) as CardType[];
 
               const lineResult = Validation.validateLineRules(testLineCards);
               if (!lineResult.isValid) {
@@ -184,7 +184,7 @@ export function GameBoard({
 
       return false;
     },
-    [getCompleteLine]
+    [getCompleteLine, grid]
   );
 
   const getBounds = () => {
@@ -251,13 +251,12 @@ export function GameBoard({
         if (tempGrid.hasCard(x, y)) continue;
 
         let isValid = false;
+        const allPlacements = [...pendingPlacements, { card: nextCard, position: { x, y } }];
+
         if (nextCard.isWild && !nextCard.wildValue) {
-          isValid = canPlaceWildcard(nextCard, { x, y }, tempGrid);
+          isValid = canPlaceWildcard({ x, y }, allPlacements);
         } else {
-          const result = Validation.validatePlacement(
-            [{ card: nextCard, position: { x, y } }],
-            tempGrid
-          );
+          const result = Validation.validatePlacement(allPlacements, grid);
           isValid = result.isValid;
         }
 
