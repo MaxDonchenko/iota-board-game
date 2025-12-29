@@ -203,20 +203,6 @@ function GameSession() {
               <ScoreDisplay gameState={gameState} />
             </div>
 
-            <div
-              style={{
-                padding: '1rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '8px',
-              }}
-            >
-              <GameControls
-                gameState={gameState}
-                onPass={passTurnAndClear}
-                onNewGame={handleNewGame}
-              />
-            </div>
-
             {currentPlayer && (
               <div
                 style={{
@@ -410,6 +396,20 @@ function GameSession() {
                 </div>
               );
             })()}
+
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '8px',
+              }}
+            >
+              <GameControls
+                gameState={gameState}
+                onPass={passTurnAndClear}
+                onNewGame={handleNewGame}
+              />
+            </div>
           </>
         )}
       </div>
