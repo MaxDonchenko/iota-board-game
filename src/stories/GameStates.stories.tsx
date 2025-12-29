@@ -5,7 +5,6 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from '../components/ScoreDisplay/ScoreDisplay';
-import { GameControls } from '../components/GameControls/GameControls';
 import { GameOverview } from '../components/GameOverview/GameOverview';
 import { Card } from '../components/Card/Card';
 import { Grid } from '../game/Grid';
@@ -363,7 +362,7 @@ function WildcardRecycleStory() {
           You can replace a wildcard on the board with a matching real card from your hand.
         </p>
         <div style={{ marginBottom: '2rem' }}>
-          <GameControls gameState={gameState} onPass={() => {}} onNewGame={() => {}} />
+          <p>Game controls would appear here (Pass, Discard, etc)</p>
         </div>
         <div style={{ marginBottom: '2rem' }}>
           <GameBoard grid={grid} selectedCards={[]} onPlaceCard={() => {}} />
