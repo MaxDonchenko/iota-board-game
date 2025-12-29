@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(stored) as Partial<GameSettings>;
         // If theme was never set by user, use device preference
         if (!parsed.theme) {
           parsed.theme = getInitialTheme();

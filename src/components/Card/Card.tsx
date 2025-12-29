@@ -47,7 +47,7 @@ export function Card({ card, onClick, selected, className = '', cursor, wildcard
                   </div>
                   <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}>
                     <div className={styles.wildShape} style={{ color: cornerColor }}>
-                      {getPlusSVG(16, cornerColor, ColorUtils.toHex('Blue', settings.theme))}
+                      {getPlusSVG(16, cornerColor)}
                     </div>
                   </div>
                   <div className={styles.wildCellV2} style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}>
@@ -153,7 +153,7 @@ export function Card({ card, onClick, selected, className = '', cursor, wildcard
         {isWild && <div className={styles.wildBadge}>WILD</div>}
         <div className={styles.shapeV2} style={{ color: cardColor }}>
           {card.getEffectiveShape() === 'Plus' ? (
-            getPlusSVG(48, cardColor, textColor)
+            getPlusSVG(48, cardColor)
           ) : (
             shapeSymbol
           )}
@@ -162,7 +162,7 @@ export function Card({ card, onClick, selected, className = '', cursor, wildcard
           {Array.from({ length: numberDisplay }, (_, i) => (
             <div key={i} className={styles.tinyShape} style={{ color: oppositeColor }}>
               {card.getEffectiveShape() === 'Plus' ? (
-                getPlusSVG(10, oppositeColor, cardColor)
+                getPlusSVG(10, oppositeColor)
               ) : (
                 shapeSymbol
               )}
@@ -206,7 +206,7 @@ function getShapeSymbol(shape: string): string {
   }
 }
 
-function getPlusSVG(size: number, color: string, _backgroundColor?: string) {
+function getPlusSVG(size: number, color: string) {
   const cutoutSize = Math.floor(size / 3); // Make cutouts slightly bigger (1-2px)
   
   // Create plus shape path: square with 4 corner cutouts

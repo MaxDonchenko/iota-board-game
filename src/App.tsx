@@ -37,6 +37,7 @@ function AppContent() {
       setPendingPlacements([]);
       setNextCardIndex(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.currentPlayerIndex]);
 
   // Clear pending placements when all cards are deselected

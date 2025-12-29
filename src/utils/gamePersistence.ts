@@ -1,7 +1,7 @@
 import { Grid } from '@/game/Grid';
 import { Deck } from '@/game/Deck';
 import { Card } from '@/game/Card';
-import type { GameState, GameSettings } from '@/types/Game.types';
+import type { GameState, GameSettings, GamePhase, TurnPhase } from '@/types/Game.types';
 import type { Shape, Number, Color } from '@/types/Card.types';
 
 export interface SerializableGameState {
@@ -142,9 +142,9 @@ export function serializeGameState(gameState: GameState, gameId: string): Serial
 
 export function deserializeGameState(serialized: SerializableGameState): GameState {
   return {
-    phase: serialized.phase as any,
+    phase: serialized.phase as GamePhase,
     currentPlayerIndex: serialized.currentPlayerIndex,
-    turnPhase: serialized.turnPhase as any,
+    turnPhase: serialized.turnPhase as TurnPhase,
     players: serialized.players.map(p => ({
       id: p.id,
       name: p.name,

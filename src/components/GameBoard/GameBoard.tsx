@@ -263,6 +263,7 @@ export function GameBoard({
     }
 
     return invalid;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid, selectedCards, nextCardIndex, pendingPlacements, settings?.showInvalidPlacements, canPlaceWildcard, getCompleteLine]);
 
   const bounds = getBounds();
