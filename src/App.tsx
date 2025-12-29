@@ -7,7 +7,6 @@ import { HotseatSetup } from './components/GameSetup/HotseatSetup';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { PlayerHand } from './components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
-import { GameControls } from './components/GameControls/GameControls';
 import { SettingsDialog } from './components/Settings/SettingsDialog';
 import { ActionsDialog } from './components/Actions/ActionsDialog';
 import { GameOverview } from './components/GameOverview/GameOverview';
@@ -80,6 +79,15 @@ function GameSession() {
   const actionsButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleNewGame = () => {
+    if (gameState && gameState.phase !== 'ended') {
+      if (
+        !window.confirm(
+          'Are you sure you want to start a new game? This will end the current game.'
+        )
+      ) {
+        return;
+      }
+    }
     resetGame();
     navigate('/');
   };
@@ -155,6 +163,7 @@ function GameSession() {
         onClose={() => setShowActions(false)}
         onExport={handleExport}
         onImport={handleImport}
+        onNewGame={handleNewGame}
         buttonRef={actionsButtonRef}
       />
 
@@ -300,40 +309,81 @@ function GameSession() {
                 </div>
 
                 {pendingPlacements.length === 0 && (
-                  <div
-                    style={{
-                      padding: '1rem',
-                      backgroundColor: 'var(--bg-secondary)',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    }}
-                  >
-                    <h3
-                      style={{
-                        color: 'var(--text-primary)',
-                        marginBottom: '1rem',
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Option B: Discard
-                    </h3>
+                  <>
                     <div
                       style={{
-                        marginBottom: '1rem',
-                        padding: '0.75rem',
-                        backgroundColor: 'var(--bg-tertiary)',
-                        borderRadius: '6px',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.9rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                       }}
                     >
-                      <p style={{ margin: 0 }}>Trade cards for new ones. Ends turn.</p>
+                      <h3
+                        style={{
+                          color: 'var(--text-primary)',
+                          marginBottom: '1rem',
+                          fontSize: '1.2rem',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        Option B: Discard
+                      </h3>
+                      <div
+                        style={{
+                          marginBottom: '1rem',
+                          padding: '0.75rem',
+                          backgroundColor: 'var(--bg-tertiary)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <p style={{ margin: 0 }}>Trade cards for new ones. Ends turn.</p>
+                      </div>
+                      <button onClick={discardSelected} className="discard-button">
+                        Discard Selected ({selectedCards.length})
+                      </button>
                     </div>
-                    <button onClick={discardSelected} className="discard-button">
-                      Discard Selected ({selectedCards.length})
-                    </button>
-                  </div>
+
+                    <div
+                      style={{
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      }}
+                    >
+                      <h3
+                        style={{
+                          color: 'var(--text-primary)',
+                          marginBottom: '1rem',
+                          fontSize: '1.2rem',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        Option C: Pass
+                      </h3>
+                      <div
+                        style={{
+                          marginBottom: '1rem',
+                          padding: '0.75rem',
+                          backgroundColor: 'var(--bg-tertiary)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <p style={{ margin: 0 }}>Skip your turn without changing cards.</p>
+                      </div>
+                      <button
+                        onClick={passTurnAndClear}
+                        className="cancel-button"
+                        style={{ width: '100%', fontWeight: 'bold' }}
+                      >
+                        Pass Turn
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -396,20 +446,6 @@ function GameSession() {
                 </div>
               );
             })()}
-
-            <div
-              style={{
-                padding: '1rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '8px',
-              }}
-            >
-              <GameControls
-                gameState={gameState}
-                onPass={passTurnAndClear}
-                onNewGame={handleNewGame}
-              />
-            </div>
           </>
         )}
       </div>

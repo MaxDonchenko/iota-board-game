@@ -24,8 +24,6 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

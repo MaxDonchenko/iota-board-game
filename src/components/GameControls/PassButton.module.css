@@ -2,8 +2,6 @@
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: opacity 0.2s ease;

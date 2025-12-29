@@ -6,6 +6,7 @@ interface ActionsDialogProps {
   onClose: () => void;
   onExport: () => void;
   onImport: () => void;
+  onNewGame: () => void;
   buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
@@ -14,6 +15,7 @@ export function ActionsDialog({
   onClose,
   onExport,
   onImport,
+  onNewGame,
   buttonRef,
 }: ActionsDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,19 @@ export function ActionsDialog({
           <div className={styles.text}>
             <div className={styles.label}>Import Game</div>
             <div className={styles.description}>Load game from JSON string</div>
+          </div>
+        </button>
+        <button
+          className={styles.option}
+          onClick={() => {
+            onNewGame();
+            onClose();
+          }}
+        >
+          <span className={styles.icon}>🔄</span>
+          <div className={styles.text}>
+            <div className={styles.label}>New Game</div>
+            <div className={styles.description}>Start a fresh match</div>
           </div>
         </button>
       </div>
