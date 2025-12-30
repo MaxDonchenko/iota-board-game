@@ -11,7 +11,7 @@ interface HotseatSetupProps {
 }
 
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const [playerCount, setPlayerCount] = useState(2);
   const [configs, setConfigs] = useState<PlayerConfig[]>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -28,6 +28,7 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
     ];
   });
   const [gameMode, setGameMode] = useState<GameMode>(settings.gameMode);
+  const [enableWildcards, setEnableWildcards] = useState(settings.enableWildcards);
 
   const handlePlayerCountChange = (count: number) => {
     setPlayerCount(count);
@@ -50,6 +51,8 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
 
   const handleStart = () => {
     if (configs.every((c) => c.name.trim().length > 0)) {
+      // Update settings with wildcard preference before starting
+      updateSettings({ enableWildcards });
       onStartGame(configs, gameMode);
     }
   };
@@ -94,6 +97,25 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
             Full (64 cards)
           </button>
         </div>
+      </div>
+
+      <div className={styles.section}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={enableWildcards}
+            onChange={(e) => setEnableWildcards(e.target.checked)}
+            className={styles.checkbox}
+            style={{ marginRight: '0.5rem' }}
+          />
+          Enable Wildcards
+        </label>
+        <p
+          className={styles.description}
+          style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}
+        >
+          Include wildcard cards in the deck that can represent any shape, number, or color
+        </p>
       </div>
 
       <div className={classNames(styles.section, styles.namesSection)}>

@@ -25,6 +25,7 @@ export interface GameSettings {
   showInvalidPlacements: boolean;
   wildcardVariant: 'modern' | 'original';
   cardVariant: 'modern' | 'original';
+  enableWildcards: boolean;
 }
 
 export interface GameState {

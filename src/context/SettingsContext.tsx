@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   showInvalidPlacements: true,
   wildcardVariant: 'modern',
   cardVariant: 'modern',
+  enableWildcards: true,
 };
 
 const STORAGE_KEY = 'iota-game-settings';

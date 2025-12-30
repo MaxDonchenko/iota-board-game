@@ -81,10 +81,15 @@ function GameSession() {
 
   // Send game state to peers after each turn (for host)
   // Send game state to host after each turn (for peers)
+  // Also sync when game ends (phase === 'ended')
   // Must be called before any conditional returns
   const isMultiplayer = service !== null;
   useEffect(() => {
-    if (isMultiplayer && gameState && gameState.phase === 'playing') {
+    if (
+      isMultiplayer &&
+      gameState &&
+      (gameState.phase === 'playing' || gameState.phase === 'ended')
+    ) {
       // Small delay to ensure state is fully updated
       const timer = setTimeout(() => {
         if (isHost) {
@@ -148,6 +153,14 @@ function GameSession() {
   // For multiplayer peers, wait a bit for game state to be imported
   const isMultiplayerPeer = service !== null && !isHost;
 
+  // Clear multiplayer connection when game ends (must be before conditional returns)
+  useEffect(() => {
+    if (gameState?.phase === 'ended' && service) {
+      console.log('[Multiplayer] Game ended, disconnecting...');
+      service.disconnect();
+    }
+  }, [gameState?.phase, service]);
+
   if (!gameState) {
     // If we're a multiplayer peer, wait a moment for game state to arrive
     if (isMultiplayerPeer) {
@@ -175,6 +188,7 @@ function GameSession() {
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const isGameOver = gameState.phase === 'ended';
+  const isAITurn = currentPlayer?.isAI === true;
 
   // In multiplayer, check if it's the current player's turn by comparing names
   // myPlayerName should be set when joining/creating game
@@ -198,28 +212,37 @@ function GameSession() {
         buttonRef={settingsButtonRef}
       />
 
+      {/* Top-right controls above game board */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 1000,
+          display: 'flex',
+          gap: '0.5rem',
+        }}
+      >
+        <button
+          ref={actionsButtonRef}
+          onClick={() => setShowActions(!showActions)}
+          className={styles.actionsButton}
+          title="Additional Actions"
+        >
+          ⋮
+        </button>
+        <button
+          ref={settingsButtonRef}
+          onClick={() => setShowSettings(!showSettings)}
+          className="settings-button"
+          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+        >
+          Settings
+        </button>
+      </div>
+
       {/* Left Sidebar */}
       <div className={styles.sidebar}>
-        {/* Controls moved inside sidebar */}
-        <div className={styles.controls}>
-          <button
-            ref={actionsButtonRef}
-            onClick={() => setShowActions(!showActions)}
-            className={styles.settingsButton}
-            title="Additional Actions"
-          >
-            ⋮
-          </button>
-          <button
-            ref={settingsButtonRef}
-            onClick={() => setShowSettings(!showSettings)}
-            className="settings-button"
-            style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-          >
-            Settings
-          </button>
-        </div>
-
         {isGameOver ? (
           <GameOver gameState={gameState} onNewGame={handleNewGame} />
         ) : (
@@ -250,8 +273,8 @@ function GameSession() {
                   padding: '1rem',
                   backgroundColor: 'var(--bg-secondary)',
                   borderRadius: '8px',
-                  opacity: isMyTurn ? 1 : 0.6,
-                  pointerEvents: isMyTurn ? 'auto' : 'none',
+                  opacity: isMyTurn && !isAITurn ? 1 : 0.6,
+                  pointerEvents: isMyTurn && !isAITurn ? 'auto' : 'none',
                 }}
               >
                 <h3
@@ -262,20 +285,28 @@ function GameSession() {
                     fontWeight: 'bold',
                   }}
                 >
-                  {isMultiplayer && !isMyTurn ? `${currentPlayer.name}'s Turn` : 'Your Hand'}
+                  {isMultiplayer && !isMyTurn
+                    ? `${currentPlayer.name}'s Turn`
+                    : isAITurn
+                    ? `${currentPlayer.name}'s Turn (AI)`
+                    : 'Your Hand'}
                 </h3>
-                {isMultiplayer && !isMyTurn && (
+                {(isMultiplayer && !isMyTurn) || isAITurn ? (
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                     Waiting for {currentPlayer.name} to make their move...
                   </p>
-                )}
+                ) : null}
                 <PlayerHand
                   cards={currentPlayer.hand}
                   selectedCards={selectedCards}
                   onSelectionChange={
-                    isMyTurn ? (setSelectedCards as (cards: CardType[]) => void) : () => {}
+                    isMyTurn && !isAITurn
+                      ? (setSelectedCards as (cards: CardType[]) => void)
+                      : () => {}
                   }
-                  onResetSelection={isMyTurn ? (resetSelection as () => void) : () => {}}
+                  onResetSelection={
+                    isMyTurn && !isAITurn ? (resetSelection as () => void) : () => {}
+                  }
                 />
               </div>
             )}

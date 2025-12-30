@@ -44,6 +44,14 @@ export function ScoreDisplay({ gameState }: ScoreDisplayProps) {
       </div>
 
       {gameState.isFinalTurn && <div className={styles.finalTurn}>Final Turn - Score Doubled!</div>}
+      {gameState.deck.isEmpty() && gameState.phase === 'playing' && (
+        <div
+          className={styles.finalTurn}
+          style={{ marginTop: '0.5rem', backgroundColor: 'var(--bg-tertiary)' }}
+        >
+          Deck is empty - Game will end when the first player gives all of their cards
+        </div>
+      )}
     </div>
   );
 }

@@ -45,7 +45,7 @@ export function ActionsDialog({
     ? {
         position: 'fixed',
         top: `${rect.bottom + 8}px`,
-        left: `${rect.left}px`,
+        right: `${window.innerWidth - rect.left}px`, // Position to the left of the button
       }
     : {};
 

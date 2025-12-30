@@ -8,7 +8,7 @@ export class GameStateManager {
     gameMode: GameMode,
     settings: GameSettings
   ): GameState {
-    const deck = new Deck(gameMode);
+    const deck = new Deck(gameMode, settings.enableWildcards);
     const grid = new Grid();
 
     // Deal cards to players
