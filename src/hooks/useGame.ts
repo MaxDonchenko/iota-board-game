@@ -142,8 +142,9 @@ export function useGame(): UseGameReturn {
         window.history.replaceState({}, '', url.toString());
       }
     } else {
-      // Remove game ID from URL if we're not on the game page
-      if (idInUrl) {
+      // Don't remove game ID from URL if we're on multiplayer setup page
+      // (it's used for the lobby connection)
+      if (idInUrl && !pathname.includes('/multiplayer/setup')) {
         url.searchParams.delete('game');
         window.history.replaceState({}, '', url.toString());
       }
@@ -159,17 +160,33 @@ export function useGame(): UseGameReturn {
 
   const startGame = useCallback(
     (playerConfigs: PlayerConfig[], gameMode: 'short' | 'full', settings: GameSettings) => {
+      console.log('[Game] startGame called', {
+        playersCount: playerConfigs.length,
+        gameMode,
+        playerNames: playerConfigs.map((p) => p.name),
+      });
       const newGameId = generateGameId();
+      console.log('[Game] Generated game ID:', newGameId);
       const configs = playerConfigs.map((c, i) => ({
         ...c,
         color: PLAYER_COLORS[i % PLAYER_COLORS.length],
       }));
+      console.log('[Game] Creating initial game state...');
       const newState = GameStateManager.createInitialState(configs, gameMode, settings);
+      console.log('[Game] Game state created', {
+        phase: newState.phase,
+        playersCount: newState.players.length,
+        currentPlayerIndex: newState.currentPlayerIndex,
+      });
+      console.log('[Game] Setting gameState and gameId...');
       setGameState(newState);
       setGameId(newGameId);
+      console.log('[Game] State setters called');
 
       // Save to storage immediately
+      console.log('[Game] Saving to storage...');
       saveGameToStorage(newState, newGameId);
+      console.log('[Game] startGame complete');
     },
     []
   );
@@ -697,9 +714,23 @@ export function useGame(): UseGameReturn {
   );
 
   const exportGame = useCallback(() => {
-    if (!gameState || !gameId) return null;
+    if (!gameState) {
+      console.log('[Game] exportGame: gameState is null');
+      return null;
+    }
+    if (!gameId) {
+      console.log('[Game] exportGame: gameId is null', { gameStateExists: !!gameState });
+      return null;
+    }
+    console.log('[Game] exportGame: Both gameState and gameId exist', {
+      gameId,
+      gameStatePhase: gameState.phase,
+      playersCount: gameState.players.length,
+    });
     const serialized = serializeGameState(gameState, gameId);
-    return JSON.stringify(serialized, null, 2);
+    const json = JSON.stringify(serialized, null, 2);
+    console.log('[Game] exportGame: Serialization complete', { jsonLength: json.length });
+    return json;
   }, [gameState, gameId]);
 
   const importGame = useCallback((json: string) => {

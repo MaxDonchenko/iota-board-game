@@ -15,8 +15,8 @@ export interface MultiplayerService {
 
   disconnect(): void;
 
-  sendGameState(state: GameState): void;
-  onGameStateReceived(callback: (state: GameState) => void): void;
+  sendGameState(state: GameState | string): void; // Can send GameState or serialized JSON string
+  onGameStateReceived(callback: (state: GameState | string) => void): void;
 
   // For handshake
   onPlayerJoined(callback: (player: PlayerInfo) => void): void;

@@ -1,22 +1,35 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { RoutingService } from '@/services/routing/RoutingService';
 import styles from './MultiplayerSetup.module.css';
 import { useMultiplayer } from '@/context/MultiplayerContext';
 import { PlayerInfo } from '@/services/multiplayer/types';
 import { Notification } from '@/components/Notification/Notification';
+import { useGameContext, type PlayerConfig } from '@/context/GameContext';
+import { useSettings } from '@/context/SettingsContext';
+import type { GameMode } from '@/types/Game.types';
+import { generateRandomName } from '@/utils/nameGenerator';
+import { SettingsDialog } from '@/components/Settings/SettingsDialog';
+import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
 
 export function MultiplayerSetup() {
-  const navigate = useNavigate();
   const { gameId: urlGameId } = useParams<{ gameId?: string }>();
-  const { initializeService, isHost, setIsHost } = useMultiplayer();
+  const { initializeService, isHost, setIsHost, setMyPlayerName, service } = useMultiplayer();
+  const { startGame, resetSelection, gameState } = useGameContext();
+  const { settings } = useSettings();
+  const { sendGameStateToPeers } = useMultiplayerGame();
   const [backend, setBackend] = useState<'supabase' | 'peerjs'>('peerjs');
-  const [playerName, setPlayerName] = useState('');
+  const [playerName, setPlayerName] = useState(() => generateRandomName());
   const [gameId, setGameId] = useState(''); // For joining
   const [createdGameId, setCreatedGameId] = useState(''); // For hosting
   const [status, setStatus] = useState<'idle' | 'connecting' | 'lobby'>('idle');
   const [players, setPlayers] = useState<PlayerInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const MAX_PLAYERS = 4;
 
   // Supabase Config
   const [sbUrl, setSbUrl] = useState<string>((import.meta.env.VITE_SUPABASE_URL as string) || '');
@@ -24,15 +37,33 @@ export function MultiplayerSetup() {
     (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || ''
   );
 
-  // Read game ID from URL if present
+  // Read game ID from URL if present (from route params or query string)
   useEffect(() => {
-    if (urlGameId && status === 'idle') {
-      setGameId(urlGameId);
+    if (status === 'idle') {
+      // Check route params first, then query string
+      const routeGameId = urlGameId || RoutingService.getGameIdFromRoute();
+      const queryGameId = RoutingService.getGameIdFromUrl();
+      const gameIdToUse = routeGameId || queryGameId;
+
+      if (gameIdToUse) {
+        setGameId(gameIdToUse);
+      }
     }
   }, [urlGameId, status]);
 
+  // Watch for gameState to become available after starting game
+  useEffect(() => {
+    if (isStartingGame && gameState && isHost) {
+      console.log('[Multiplayer] gameState became available, sending to peers...');
+      sendGameStateToPeers();
+      RoutingService.navigateToMultiplayerGame();
+      console.log('[Multiplayer] Navigation triggered to game page');
+      // Don't reset isStartingGame - we're navigating away
+    }
+  }, [gameState, isStartingGame, isHost, sendGameStateToPeers]);
+
   const handleBack = () => {
-    navigate('/');
+    RoutingService.navigateToHome();
   };
 
   const handleCreateGame = async () => {
@@ -57,12 +88,30 @@ export function MultiplayerSetup() {
 
       // Listen for players
       srv.onPlayerJoined((p) => {
-        setPlayers((prev) => [...prev, p]);
+        setPlayers((prev) => {
+          // Check if player already exists
+          if (prev.some((existing) => existing.id === p.id)) {
+            return prev;
+          }
+          // Check player limit
+          if (prev.length >= MAX_PLAYERS) {
+            setError(`Maximum ${MAX_PLAYERS} players allowed`);
+            return prev;
+          }
+          return [...prev, p];
+        });
       });
 
-      const id = await srv.connect(playerName);
+      // Add timeout for connection (20 seconds)
+      const connectionPromise = srv.connect(playerName);
+      const timeoutPromise = new Promise<string>((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout after 20 seconds')), 20000);
+      });
+
+      const id = await Promise.race([connectionPromise, timeoutPromise]);
       setCreatedGameId(id);
       setStatus('lobby');
+      setMyPlayerName(playerName);
       // Show host immediately in the players list
       const hostPlayer: PlayerInfo = {
         id: srv.myPlayerId || 'host',
@@ -71,12 +120,18 @@ export function MultiplayerSetup() {
       };
       setPlayers([hostPlayer]);
       // Update URL with game ID
-      navigate(`/multiplayer/setup/${id}`, { replace: true });
+      RoutingService.navigateToMultiplayerSetup(id);
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'Failed to create game';
       setError(message);
       setStatus('idle');
+      // If timeout, navigate back to setup
+      if (message.includes('timeout')) {
+        setTimeout(() => {
+          RoutingService.navigateToMultiplayerSetup();
+        }, 2000);
+      }
     }
   };
 
@@ -100,30 +155,84 @@ export function MultiplayerSetup() {
         backend === 'supabase' ? { url: sbUrl, key: sbKey } : undefined
       );
 
-      // Listen for game starts or state updates?
-      // Usually we wait for host to send state.
+      // Add timeout for connection (20 seconds)
+      const connectionPromise = srv.connect(playerName, gameId);
+      const timeoutPromise = new Promise<string>((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout after 20 seconds')), 20000);
+      });
 
-      await srv.connect(playerName, gameId);
+      await Promise.race([connectionPromise, timeoutPromise]);
       setStatus('lobby');
+      setMyPlayerName(playerName);
+      // Update URL with game ID when peer joins
+      if (gameId) {
+        RoutingService.navigateToMultiplayerSetup(gameId);
+      }
       setPlayers([
         // We don't know everyone yet until Host tells us, or we get updates.
         // For now, list myself.
         { id: 'me', name: playerName, isHost: false },
       ]);
+
+      // Game state handling is now done by useMultiplayerGame hook
+      // Just set up the listener - the hook will handle the rest
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'Failed to join game';
       setError(message);
       setStatus('idle');
+      // If timeout, navigate back to setup
+      if (message.includes('timeout')) {
+        setTimeout(() => {
+          RoutingService.navigateToMultiplayerSetup();
+        }, 2000);
+      }
     }
   };
 
   const handleStartGame = () => {
-    // In a real app, we would broadcast "START_GAME" action or initial state.
-    // For now, we assume the host navigates to game, which initializes state.
-    // But we need to sync this state.
-    // The Game page needs to know it's multiplayer.
-    navigate('/multiplayer/game');
+    if (!isHost || players.length === 0 || !service || isStartingGame) {
+      console.log('[Multiplayer] Start game blocked:', {
+        isHost,
+        playersCount: players.length,
+        hasService: !!service,
+        isStartingGame,
+      });
+      return;
+    }
+
+    console.log('[Multiplayer] Starting game...', {
+      playersCount: players.length,
+      playerNames: players.map((p) => p.name),
+    });
+
+    // Prevent multiple clicks
+    setIsStartingGame(true);
+
+    // Convert PlayerInfo[] to PlayerConfig[] for game initialization
+    const playerConfigs: PlayerConfig[] = players.map((p) => ({
+      name: p.name,
+      isAI: false, // Multiplayer players are not AI
+    }));
+
+    console.log(
+      '[Multiplayer] Player configs prepared:',
+      playerConfigs.map((c) => ({ name: c.name, isAI: c.isAI }))
+    );
+
+    // Use 'full' game mode for multiplayer (can be made configurable later)
+    const gameMode: GameMode = 'full';
+
+    console.log('[Multiplayer] Calling startGame with mode:', gameMode);
+
+    // Initialize the game with the players from the lobby
+    // startGame will replace any existing game state, so we don't need to clear it first
+    startGame(playerConfigs, gameMode, settings);
+    resetSelection();
+
+    console.log('[Multiplayer] startGame called, waiting for game state to be ready...');
+    // Note: React state updates are async, so gameState won't be available immediately
+    // The useEffect hook below will handle sending the game state when it becomes available
   };
 
   const copyGameId = () => {
@@ -144,7 +253,26 @@ export function MultiplayerSetup() {
               <h2 className={styles.title}>
                 Lobby ({backend === 'peerjs' ? 'PeerJS' : 'Supabase'})
               </h2>
+              {isHost && (
+                <div style={{ position: 'absolute', top: 0, right: 0 }}>
+                  <button
+                    ref={settingsButtonRef}
+                    onClick={() => setShowSettings(true)}
+                    className="settings-button"
+                    style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+                  >
+                    Settings
+                  </button>
+                </div>
+              )}
             </header>
+            {isHost && (
+              <SettingsDialog
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                buttonRef={settingsButtonRef}
+              />
+            )}
 
             <div className={styles.lobby}>
               {isHost ? (
@@ -158,21 +286,32 @@ export function MultiplayerSetup() {
                   </div>
 
                   <div className={styles.playerList}>
-                    <h4>Players Joined:</h4>
+                    <h4>
+                      Players Joined: {players.length}/{MAX_PLAYERS}
+                    </h4>
                     {players.length === 0 ? (
                       <p style={{ fontStyle: 'italic', color: 'gray' }}>Waiting for players...</p>
                     ) : (
                       players.map((p) => (
                         <div key={p.id} className={styles.playerItem}>
-                          {p.isHost ? '👑 ' : ''}
+                          {p.isHost ? '🏠 ' : ''}
                           {p.name}
                         </div>
                       ))
                     )}
+                    {players.length >= MAX_PLAYERS && (
+                      <p style={{ fontSize: '0.9rem', color: 'orange', marginTop: '0.5rem' }}>
+                        Maximum players reached
+                      </p>
+                    )}
                   </div>
 
-                  <button className={styles.actionButton} onClick={handleStartGame}>
-                    Start Game
+                  <button
+                    className={styles.actionButton}
+                    onClick={handleStartGame}
+                    disabled={isStartingGame}
+                  >
+                    {isStartingGame ? 'Starting...' : 'Start Game'}
                   </button>
                 </>
               ) : (
@@ -214,6 +353,18 @@ export function MultiplayerSetup() {
               ← Back
             </button>
             <h2 className={styles.title}>Multiplayer Setup</h2>
+            {isHost && (
+              <div style={{ position: 'absolute', top: 0, right: 0 }}>
+                <button
+                  ref={settingsButtonRef}
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="settings-button"
+                  style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+                >
+                  Settings
+                </button>
+              </div>
+            )}
           </header>
 
           {error && (
@@ -266,23 +417,40 @@ export function MultiplayerSetup() {
 
           <div className={styles.section}>
             <label className={styles.label}>Your Name</label>
-            <input
-              className={styles.input}
-              placeholder="Enter your name"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-            />
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="Enter your name"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                style={{ fontSize: '1rem', padding: '0.75rem' }}
+              />
+              <button
+                type="button"
+                onClick={() => setPlayerName(generateRandomName())}
+                className={styles.actionButton}
+                style={{
+                  whiteSpace: 'nowrap',
+                  minWidth: '3rem',
+                }}
+                title="Generate new name"
+              >
+                🎲
+              </button>
+            </div>
           </div>
 
           <div className={styles.section}>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <label className={styles.label}>Create New Game</label>
                 <p
                   style={{
                     fontSize: '0.9rem',
                     color: 'var(--text-secondary)',
                     marginBottom: '0.5rem',
+                    minHeight: '3rem',
                   }}
                 >
                   Start a new lobby and invite friends.
@@ -294,14 +462,14 @@ export function MultiplayerSetup() {
 
               <div style={{ width: '1px', background: 'var(--border-color)' }}></div>
 
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <label className={styles.label}>Join Existing Game</label>
                 <input
                   className={styles.input}
                   placeholder="Game ID"
                   value={gameId}
                   onChange={(e) => setGameId(e.target.value)}
-                  style={{ marginBottom: '0.5rem' }}
+                  style={{ marginBottom: '0.5rem', minHeight: '3rem' }}
                 />
                 <button
                   className={`${styles.actionButton} ${styles.secondary}`}

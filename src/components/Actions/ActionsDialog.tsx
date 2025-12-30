@@ -45,7 +45,7 @@ export function ActionsDialog({
     ? {
         position: 'fixed',
         top: `${rect.bottom + 8}px`,
-        right: `${window.innerWidth - rect.right}px`,
+        left: `${rect.left}px`,
       }
     : {};
 

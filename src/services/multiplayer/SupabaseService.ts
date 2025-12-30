@@ -20,7 +20,7 @@ export class SupabaseService implements MultiplayerService {
   private roomId: string = '';
   public myPlayerId: string = '';
 
-  private onStateReceivedCallback: ((state: GameState) => void) | null = null;
+  private onStateReceivedCallback: ((state: GameState | string) => void) | null = null;
   private onPlayerJoinedCallback: ((player: PlayerInfo) => void) | null = null;
   private onActionReceivedCallback: ((action: GameAction) => void) | null = null;
 
@@ -44,7 +44,9 @@ export class SupabaseService implements MultiplayerService {
           this.channel
             .on('broadcast', { event: 'game_state' }, ({ payload }) => {
               if (this.onStateReceivedCallback) {
-                this.onStateReceivedCallback(payload as GameState);
+                // Always receive as string
+                const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
+                this.onStateReceivedCallback(payloadStr);
               }
             })
             .on('broadcast', { event: 'player_join' }, ({ payload }) => {
@@ -90,15 +92,17 @@ export class SupabaseService implements MultiplayerService {
     // this.supabase?.auth.signOut(); // Not using auth for this simple demo
   }
 
-  sendGameState(state: GameState): void {
+  sendGameState(state: GameState | string): void {
+    // Always send as string for simplicity
+    const payload = typeof state === 'string' ? state : JSON.stringify(state);
     this.channel?.send({
       type: 'broadcast',
       event: 'game_state',
-      payload: state,
+      payload,
     });
   }
 
-  onGameStateReceived(callback: (state: GameState) => void): void {
+  onGameStateReceived(callback: (state: GameState | string) => void): void {
     this.onStateReceivedCallback = callback;
   }
 

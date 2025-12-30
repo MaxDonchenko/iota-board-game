@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
-import { MultiplayerProvider } from './context/MultiplayerContext';
+import { MultiplayerProvider, useMultiplayer } from './context/MultiplayerContext';
+import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 import { Welcome } from './components/Welcome/Welcome';
 import { HotseatSetup } from './components/GameSetup/HotseatSetup';
 import { MultiplayerSetup } from './components/MultiplayerSetup/MultiplayerSetup';
@@ -57,6 +58,7 @@ function SettingsHeader() {
 function GameSession() {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const { service, myPlayerName, isHost } = useMultiplayer();
   const {
     gameState,
     resetGame,
@@ -75,6 +77,27 @@ function GameSession() {
     exportGame,
     importGame,
   } = useGameContext();
+  const { sendGameStateToPeers } = useMultiplayerGame();
+
+  // Send game state to peers after each turn (for host)
+  // Must be called before any conditional returns
+  const isMultiplayer = service !== null;
+  useEffect(() => {
+    if (isMultiplayer && isHost && gameState && gameState.phase === 'playing') {
+      // Small delay to ensure state is fully updated
+      const timer = setTimeout(() => {
+        sendGameStateToPeers();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    gameState?.currentPlayerIndex,
+    gameState?.phase,
+    isMultiplayer,
+    isHost,
+    sendGameStateToPeers,
+    gameState,
+  ]);
 
   const [showSettings, setShowSettings] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -114,12 +137,41 @@ function GameSession() {
     }
   };
 
+  // For multiplayer peers, wait a bit for game state to be imported
+  const isMultiplayerPeer = service !== null && !isHost;
+
   if (!gameState) {
+    // If we're a multiplayer peer, wait a moment for game state to arrive
+    if (isMultiplayerPeer) {
+      // Return loading state instead of redirecting immediately
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh',
+            flexDirection: 'column',
+            gap: '1rem',
+          }}
+        >
+          <div>Waiting for game state...</div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            If this persists, the host may not have started the game yet.
+          </div>
+        </div>
+      );
+    }
     return <Navigate to="/" />;
   }
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const isGameOver = gameState.phase === 'ended';
+
+  // In multiplayer, check if it's the current player's turn by comparing names
+  // myPlayerName should be set when joining/creating game
+  const isMyTurn =
+    !isMultiplayer || !myPlayerName || !currentPlayer || currentPlayer.name === myPlayerName;
 
   return (
     <div className={styles.container}>
@@ -190,6 +242,8 @@ function GameSession() {
                   padding: '1rem',
                   backgroundColor: 'var(--bg-secondary)',
                   borderRadius: '8px',
+                  opacity: isMyTurn ? 1 : 0.6,
+                  pointerEvents: isMyTurn ? 'auto' : 'none',
                 }}
               >
                 <h3
@@ -200,18 +254,25 @@ function GameSession() {
                     fontWeight: 'bold',
                   }}
                 >
-                  Your Hand
+                  {isMultiplayer && !isMyTurn ? `${currentPlayer.name}'s Turn` : 'Your Hand'}
                 </h3>
+                {isMultiplayer && !isMyTurn && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                    Waiting for {currentPlayer.name} to make their move...
+                  </p>
+                )}
                 <PlayerHand
                   cards={currentPlayer.hand}
                   selectedCards={selectedCards}
-                  onSelectionChange={setSelectedCards as (cards: CardType[]) => void}
-                  onResetSelection={resetSelection as () => void}
+                  onSelectionChange={
+                    isMyTurn ? (setSelectedCards as (cards: CardType[]) => void) : () => {}
+                  }
+                  onResetSelection={isMyTurn ? (resetSelection as () => void) : () => {}}
                 />
               </div>
             )}
 
-            {selectedCards.length > 0 && !isGameOver && (
+            {selectedCards.length > 0 && !isGameOver && isMyTurn && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div
                   style={{
@@ -268,10 +329,18 @@ function GameSession() {
                             justifyContent: 'center',
                           }}
                         >
-                          <button onClick={confirmTurn} className="confirm-button">
+                          <button
+                            onClick={confirmTurn}
+                            className="confirm-button"
+                            disabled={!isMyTurn}
+                          >
                             Confirm Turn
                           </button>
-                          <button onClick={cancelPreview} className="cancel-button">
+                          <button
+                            onClick={cancelPreview}
+                            className="cancel-button"
+                            disabled={!isMyTurn}
+                          >
                             Cancel
                           </button>
                         </div>
@@ -312,7 +381,11 @@ function GameSession() {
                       >
                         <p style={{ margin: 0 }}>Trade cards for new ones. Ends turn.</p>
                       </div>
-                      <button onClick={discardSelected} className="discard-button">
+                      <button
+                        onClick={discardSelected}
+                        className="discard-button"
+                        disabled={!isMyTurn}
+                      >
                         Discard Selected ({selectedCards.length})
                       </button>
                     </div>
@@ -351,6 +424,7 @@ function GameSession() {
                         onClick={passTurnAndClear}
                         className="cancel-button"
                         style={{ width: '100%', fontWeight: 'bold' }}
+                        disabled={!isMyTurn}
                       >
                         Pass Turn
                       </button>
@@ -428,7 +502,7 @@ function GameSession() {
           selectedCards={selectedCards}
           pendingPlacements={pendingPlacements}
           nextCardIndex={nextCardIndex}
-          onPlaceCard={placePreview}
+          onPlaceCard={isMyTurn ? placePreview : () => {}}
           settings={settings}
           lastMovePlacements={gameState.lastMovePlacements}
           lastMovePlayerIndex={gameState.lastMovePlayerIndex}
@@ -485,15 +559,7 @@ function App() {
                 }
               />
               <Route path="/multiplayer/setup/:gameId?" element={<MultiplayerSetup />} />
-              <Route
-                path="/multiplayer/game"
-                element={
-                  <div>
-                    <SettingsHeader />
-                    Multiplayer Game (In Progress)
-                  </div>
-                }
-              />
+              <Route path="/multiplayer/game" element={<GameSession />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MultiplayerProvider>

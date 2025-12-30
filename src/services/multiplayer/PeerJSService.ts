@@ -15,7 +15,7 @@ export class PeerJSService implements MultiplayerService {
   myPlayerName: string = '';
 
   // Callbacks
-  private onStateReceivedCallback: ((state: GameState) => void) | null = null;
+  private onStateReceivedCallback: ((state: GameState | string) => void) | null = null;
   private onPlayerJoinedCallback: ((player: PlayerInfo) => void) | null = null;
   private onActionReceivedCallback: ((action: GameAction) => void) | null = null;
 
@@ -108,7 +108,10 @@ export class PeerJSService implements MultiplayerService {
       if (data && typeof data === 'object' && data !== null) {
         const message = data as { type?: string; payload?: unknown };
         if (message.type === 'GAME_STATE' && this.onStateReceivedCallback && message.payload) {
-          this.onStateReceivedCallback(message.payload as GameState);
+          // Always receive as string - PeerJS sends strings more reliably
+          const payload =
+            typeof message.payload === 'string' ? message.payload : JSON.stringify(message.payload);
+          this.onStateReceivedCallback(payload);
         } else if (message.type === 'ACTION' && this.onActionReceivedCallback && message.payload) {
           this.onActionReceivedCallback(message.payload as GameAction);
         }
@@ -131,10 +134,19 @@ export class PeerJSService implements MultiplayerService {
     this.peer?.destroy();
   }
 
-  sendGameState(state: GameState): void {
+  sendGameState(state: GameState | string): void {
     if (!this.isHost) return; // Only host sends state
-    const message = { type: 'GAME_STATE', payload: state };
-    this.connections.forEach((conn) => conn.send(message));
+    // Always send as string for simplicity - PeerJS handles strings better
+    const payload = typeof state === 'string' ? state : JSON.stringify(state);
+    const message = { type: 'GAME_STATE', payload };
+    this.connections.forEach((conn) => {
+      try {
+        conn.send(message);
+        console.log(`${PEERJS_LOG_PREFIX} Sent game state to peer`);
+      } catch (e) {
+        console.error(`${PEERJS_LOG_PREFIX} Failed to send game state:`, e);
+      }
+    });
   }
 
   sendAction(action: GameAction): void {
@@ -151,7 +163,7 @@ export class PeerJSService implements MultiplayerService {
     }
   }
 
-  onGameStateReceived(callback: (state: GameState) => void): void {
+  onGameStateReceived(callback: (state: GameState | string) => void): void {
     this.onStateReceivedCallback = callback;
   }
 

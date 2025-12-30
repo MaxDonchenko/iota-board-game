@@ -13,6 +13,8 @@ interface MultiplayerContextType {
   initializeService: (type: 'supabase' | 'peerjs', config?: SupabaseConfig) => MultiplayerService;
   isHost: boolean;
   setIsHost: (isHost: boolean) => void;
+  myPlayerName: string | null;
+  setMyPlayerName: (name: string | null) => void;
 }
 
 const MultiplayerContext = createContext<MultiplayerContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ const MultiplayerContext = createContext<MultiplayerContextType | undefined>(und
 export function MultiplayerProvider({ children }: { children: ReactNode }) {
   const [service, setService] = useState<MultiplayerService | null>(null);
   const [isHost, setIsHost] = useState(false);
+  const [myPlayerName, setMyPlayerName] = useState<string | null>(null);
 
   const initializeService = (type: 'supabase' | 'peerjs', config?: SupabaseConfig) => {
     let newService: MultiplayerService;
@@ -37,7 +40,9 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <MultiplayerContext.Provider value={{ service, initializeService, isHost, setIsHost }}>
+    <MultiplayerContext.Provider
+      value={{ service, initializeService, isHost, setIsHost, myPlayerName, setMyPlayerName }}
+    >
       {children}
     </MultiplayerContext.Provider>
   );
