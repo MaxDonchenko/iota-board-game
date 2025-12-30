@@ -6,7 +6,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useMultiplayer } from '@/context/MultiplayerContext';
 import { useGameContext } from '@/context/GameContext';
-import { RoutingService } from '@/services/routing/RoutingService';
+import { useRouting } from '@/hooks/useRouting';
 import { parseJson } from '@/utils/jsonParse';
 import type { GameAction } from '@/services/multiplayer/types';
 import type { SerializableGameState } from '@/utils/gamePersistence';
@@ -14,6 +14,7 @@ import type { SerializableGameState } from '@/utils/gamePersistence';
 export function useMultiplayerGame() {
   const { service, isHost } = useMultiplayer();
   const { gameState, exportGame, importGame } = useGameContext();
+  const routing = useRouting();
   const hasImportedInitialState = useRef(false);
   const lastSentStateRef = useRef<string | null>(null);
 
@@ -55,7 +56,7 @@ export function useMultiplayerGame() {
 
           // Navigate to game page
           setTimeout(() => {
-            RoutingService.navigateToMultiplayerGame();
+            routing.navigateToMultiplayerGame();
           }, 300);
         } else {
           console.error('[Multiplayer] Failed to import game state:', result.error);
@@ -70,7 +71,7 @@ export function useMultiplayerGame() {
     return () => {
       // Cleanup if needed
     };
-  }, [service, isHost, importGame]);
+  }, [service, isHost, importGame, routing]);
 
   /**
    * Send game state to peers (for host)

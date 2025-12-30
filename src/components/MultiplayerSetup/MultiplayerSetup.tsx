@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { RoutingService } from '@/services/routing/RoutingService';
 import styles from './MultiplayerSetup.module.css';
 import { useMultiplayer } from '@/context/MultiplayerContext';
@@ -11,10 +11,12 @@ import type { GameMode } from '@/types/Game.types';
 import { generateRandomName } from '@/utils/nameGenerator';
 import { SettingsDialog } from '@/components/Settings/SettingsDialog';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
+import { useRouting } from '@/hooks/useRouting';
 
 export function MultiplayerSetup() {
   const { gameId: urlGameId } = useParams<{ gameId?: string }>();
-  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
+  const routing = useRouting();
   const { initializeService, isHost, setIsHost, setMyPlayerName, service } = useMultiplayer();
   const { startGame, resetSelection, gameState } = useGameContext();
   const { settings } = useSettings();
@@ -28,10 +30,15 @@ export function MultiplayerSetup() {
 
   // Update URL when backend changes
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('mode', backend);
-    window.history.replaceState({}, '', url.toString());
-  }, [backend]);
+    setSearchParams(
+      (prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set('mode', backend);
+        return newParams;
+      },
+      { replace: true }
+    );
+  }, [backend, setSearchParams]);
   const [playerName, setPlayerName] = useState(() => generateRandomName());
   const [gameId, setGameId] = useState(''); // For joining
   const [createdGameId, setCreatedGameId] = useState(''); // For hosting
@@ -69,14 +76,14 @@ export function MultiplayerSetup() {
     if (isStartingGame && gameState && isHost) {
       console.log('[Multiplayer] gameState became available, sending to peers...');
       sendGameStateToPeers();
-      RoutingService.navigateToMultiplayerGame();
+      routing.navigateToMultiplayerGame();
       console.log('[Multiplayer] Navigation triggered to game page');
       // Don't reset isStartingGame - we're navigating away
     }
-  }, [gameState, isStartingGame, isHost, sendGameStateToPeers]);
+  }, [gameState, isStartingGame, isHost, sendGameStateToPeers, routing]);
 
   const handleBack = () => {
-    RoutingService.navigateToHome();
+    routing.navigateToHome();
   };
 
   const handleCreateGame = async () => {
@@ -133,7 +140,7 @@ export function MultiplayerSetup() {
       };
       setPlayers([hostPlayer]);
       // Update URL with game ID
-      RoutingService.navigateToMultiplayerSetup(id);
+      routing.navigateToMultiplayerSetup(id);
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'Failed to create game';
@@ -142,7 +149,7 @@ export function MultiplayerSetup() {
       // If timeout, navigate back to setup
       if (message.includes('timeout')) {
         setTimeout(() => {
-          RoutingService.navigateToMultiplayerSetup();
+          routing.navigateToMultiplayerSetup();
         }, 2000);
       }
     }
@@ -179,7 +186,7 @@ export function MultiplayerSetup() {
       setMyPlayerName(playerName);
       // Update URL with game ID when peer joins
       if (gameId) {
-        RoutingService.navigateToMultiplayerSetup(gameId);
+        routing.navigateToMultiplayerSetup(gameId);
       }
       setPlayers([
         // We don't know everyone yet until Host tells us, or we get updates.
@@ -197,7 +204,7 @@ export function MultiplayerSetup() {
       // If timeout, navigate back to setup
       if (message.includes('timeout')) {
         setTimeout(() => {
-          RoutingService.navigateToMultiplayerSetup();
+          routing.navigateToMultiplayerSetup();
         }, 2000);
       }
     }
@@ -406,7 +413,7 @@ export function MultiplayerSetup() {
                 href="#/info#multiplayer"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate('/info#multiplayer');
+                  routing.navigate('/info#multiplayer');
                 }}
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 title="Learn more about multiplayer modes"
