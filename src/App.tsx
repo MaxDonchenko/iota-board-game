@@ -201,6 +201,12 @@ function GameSession() {
   const isMyTurn =
     !isMultiplayer || !myPlayerName || !currentPlayer || currentPlayer.name === myPlayerName;
 
+  // Find the player that matches myPlayerName in multiplayer, or use currentPlayer otherwise
+  const playerToShowHand =
+    isMultiplayer && myPlayerName && !isMyTurn
+      ? gameState.players.find((p) => p.name === myPlayerName) || currentPlayer
+      : currentPlayer;
+
   return (
     <div className={styles.container}>
       <ActionsDialog
@@ -273,7 +279,7 @@ function GameSession() {
               <ScoreDisplay gameState={gameState} />
             </div>
 
-            {currentPlayer && (
+            {playerToShowHand && (
               <div
                 style={{
                   padding: '1rem',
@@ -292,7 +298,7 @@ function GameSession() {
                   }}
                 >
                   {isMultiplayer && !isMyTurn
-                    ? `${currentPlayer.name}'s Turn`
+                    ? `Your Hand (${playerToShowHand.name})`
                     : isAITurn
                     ? `${currentPlayer.name}'s Turn (AI)`
                     : 'Your Hand'}
@@ -303,7 +309,7 @@ function GameSession() {
                   </p>
                 ) : null}
                 <PlayerHand
-                  cards={currentPlayer.hand}
+                  cards={playerToShowHand.hand}
                   selectedCards={selectedCards}
                   onSelectionChange={
                     isMyTurn && !isAITurn
