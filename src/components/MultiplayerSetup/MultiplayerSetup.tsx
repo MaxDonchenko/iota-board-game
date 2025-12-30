@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { RoutingService } from '@/services/routing/RoutingService';
 import styles from './MultiplayerSetup.module.css';
 import { useMultiplayer } from '@/context/MultiplayerContext';
@@ -14,11 +14,24 @@ import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
 
 export function MultiplayerSetup() {
   const { gameId: urlGameId } = useParams<{ gameId?: string }>();
+  const navigate = useNavigate();
   const { initializeService, isHost, setIsHost, setMyPlayerName, service } = useMultiplayer();
   const { startGame, resetSelection, gameState } = useGameContext();
   const { settings } = useSettings();
   const { sendGameStateToPeers } = useMultiplayerGame();
-  const [backend, setBackend] = useState<'supabase' | 'peerjs'>('peerjs');
+  // Initialize backend from URL or default to peerjs
+  const [backend, setBackend] = useState<'supabase' | 'peerjs'>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    return mode === 'supabase' || mode === 'peerjs' ? mode : 'peerjs';
+  });
+
+  // Update URL when backend changes
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', backend);
+    window.history.replaceState({}, '', url.toString());
+  }, [backend]);
   const [playerName, setPlayerName] = useState(() => generateRandomName());
   const [gameId, setGameId] = useState(''); // For joining
   const [createdGameId, setCreatedGameId] = useState(''); // For hosting
@@ -384,7 +397,23 @@ export function MultiplayerSetup() {
           )}
 
           <div className={styles.section}>
-            <label className={styles.label}>Choose Backend</label>
+            <label
+              className={styles.label}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              Choose Backend
+              <a
+                href="#/info#multiplayer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/info#multiplayer');
+                }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                title="Learn more about multiplayer modes"
+              >
+                ❓
+              </a>
+            </label>
             <div className={styles.buttonGroup}>
               <button
                 className={`${styles.cardButton} ${backend === 'peerjs' ? styles.active : ''}`}
@@ -419,6 +448,7 @@ export function MultiplayerSetup() {
                   value={sbKey}
                   onChange={(e) => setSbKey(e.target.value)}
                   type="password"
+                  autoComplete="off"
                 />
                 <p style={{ fontSize: '0.8rem', color: 'gray' }}>
                   Required for Supabase mode. Use P2P (PeerJS) if you don't have this.

@@ -7,6 +7,7 @@ import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 import { Welcome } from './components/Welcome/Welcome';
 import { HotseatSetup } from './components/GameSetup/HotseatSetup';
 import { MultiplayerSetup } from './components/MultiplayerSetup/MultiplayerSetup';
+import { Info } from './components/Info/Info';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { PlayerHand } from './components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from './components/ScoreDisplay/ScoreDisplay';
@@ -604,6 +605,7 @@ function App() {
               />
               <Route path="/multiplayer/setup/:gameId?" element={<MultiplayerSetup />} />
               <Route path="/multiplayer/game" element={<GameSession />} />
+              <Route path="/info" element={<Info />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MultiplayerProvider>

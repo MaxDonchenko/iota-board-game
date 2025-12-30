@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './ActionsDialog.module.css';
 
 interface ActionsDialogProps {
@@ -18,6 +19,7 @@ export function ActionsDialog({
   onNewGame,
   buttonRef,
 }: ActionsDialogProps) {
+  const navigate = useNavigate();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,6 +92,21 @@ export function ActionsDialog({
           <div className={styles.text}>
             <div className={styles.label}>New Game</div>
             <div className={styles.description}>Start a fresh match</div>
+          </div>
+        </button>
+        <button
+          className={styles.option}
+          onClick={() => {
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.split('#')[0];
+            window.open(`${baseUrl}#/info`, '_blank', 'noopener,noreferrer');
+            onClose();
+          }}
+        >
+          <span className={styles.icon}>ℹ️</span>
+          <div className={styles.text}>
+            <div className={styles.label}>Info</div>
+            <div className={styles.description}>Game information and help</div>
           </div>
         </button>
       </div>

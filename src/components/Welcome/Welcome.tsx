@@ -35,6 +35,16 @@ export function Welcome() {
             >
               Official Rules (PDF)
             </a>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/info');
+              }}
+              className={styles.link}
+            >
+              Game Information
+            </a>
           </div>
         </section>
 
@@ -69,12 +79,12 @@ export function Welcome() {
         <p>
           © {new Date().getFullYear()} IOTA Digital. Original game by{' '}
           <a
-            href="https://en.wikipedia.org/wiki/Gene_Mackles"
+            href="https://en.wikipedia.org/wiki/Gamewright_Games"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.link}
           >
-            Gene Mackles
+            Gamewright
           </a>
           . Web implementation by{' '}
           <a

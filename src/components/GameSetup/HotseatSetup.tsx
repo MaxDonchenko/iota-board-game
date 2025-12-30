@@ -12,7 +12,10 @@ interface HotseatSetupProps {
 
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const { settings, updateSettings } = useSettings();
-  const [playerCount, setPlayerCount] = useState(2);
+  const [playerCount, setPlayerCount] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('vs') === 'ai' ? 2 : 2;
+  });
   const [configs, setConfigs] = useState<PlayerConfig[]>(() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('vs');

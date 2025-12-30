@@ -1,6 +1,8 @@
 .container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   position: relative;
   background-color: var(--bg-background);
 }
@@ -17,6 +19,8 @@
   border-right: 1px solid var(--border-color);
   scrollbar-gutter: stable;
   position: relative;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 .content {
@@ -25,6 +29,8 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 .controls {
@@ -60,6 +66,10 @@
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    overflow: visible;
   }
 
   .sidebar {
@@ -67,5 +77,13 @@
     min-width: unset;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
+    height: auto;
+    max-height: none;
+    margin-top: 3.25rem; /* reserve space for the top-right controls */
+  }
+
+  .content {
+    height: auto;
+    max-height: none;
   }
 }
