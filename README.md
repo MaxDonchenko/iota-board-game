@@ -120,7 +120,17 @@ npm run storybook
 
 ## Deployment
 
-Deploy to GitHub Pages:
+### Environment Variables
+
+This project uses environment variables for Supabase configuration.
+
+### Deploy to GitHub Pages
+
+**Option 1: Using GitHub Actions (Recommended)**
+
+The repository includes a GitHub Actions workflow that automatically builds and deploys to GitHub Pages when you push to the `main` branch. Set up your environment variables as GitHub Secrets (see [ENV_SETUP.md](./ENV_SETUP.md)).
+
+**Option 2: Manual Deployment**
 
 ```bash
 npm run deploy
