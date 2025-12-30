@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './ActionsDialog.module.css';
 
 interface ActionsDialogProps {
@@ -19,7 +18,6 @@ export function ActionsDialog({
   onNewGame,
   buttonRef,
 }: ActionsDialogProps) {
-  const navigate = useNavigate();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
