@@ -9,6 +9,12 @@ export function GameModeSelector() {
       <label className={styles.label}>Default Game Mode</label>
       <div className={styles.buttonGroup}>
         <button
+          onClick={() => updateSettings({ gameMode: 'ultra-short' })}
+          className={`${styles.button} ${settings.gameMode === 'ultra-short' ? styles.active : ''}`}
+        >
+          Ultra Short (16 cards)
+        </button>
+        <button
           onClick={() => updateSettings({ gameMode: 'short' })}
           className={`${styles.button} ${settings.gameMode === 'short' ? styles.active : ''}`}
         >

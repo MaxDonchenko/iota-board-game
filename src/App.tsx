@@ -150,14 +150,19 @@ function GameSession() {
     }
   };
 
+  // Wait a bit to ensure game over state is synced before disconnecting
   // For multiplayer peers, wait a bit for game state to be imported
   const isMultiplayerPeer = service !== null && !isHost;
 
   // Clear multiplayer connection when game ends (must be before conditional returns)
   useEffect(() => {
     if (gameState?.phase === 'ended' && service) {
-      console.log('[Multiplayer] Game ended, disconnecting...');
-      service.disconnect();
+      // Wait 2 seconds to ensure game over state is synced to all players
+      const timer = setTimeout(() => {
+        console.log('[Multiplayer] Game ended, disconnecting after sync delay...');
+        service.disconnect();
+      }, 2000);
+      return () => clearTimeout(timer);
     }
   }, [gameState?.phase, service]);
 

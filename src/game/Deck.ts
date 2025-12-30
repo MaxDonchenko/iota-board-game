@@ -26,7 +26,7 @@ export class Deck {
           }
         }
       }
-    } else {
+    } else if (gameMode === 'short') {
       // Short mode: 32 cards (4 shapes × 4 numbers × 2 colors)
       const shortColors: (typeof COLORS)[number][] = ['Red', 'Blue'];
       for (const shape of SHAPES) {
@@ -36,11 +36,28 @@ export class Deck {
           }
         }
       }
+    } else if (gameMode === 'ultra-short') {
+      // Ultra-short mode: 16 cards (2 shapes × 2 numbers × 4 colors)
+      const ultraShortShapes: (typeof SHAPES)[number][] = ['Square', 'Circle'];
+      const ultraShortNumbers: (typeof NUMBERS)[number][] = [1, 2];
+      // Use all 4 colors for ultra-short mode
+      for (const shape of ultraShortShapes) {
+        for (const number of ultraShortNumbers) {
+          for (const color of COLORS) {
+            this.cards.push(new Card(shape, number, color));
+          }
+        }
+      }
     }
 
     // Add wild cards (without default values - they're just wildcards) if enabled
     if (enableWildcards) {
-      const wildCount = gameMode === 'full' ? WILD_CARD_COUNTS.FULL : WILD_CARD_COUNTS.SHORT;
+      const wildCount =
+        gameMode === 'full'
+          ? WILD_CARD_COUNTS.FULL
+          : gameMode === 'short'
+          ? WILD_CARD_COUNTS.SHORT
+          : WILD_CARD_COUNTS.ULTRA_SHORT;
       for (let i = 0; i < wildCount; i++) {
         // Create wildcard without a value - shape/number/color are just placeholders
         const wildCard = new Card('Square', 1, 'Red', true);

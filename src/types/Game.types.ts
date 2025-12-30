@@ -5,7 +5,7 @@ import type { Coordinate } from './Grid.types';
 
 export type GamePhase = 'setup' | 'playing' | 'ended';
 export type TurnPhase = 'wildCardRecycle' | 'cardPlacement' | 'pass' | 'scoring';
-export type GameMode = 'short' | 'full';
+export type GameMode = 'ultra-short' | 'short' | 'full';
 export type AIDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface Player {

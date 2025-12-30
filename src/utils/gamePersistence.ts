@@ -7,6 +7,7 @@ import type {
   GamePhase,
   TurnPhase,
   AIDifficulty,
+  GameMode,
 } from '@/types/Game.types';
 import type { Shape, Number, Color } from '@/types/Card.types';
 
@@ -128,7 +129,7 @@ function serializeDeck(deck: Deck): SerializableDeck {
 }
 
 function deserializeDeck(serialized: SerializableDeck): Deck {
-  const deck = new Deck(serialized.gameMode as 'short' | 'full');
+  const deck = new Deck(serialized.gameMode as GameMode);
   deck.drawPile = serialized.drawPile.map(deserializeCard);
   deck.discardPile = serialized.discardPile.map(deserializeCard);
   return deck;
@@ -180,7 +181,7 @@ export function deserializeGameState(serialized: SerializableGameState): GameSta
     grid: deserializeGrid(serialized.grid),
     deck: deserializeDeck(serialized.deck),
     isFinalTurn: serialized.isFinalTurn,
-    gameMode: serialized.gameMode as 'short' | 'full',
+    gameMode: serialized.gameMode as GameMode,
     settings: serialized.settings,
     startTime: serialized.startTime ? new Date(serialized.startTime) : undefined,
     lastMovePlacements: serialized.lastMovePlacements?.map((p) => ({

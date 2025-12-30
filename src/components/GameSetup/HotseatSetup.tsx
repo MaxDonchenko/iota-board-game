@@ -31,6 +31,10 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const [enableWildcards, setEnableWildcards] = useState(settings.enableWildcards);
 
   const handlePlayerCountChange = (count: number) => {
+    // Limit to 2 players for ultra-short mode
+    if (gameMode === 'ultra-short' && count > 2) {
+      return;
+    }
     setPlayerCount(count);
     const newConfigs = [...configs];
     if (count > configs.length) {
@@ -41,6 +45,17 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
       newConfigs.splice(count);
     }
     setConfigs(newConfigs);
+  };
+
+  // When game mode changes to ultra-short, limit to 2 players
+  const handleGameModeChange = (mode: GameMode) => {
+    setGameMode(mode);
+    if (mode === 'ultra-short' && playerCount > 2) {
+      setPlayerCount(2);
+      const newConfigs = [...configs];
+      newConfigs.splice(2);
+      setConfigs(newConfigs);
+    }
   };
 
   const handleConfigChange = (index: number, updates: Partial<PlayerConfig>) => {
@@ -67,9 +82,11 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
       </header>
 
       <div className={styles.section}>
-        <label className={styles.label}>Number of Players (2-4)</label>
+        <label className={styles.label}>
+          Number of Players {gameMode === 'ultra-short' ? '(2 only)' : '(2-4)'}
+        </label>
         <div className={styles.buttonGroup}>
-          {[2, 3, 4].map((count) => (
+          {(gameMode === 'ultra-short' ? [2] : [2, 3, 4]).map((count) => (
             <button
               key={count}
               onClick={() => handlePlayerCountChange(count)}
@@ -85,13 +102,19 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
         <label className={styles.label}>Deck Size</label>
         <div className={styles.buttonGroup}>
           <button
-            onClick={() => setGameMode('short')}
+            onClick={() => handleGameModeChange('ultra-short')}
+            className={classNames(styles.button, { [styles.active]: gameMode === 'ultra-short' })}
+          >
+            Ultra Short (16 cards)
+          </button>
+          <button
+            onClick={() => handleGameModeChange('short')}
             className={classNames(styles.button, { [styles.active]: gameMode === 'short' })}
           >
             Short (32 cards)
           </button>
           <button
-            onClick={() => setGameMode('full')}
+            onClick={() => handleGameModeChange('full')}
             className={classNames(styles.button, { [styles.active]: gameMode === 'full' })}
           >
             Full (64 cards)

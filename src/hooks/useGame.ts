@@ -15,7 +15,7 @@ import {
   type SerializableGameState,
 } from '@/utils/gamePersistence';
 import { AIEngine } from '@/ai/AIEngine';
-import type { GameState, GameSettings, AIDifficulty } from '@/types/Game.types';
+import type { GameState, GameSettings, AIDifficulty, GameMode } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
 import type { Coordinate } from '@/types/Grid.types';
@@ -37,11 +37,7 @@ export interface PlayerConfig {
 
 interface UseGameReturn {
   gameState: GameState | null;
-  startGame: (
-    playerConfigs: PlayerConfig[],
-    gameMode: 'short' | 'full',
-    settings: GameSettings
-  ) => void;
+  startGame: (playerConfigs: PlayerConfig[], gameMode: GameMode, settings: GameSettings) => void;
   placeCards: (
     placements: Placement[],
     cardMapping?: Map<Card, Card>
@@ -159,7 +155,7 @@ export function useGame(): UseGameReturn {
   }, [gameState, gameId]);
 
   const startGame = useCallback(
-    (playerConfigs: PlayerConfig[], gameMode: 'short' | 'full', settings: GameSettings) => {
+    (playerConfigs: PlayerConfig[], gameMode: GameMode, settings: GameSettings) => {
       console.log('[Game] startGame called', {
         playersCount: playerConfigs.length,
         gameMode,

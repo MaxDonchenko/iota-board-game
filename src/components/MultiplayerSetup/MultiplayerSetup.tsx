@@ -29,7 +29,7 @@ export function MultiplayerSetup() {
   const [showSettings, setShowSettings] = useState(false);
   const [isStartingGame, setIsStartingGame] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
-  const MAX_PLAYERS = 4;
+  const MAX_PLAYERS = settings.gameMode === 'ultra-short' ? 2 : 4;
 
   // Supabase Config
   const [sbUrl, setSbUrl] = useState<string>((import.meta.env.VITE_SUPABASE_URL as string) || '');
@@ -201,6 +201,18 @@ export function MultiplayerSetup() {
       return;
     }
 
+    // Validate player count for ultra-short mode
+    if (settings.gameMode === 'ultra-short' && players.length > 2) {
+      setError('Ultra-short mode is limited to 2 players only');
+      return;
+    }
+
+    // Prevent starting with only 1 player
+    if (players.length < 2) {
+      setError('At least 2 players are required. Use single player mode for solo games.');
+      return;
+    }
+
     console.log('[Multiplayer] Starting game...', {
       playersCount: players.length,
       playerNames: players.map((p) => p.name),
@@ -220,8 +232,8 @@ export function MultiplayerSetup() {
       playerConfigs.map((c) => ({ name: c.name, isAI: c.isAI }))
     );
 
-    // Use 'full' game mode for multiplayer (can be made configurable later)
-    const gameMode: GameMode = 'full';
+    // Use game mode from settings
+    const gameMode: GameMode = settings.gameMode;
 
     console.log('[Multiplayer] Calling startGame with mode:', gameMode);
 
@@ -254,7 +266,7 @@ export function MultiplayerSetup() {
                 Lobby ({backend === 'peerjs' ? 'PeerJS' : 'Supabase'})
               </h2>
               {isHost && (
-                <div style={{ position: 'absolute', top: 0, right: 0 }}>
+                <div style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 1000 }}>
                   <button
                     ref={settingsButtonRef}
                     onClick={() => setShowSettings(true)}
