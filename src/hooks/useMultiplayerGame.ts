@@ -34,7 +34,7 @@ export function useMultiplayerGame() {
           console.warn('[Multiplayer] Received game state as object, serializing');
           gameStateJson = JSON.stringify({
             id: `multiplayer-${Date.now()}`,
-            ...state,
+            ...(typeof state === 'object' && state !== null ? state : {}),
           });
         }
 
@@ -130,6 +130,40 @@ export function useMultiplayerGame() {
   );
 
   /**
+   * Send game state to host (for peers)
+   * Peers send their updated state to the host after making a move
+   */
+  const sendGameStateToHost = useCallback(() => {
+    if (!service || isHost || !gameState) {
+      console.log('[Multiplayer] sendGameStateToHost skipped:', {
+        hasService: !!service,
+        isHost,
+        hasGameState: !!gameState,
+      });
+      return;
+    }
+
+    const gameStateJson = exportGame();
+    if (gameStateJson) {
+      try {
+        const parsed = parseJson<SerializableGameState>(gameStateJson);
+        console.log('[Multiplayer] Sending game state to host with ID:', parsed.id);
+        // Send as action to host - host will import it
+        const action: GameAction = {
+          type: 'GAME_STATE_UPDATE',
+          payload: gameStateJson,
+          playerId: service.myPlayerId || 'unknown',
+        };
+        service.sendAction(action);
+      } catch (e) {
+        console.error('[Multiplayer] Failed to parse game state before sending to host:', e);
+      }
+    } else {
+      console.warn('[Multiplayer] exportGame() returned null, cannot send to host');
+    }
+  }, [service, isHost, gameState, exportGame]);
+
+  /**
    * Handle receiving actions from peers (for host)
    */
   useEffect(() => {
@@ -137,8 +171,35 @@ export function useMultiplayerGame() {
 
     const handleActionReceived = (action: GameAction) => {
       console.log('[Multiplayer] Received action from peer:', action.type);
-      // Actions will be handled by the game logic
-      // This is just for logging - actual handling should be in useGame hook
+
+      // If peer sent a game state update, import it
+      if (action.type === 'GAME_STATE_UPDATE' && typeof action.payload === 'string') {
+        console.log('[Multiplayer] Peer sent game state update, importing...');
+        try {
+          const parsed = parseJson<SerializableGameState>(action.payload);
+          console.log('[Multiplayer] Importing game state from peer with ID:', parsed.id);
+
+          // Skip confirmation dialog for multiplayer
+          const originalConfirm = window.confirm;
+          window.confirm = () => true;
+
+          const result = importGame(action.payload);
+          window.confirm = originalConfirm;
+
+          if (result.success) {
+            console.log('[Multiplayer] Game state imported from peer successfully');
+            // After importing, broadcast to all peers (including the one who sent it)
+            // This ensures everyone is in sync
+            setTimeout(() => {
+              sendGameStateToPeers();
+            }, 100);
+          } else {
+            console.error('[Multiplayer] Failed to import game state from peer:', result.error);
+          }
+        } catch (e) {
+          console.error('[Multiplayer] Failed to parse game state from peer:', e);
+        }
+      }
     };
 
     service.onActionReceived(handleActionReceived);
@@ -146,10 +207,11 @@ export function useMultiplayerGame() {
     return () => {
       // Cleanup if needed
     };
-  }, [service, isHost]);
+  }, [service, isHost, importGame, sendGameStateToPeers]);
 
   return {
     sendGameStateToPeers,
+    sendGameStateToHost,
     sendActionToHost,
     hasImportedInitialState: hasImportedInitialState.current,
   };

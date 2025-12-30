@@ -77,16 +77,23 @@ function GameSession() {
     exportGame,
     importGame,
   } = useGameContext();
-  const { sendGameStateToPeers } = useMultiplayerGame();
+  const { sendGameStateToPeers, sendGameStateToHost } = useMultiplayerGame();
 
   // Send game state to peers after each turn (for host)
+  // Send game state to host after each turn (for peers)
   // Must be called before any conditional returns
   const isMultiplayer = service !== null;
   useEffect(() => {
-    if (isMultiplayer && isHost && gameState && gameState.phase === 'playing') {
+    if (isMultiplayer && gameState && gameState.phase === 'playing') {
       // Small delay to ensure state is fully updated
       const timer = setTimeout(() => {
-        sendGameStateToPeers();
+        if (isHost) {
+          // Host sends to all peers
+          sendGameStateToPeers();
+        } else {
+          // Peer sends to host
+          sendGameStateToHost();
+        }
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -96,6 +103,7 @@ function GameSession() {
     isMultiplayer,
     isHost,
     sendGameStateToPeers,
+    sendGameStateToHost,
     gameState,
   ]);
 
