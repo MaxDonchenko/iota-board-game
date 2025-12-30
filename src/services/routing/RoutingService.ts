@@ -71,10 +71,14 @@ export class RoutingService {
     if (this.useHashRouting()) {
       window.location.hash = path;
     } else {
-      // Regular routing with base path - use window.location.href to ensure
-      // React Router's BrowserRouter properly handles the navigation
-      const fullPath = `${this.getBasePath()}${path}`;
-      window.location.href = fullPath;
+      // Regular routing with base path - use URL constructor to handle path joining correctly
+      const url = new URL(window.location.href);
+      const basePath = this.getBasePath().replace(/\/$/, ''); // Remove trailing slash
+      const cleanPath = path.startsWith('/') ? path : `/${path}`; // Ensure path starts with /
+      // Join basePath and cleanPath, ensuring no double slashes
+      const fullPath = `${basePath}${cleanPath}`.replace(/\/+/g, '/');
+      url.pathname = fullPath;
+      window.location.href = url.toString();
     }
   }
 

@@ -743,7 +743,7 @@ export function useGame(): UseGameReturn {
       // Update URL
       const url = new URL(window.location.href);
       url.searchParams.set('game', serialized.id);
-      window.history.pushState({}, '', url);
+      window.history.pushState({}, '', url.toString());
 
       return { success: true };
     } catch (e) {
