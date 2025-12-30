@@ -34,6 +34,7 @@ const mockGameState: GameState = {
     showInvalidPlacements: true,
     wildcardVariant: 'modern',
     cardVariant: 'modern',
+    enableWildcards: true,
   },
 };
 
