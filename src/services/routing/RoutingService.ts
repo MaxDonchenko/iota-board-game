@@ -71,11 +71,10 @@ export class RoutingService {
     if (this.useHashRouting()) {
       window.location.hash = path;
     } else {
-      // Regular routing with base path
+      // Regular routing with base path - use window.location.href to ensure
+      // React Router's BrowserRouter properly handles the navigation
       const fullPath = `${this.getBasePath()}${path}`;
-      window.history.pushState({}, '', fullPath);
-      // Trigger popstate to notify React Router
-      window.dispatchEvent(new PopStateEvent('popstate'));
+      window.location.href = fullPath;
     }
   }
 
