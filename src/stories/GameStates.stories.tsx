@@ -5,13 +5,12 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from '../components/ScoreDisplay/ScoreDisplay';
-import { GameOverview } from '../components/GameOverview/GameOverview';
 import { Card } from '../components/Card/Card';
 import { Grid } from '../game/Grid';
 import { Deck } from '../game/Deck';
+import { GameStateManager } from '../game/GameState';
 import { Card as CardClass } from '../game/Card';
 import type { GameState } from '../types/Game.types';
-import type { Coordinate } from '../types/Grid.types';
 import type { WildValue } from '../types/Card.types';
 
 const meta: Meta = {
@@ -376,6 +375,60 @@ function WildcardRecycleStory() {
   );
 }
 
+function ThreefoldRepetitionStory() {
+  const [gameState] = useState<GameState>(() => {
+    const initial = GameStateManager.createInitialState(
+      [
+        { name: 'Player 1', color: 'red' },
+        { name: 'Player 2', color: 'blue' },
+      ],
+      'full',
+      {
+        theme: 'light',
+        useGradients: true,
+        gameMode: 'full',
+        showInvalidPlacements: false,
+        wildcardVariant: 'modern',
+        cardVariant: 'modern',
+        enableWildcards: true,
+      }
+    );
+
+    initial.players.forEach((p) => (p.passCount = 3));
+    initial.phase = 'draw';
+    initial.turnPhase = 'pass';
+    return initial;
+  });
+
+  return (
+    <ThemeSync>
+      <div style={{ padding: '2rem' }}>
+        <h1 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+          Threefold Repetition — Draw State
+        </h1>
+
+        <div style={{ marginBottom: '2rem' }}>
+          <GameBoard grid={gameState.grid} selectedCards={[]} onPlaceCard={() => {}} />
+        </div>
+
+        <div style={{ marginBottom: '2rem' }}>
+          <ScoreDisplay gameState={gameState} />
+        </div>
+      </div>
+    </ThemeSync>
+  );
+}
+
+const ThreefoldRepetition: StoryObj = {
+  render: () => (
+    <SettingsProvider>
+      <ThemeProvider>
+        <ThreefoldRepetitionStory />
+      </ThemeProvider>
+    </SettingsProvider>
+  ),
+};
+
 export const WildcardConfirmation: StoryObj = {
   render: () => (
     <SettingsProvider>
@@ -415,3 +468,5 @@ export const WildcardRecycle: StoryObj = {
     </SettingsProvider>
   ),
 };
+
+export { ThreefoldRepetition };

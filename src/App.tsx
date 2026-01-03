@@ -193,7 +193,7 @@ function GameSession() {
   }
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  const isGameOver = gameState.phase === 'ended';
+  const isGameOver = gameState.phase === 'ended' || gameState.phase === 'draw';
   const isAITurn = currentPlayer?.isAI === true;
 
   // In multiplayer, check if it's the current player's turn by comparing names

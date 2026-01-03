@@ -310,8 +310,14 @@ export function useGame(): UseGameReturn {
         });
       }
 
-      // Move to next turn
-      const nextState = GameStateManager.nextTurn(gameState);
+      // Move to next turn. Ensure we mark this turn as a pass so
+      // `nextTurn` correctly increments pass counters.
+      const stateToAdvance: GameState = {
+        ...gameState,
+        turnPhase: 'pass',
+      };
+
+      const nextState = GameStateManager.nextTurn(stateToAdvance);
       setGameState({
         ...nextState,
         lastMovePlacements: [],

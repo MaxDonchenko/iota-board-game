@@ -34,6 +34,11 @@ export function Info() {
             valid lines and combinations. Each turn, you can place one or more cards that form valid
             lines, or pass your turn.
           </p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+            <strong>Note:</strong> Threefold repetition — if every player passes their turn three
+            times in a row (in turn order), the game automatically ends in a draw. This rule wasn't
+            part of the original rulebook but was added here to prevent games from getting stuck.
+          </p>
           <p>
             <a
               href="https://cdn.1j1ju.com/medias/0e/e4/7f-iota-rulebook.pdf"

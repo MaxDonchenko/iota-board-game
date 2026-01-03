@@ -49,12 +49,45 @@ export class GameStateManager {
     };
   }
 
+  static checkThreefoldRepetition(state: GameState): boolean {
+    const passCounts = state.players.map((player) => player.passCount || 0);
+    return passCounts.every((count) => count >= 3);
+  }
+
   static nextTurn(state: GameState): GameState {
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+
+    // If the current turn was a pass, increment that player's pass count.
+    // Otherwise reset all players' pass counts because a non-pass action broke the consecutive-pass sequence.
+    const updatedPlayers = state.players.map((player, index) => {
+      if (state.turnPhase === 'pass') {
+        if (index === state.currentPlayerIndex) {
+          return { ...player, passCount: (player.passCount || 0) + 1 };
+        }
+        return player;
+      }
+
+      // Non-pass action -> reset any existing pass counters
+      if (player.passCount && player.passCount !== 0) {
+        return { ...player, passCount: 0 };
+      }
+      return player;
+    });
+
+    // Check for threefold repetition
+    if (this.checkThreefoldRepetition({ ...state, players: updatedPlayers })) {
+      return {
+        ...state,
+        phase: 'draw',
+        players: updatedPlayers,
+      };
+    }
+
     return {
       ...state,
       currentPlayerIndex: nextPlayerIndex,
       turnPhase: 'cardPlacement',
+      players: updatedPlayers,
     };
   }
 

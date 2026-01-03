@@ -3,7 +3,7 @@ import type { Grid } from '@/game/Grid';
 import type { Deck } from '@/game/Deck';
 import type { Coordinate } from './Grid.types';
 
-export type GamePhase = 'setup' | 'playing' | 'ended';
+export type GamePhase = 'setup' | 'playing' | 'ended' | 'draw';
 export type TurnPhase = 'wildCardRecycle' | 'cardPlacement' | 'pass' | 'scoring';
 export type GameMode = 'ultra-short' | 'short' | 'full';
 export type AIDifficulty = 'easy' | 'medium' | 'hard';
@@ -16,6 +16,7 @@ export interface Player {
   isAI?: boolean;
   difficulty?: AIDifficulty;
   color: string;
+  passCount?: number;
 }
 
 export interface GameSettings {
