@@ -8,6 +8,7 @@
     "build:gh": "tsc && GITHUB_PAGES=true vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "deploy": "npm run build:gh && gh-pages -d dist",
+    "preview:gh": "node scripts/serve-gh-pages.js",
     "test": "vitest --environment jsdom --run",
     "test:watch": "vitest --environment jsdom --watch",
     "test:ui": "vitest --ui",
