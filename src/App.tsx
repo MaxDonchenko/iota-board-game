@@ -435,7 +435,8 @@ function GameSession() {
                       <button
                         onClick={discardSelected}
                         className="discard-button"
-                        disabled={!isMyTurn}
+                        disabled={!isMyTurn || gameState.deck.isEmpty()}
+                        title={gameState.deck.isEmpty() ? 'Deck is empty - cannot discard' : ''}
                       >
                         Discard Selected ({selectedCards.length})
                       </button>
