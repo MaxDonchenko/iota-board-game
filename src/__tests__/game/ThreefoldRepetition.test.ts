@@ -244,4 +244,78 @@ describe('Threefold Repetition', () => {
       expect(state.phase).toBe('playing');
     });
   });
+
+  describe('canMakeAnyMove', () => {
+    it('should return true when player can place a card', () => {
+      expect(GameStateManager.canMakeAnyMove(gameState, 0)).toBe(true);
+    });
+
+    it('should return true when deck is not empty (can exchange)', () => {
+      gameState.deck.drawPile = []; // Empty deck
+      expect(GameStateManager.canMakeAnyMove(gameState, 0)).toBe(true); // Still true because can place cards
+    });
+
+    it('should return true when there are wildcards to recycle', () => {
+      // Setup: add a wildcard to the grid and give player matching card
+      const wildcard = gameState.players[0].hand[0];
+      wildcard.isWild = true;
+      wildcard.wildValue = { shape: 'Square', number: 1, color: 'Red' };
+      gameState.grid.addCard(1, 1, wildcard);
+
+      const matchingCard = gameState.players[1].hand[0];
+      matchingCard.shape = 'Square';
+      matchingCard.number = 1;
+      matchingCard.color = 'Red';
+      matchingCard.isWild = false;
+
+      expect(GameStateManager.canMakeAnyMove(gameState, 1)).toBe(true);
+    });
+  });
+
+  describe('automatic draw on no valid moves', () => {
+    it('should trigger draw phase when next player has no valid moves', () => {
+      // When player 1 can still place (starter card exists), game continues
+      gameState.currentPlayerIndex = 0;
+      gameState.turnPhase = 'cardPlacement';
+
+      const newState = GameStateManager.nextTurn(gameState);
+
+      // Game should continue since player 1 can place near starter
+      expect(newState.phase).toBe('playing');
+      expect(newState.currentPlayerIndex).toBe(1);
+    });
+
+    it('should set correct drawReason for threefold repetition', () => {
+      gameState.players[0].passCount = 3;
+      gameState.players[1].passCount = 3;
+      gameState.currentPlayerIndex = 0;
+      gameState.turnPhase = 'pass';
+
+      const newState = GameStateManager.nextTurn(gameState);
+
+      expect(newState.phase).toBe('draw');
+      expect(newState.drawReason).toBe('threefold-repetition');
+    });
+
+    it('should prioritize threefold repetition check over no-valid-moves', () => {
+      // Setup both conditions
+      gameState.players[0].passCount = 3;
+      gameState.players[1].passCount = 3;
+
+      gameState.players[1].hand = [gameState.players[1].hand[0]];
+      gameState.players[1].hand[0].shape = 'Triangle';
+      gameState.players[1].hand[0].number = 4;
+      gameState.players[1].hand[0].color = 'Yellow';
+      gameState.deck.drawPile = [];
+
+      gameState.currentPlayerIndex = 0;
+      gameState.turnPhase = 'pass';
+
+      const newState = GameStateManager.nextTurn(gameState);
+
+      // Threefold repetition is checked first
+      expect(newState.phase).toBe('draw');
+      expect(newState.drawReason).toBe('threefold-repetition');
+    });
+  });
 });

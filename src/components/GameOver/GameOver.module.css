@@ -42,6 +42,36 @@
   opacity: 0.8;
 }
 
+.drawInfo {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.08) 0%, rgba(156, 39, 176, 0.08) 100%);
+  border-left: 4px solid var(--accent-secondary, #ffc107);
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.drawReasonBadge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-secondary, #ffc107);
+  color: #000;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.drawMessage {
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
+  text-align: left;
+  font-weight: 500;
+}
+
 .newGameButton {
   padding: 0.75rem 1.5rem;
   background-color: var(--accent-primary, #61bb46);

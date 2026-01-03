@@ -7,6 +7,7 @@ export type GamePhase = 'setup' | 'playing' | 'ended' | 'draw';
 export type TurnPhase = 'wildCardRecycle' | 'cardPlacement' | 'pass' | 'scoring';
 export type GameMode = 'ultra-short' | 'short' | 'full';
 export type AIDifficulty = 'easy' | 'medium' | 'hard';
+export type DrawReason = 'threefold-repetition' | 'no-valid-moves';
 
 export interface Player {
   id: string;
@@ -42,4 +43,5 @@ export interface GameState {
   startTime?: Date;
   lastMovePlacements?: { card: Card; position: Coordinate }[];
   lastMovePlayerIndex?: number | null;
+  drawReason?: DrawReason;
 }

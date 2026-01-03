@@ -13,15 +13,33 @@ export function GameOver({ gameState, onNewGame }: GameOverProps) {
     ? gameState.players.reduce((prev, current) => (current.score > prev.score ? current : prev))
     : null;
 
+  const getDrawReason = () => {
+    if (gameState.drawReason === 'no-valid-moves') {
+      return 'No Valid Moves';
+    }
+    return 'Threefold Repetition';
+  };
+
+  const getDrawMessage = () => {
+    if (gameState.drawReason === 'no-valid-moves') {
+      return `None of the players has valid moves available:
+      • Can't place any cards on the board
+      • Can't exchange cards (empty deck)
+      • No wildcards on the board to recycle`;
+    }
+    return 'All players passed three times in a row.';
+  };
+
   return (
     <div className={styles.gameOver}>
       <h2 className={styles.title}>{isDraw ? 'Game Drawn' : 'Game Over!'}</h2>
 
       {isDraw ? (
         <div className={styles.drawInfo}>
-          <p className={styles.drawMessage}>
-            The game ended in a draw due to threefold repetition.
-          </p>
+          <div className={styles.drawReasonBadge}>
+            {gameState.drawReason === 'no-valid-moves' ? '⚠️' : '🔄'} {getDrawReason()}
+          </div>
+          <p className={styles.drawMessage}>{getDrawMessage()}</p>
         </div>
       ) : (
         <div className={styles.winnerInfo}>
