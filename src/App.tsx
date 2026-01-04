@@ -61,6 +61,7 @@ function GameSession() {
     resetSelection,
     getValidWildcardValues,
     setWildcardValueAtIndex,
+    removePreviewPlacement,
     exportGame,
     importGame,
   } = useGameContext();
@@ -210,6 +211,7 @@ function GameSession() {
       onImport={handleImport}
       onResetSelection={resetSelection}
       onWildcardValue={setWildcardValueAtIndex}
+      onRemoveCard={removePreviewPlacement}
       getValidWildcardValues={getValidWildcardValues}
       settings={settings}
     />

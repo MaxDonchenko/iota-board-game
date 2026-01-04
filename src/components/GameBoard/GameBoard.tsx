@@ -22,6 +22,7 @@ interface GameBoardProps {
   }>;
   nextCardIndex?: number;
   onPlaceCard?: (position: Coordinate) => void;
+  onRemoveCard?: (position: Coordinate) => void;
   settings?: GameSettings;
   lastMovePlacements?: Array<{ card: CardType; position: Coordinate }>;
   lastMovePlayerIndex?: number | null;
@@ -35,6 +36,7 @@ export function GameBoard({
   pendingPlacements = [],
   nextCardIndex = 0,
   onPlaceCard,
+  onRemoveCard,
   settings,
   lastMovePlacements = [],
   lastMovePlayerIndex = null,
@@ -290,15 +292,21 @@ export function GameBoard({
     isNotAllowed: boolean,
     isInvalid: boolean
   ) => {
+    const pendingPlacement = pendingPlacements.find(
+      (p) => p.position.x === x && p.position.y === y
+    );
+
+    if (pendingPlacement && onRemoveCard) {
+      onRemoveCard(pendingPlacement.position);
+      return;
+    }
+
     if (hasCard || isNotAllowed || isInvalid) {
       return;
     }
 
     if (selectedCards.length > 0 && nextCardIndex < selectedCards.length && onPlaceCard) {
-      const isAlreadyPlaced = pendingPlacements.some(
-        (p) => p.position.x === x && p.position.y === y
-      );
-      if (!isAlreadyPlaced) {
+      if (!pendingPlacement) {
         onPlaceCard({ x, y });
       }
     }
@@ -337,9 +345,7 @@ export function GameBoard({
 
       const isPlacementMode = selectedCards.length > 0 && nextCardIndex < selectedCards.length;
       const isClickable =
-        !hasCard &&
-        isPlacementMode &&
-        !pendingPlacements.some((p) => p.position.x === x && p.position.y === y);
+        !hasCard && ((isPlacementMode && !pendingPlacement) || (pendingPlacement && onRemoveCard));
       const isNotAllowed = hasCard && isPlacementMode;
       const isInvalidPlacement = !hasCard && isPlacementMode && invalidPlacements.has(`${x},${y}`);
 

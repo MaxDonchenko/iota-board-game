@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GameStateManager } from '@/game/GameState';
 import { Validation } from '@/game/Validation';
@@ -63,6 +63,7 @@ interface UseGameReturn {
   resetSelection: () => void;
   getValidWildcardValues: (wildCard: Card, position: Coordinate) => WildValue[];
   setWildcardValueAtIndex: (index: number, value: WildValue) => void;
+  removePreviewPlacement: (position: Coordinate) => void;
 
   // Persistence helpers
   exportGame: () => string | null;
@@ -87,7 +88,12 @@ export function useGame(): UseGameReturn {
   // UI selection state
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<PreviewPlacement[]>([]);
-  const [nextCardIndex, setNextCardIndex] = useState(0);
+
+  const nextCardIndex = useMemo(() => {
+    const placedCards = new Set(pendingPlacements.map((p) => p.originalHandCard));
+    const index = selectedCards.findIndex((c) => !placedCards.has(c));
+    return index === -1 ? selectedCards.length : index;
+  }, [selectedCards, pendingPlacements]);
 
   // Load game from URL
   useEffect(() => {
@@ -468,7 +474,6 @@ export function useGame(): UseGameReturn {
     );
     if (validPending.length !== pendingPlacements.length) {
       setPendingPlacements(validPending);
-      setNextCardIndex(validPending.length);
     }
   }, [selectedCards, pendingPlacements]);
 
@@ -490,14 +495,18 @@ export function useGame(): UseGameReturn {
   const placePreview = useCallback(
     (position: Coordinate) => {
       if (!gameState || selectedCards.length === 0) return;
-      if (nextCardIndex >= selectedCards.length) return;
 
-      const card = selectedCards[nextCardIndex];
-      const newPlacements = [...pendingPlacements, { card, originalHandCard: card, position }];
+      const placedCards = new Set(pendingPlacements.map((p) => p.originalHandCard));
+      const nextCard = selectedCards.find((c) => !placedCards.has(c));
+      if (!nextCard) return;
+
+      const newPlacements = [
+        ...pendingPlacements,
+        { card: nextCard, originalHandCard: nextCard, position },
+      ];
       setPendingPlacements(newPlacements);
-      setNextCardIndex(nextCardIndex + 1);
     },
-    [gameState, selectedCards, nextCardIndex, pendingPlacements]
+    [gameState, selectedCards, pendingPlacements]
   );
 
   const confirmTurn = useCallback(() => {
@@ -524,24 +533,20 @@ export function useGame(): UseGameReturn {
     if (result.success) {
       setSelectedCards([]);
       setPendingPlacements([]);
-      setNextCardIndex(0);
     } else {
       alert(result.error || 'Invalid placement');
       setPendingPlacements([]);
-      setNextCardIndex(0);
     }
   }, [gameState, pendingPlacements, placeCards]);
 
   const cancelPreview = useCallback(() => {
     setPendingPlacements([]);
-    setNextCardIndex(0);
   }, []);
 
   const passTurnAndClear = useCallback(() => {
     passTurn();
     setSelectedCards([]);
     setPendingPlacements([]);
-    setNextCardIndex(0);
   }, [passTurn]);
 
   const discardSelected = useCallback(() => {
@@ -559,7 +564,6 @@ export function useGame(): UseGameReturn {
     if (result.success) {
       setSelectedCards([]);
       setPendingPlacements([]);
-      setNextCardIndex(0);
     } else {
       alert(result.error || 'Failed to discard cards');
     }
@@ -568,7 +572,12 @@ export function useGame(): UseGameReturn {
   const resetSelection = useCallback(() => {
     setSelectedCards([]);
     setPendingPlacements([]);
-    setNextCardIndex(0);
+  }, []);
+
+  const removePreviewPlacement = useCallback((position: Coordinate) => {
+    setPendingPlacements((prev) =>
+      prev.filter((p) => p.position.x !== position.x || p.position.y !== position.y)
+    );
   }, []);
 
   const setWildcardValueAtIndex = useCallback((index: number, value: WildValue) => {
@@ -790,6 +799,7 @@ export function useGame(): UseGameReturn {
     resetSelection,
     getValidWildcardValues,
     setWildcardValueAtIndex,
+    removePreviewPlacement,
 
     exportGame,
     importGame,

@@ -39,6 +39,7 @@ interface GameRendererProps {
   onResetSelection?: () => void;
   onWildcardValue?: (index: number, value: WildValue) => void;
   getValidWildcardValues?: (card: CardType, position: { x: number; y: number }) => WildValue[];
+  onRemoveCard?: (position: Coordinate) => void;
   settings?: GameSettings;
 }
 
@@ -65,6 +66,7 @@ export function GameRenderer({
   onResetSelection,
   onWildcardValue,
   getValidWildcardValues,
+  onRemoveCard,
   settings,
 }: GameRendererProps) {
   const [showSettings, setShowSettings] = useState(false);
@@ -439,6 +441,7 @@ export function GameRenderer({
           pendingPlacements={pendingPlacements}
           nextCardIndex={nextCardIndex}
           onPlaceCard={isMyTurn ? onPlaceCard : () => {}}
+          onRemoveCard={isMyTurn ? onRemoveCard : undefined}
           settings={settings}
           lastMovePlacements={gameState.lastMovePlacements}
           lastMovePlayerIndex={gameState.lastMovePlayerIndex}
