@@ -1,4 +1,5 @@
 import { Card } from '../Card/Card';
+import classNames from 'classnames';
 import type { Card as CardType } from '@/game/Card';
 import styles from './PlayerHand.module.css';
 
@@ -8,6 +9,7 @@ interface PlayerHandProps {
   selectedCards?: CardType[];
   onSelectionChange?: (selected: CardType[]) => void;
   onResetSelection?: () => void;
+  disabled?: boolean;
 }
 
 export function PlayerHand({
@@ -16,10 +18,12 @@ export function PlayerHand({
   selectedCards = [],
   onSelectionChange,
   onResetSelection,
+  disabled = false,
 }: PlayerHandProps) {
   const isSelected = (card: CardType) => selectedCards.includes(card);
 
   const handleCardClick = (card: CardType) => {
+    if (disabled) return;
     if (isSelected(card)) {
       // Deselect
       const newSelection = selectedCards.filter((c) => c !== card);
@@ -34,7 +38,7 @@ export function PlayerHand({
   };
 
   return (
-    <div className={styles.hand}>
+    <div className={classNames(styles.hand, { [styles.disabled]: disabled })}>
       <div className={styles.cards}>
         {cards.map((card, index) => (
           <Card
@@ -58,6 +62,7 @@ export function PlayerHand({
             onClick={onResetSelection}
             className={styles.resetButton}
             style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+            disabled={disabled}
           >
             Reset
           </button>

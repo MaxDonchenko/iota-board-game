@@ -42,6 +42,7 @@ interface GameRendererProps {
   onWildcardValue?: (index: number, value: WildValue) => void;
   getValidWildcardValues?: (card: CardType, position: { x: number; y: number }) => WildValue[];
   onRemoveCard?: (position: Coordinate) => void;
+  localPlayer?: import('@/types/Game.types').Player | null;
   settings?: GameSettings;
 }
 
@@ -69,6 +70,7 @@ export function GameRenderer({
   onWildcardValue,
   getValidWildcardValues,
   onRemoveCard,
+  localPlayer,
   settings,
 }: GameRendererProps) {
   const [showSettings, setShowSettings] = useState(false);
@@ -80,9 +82,9 @@ export function GameRenderer({
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const isGameOver = gameState.phase === 'ended' || gameState.phase === 'draw';
 
-  // Find the player that matches myPlayerName in multiplayer, or use currentPlayer otherwise
-  // This is needed for the sidebar to show the right player's hand
-  const playerToShowHand = currentPlayer;
+  // "Me" is the provided localPlayer, falling back to currentPlayer
+  const playerToShowHand = localPlayer || currentPlayer;
+  const playerColors = gameState.players.map((p) => p.color);
 
   return (
     <div className={styles.container}>
@@ -156,7 +158,7 @@ export function GameRenderer({
                     fontWeight: 'bold',
                   }}
                 >
-                  {!isMyTurn ? `${currentPlayer.name}'s hand` : 'Your hand'}
+                  Your hand
                 </h3>
                 {isAITurn ? (
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -189,6 +191,7 @@ export function GameRenderer({
                     });
                   }}
                   onResetSelection={onResetSelection}
+                  disabled={!isMyTurn || isAITurn}
                 />
               </div>
             )}
@@ -427,7 +430,7 @@ export function GameRenderer({
             justifyContent: 'safe center',
             minWidth: '100%',
             minHeight: '100%',
-            padding: '2rem',
+            paddingTop: '3.25rem',
           }}
         >
           <div
@@ -449,6 +452,7 @@ export function GameRenderer({
               settings={settings}
               lastMovePlacements={gameState.lastMovePlacements}
               lastMovePlayerIndex={gameState.lastMovePlayerIndex}
+              playerColors={playerColors}
             />
           </div>
         </div>

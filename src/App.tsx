@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
@@ -48,6 +48,8 @@ function GameSession() {
   const { service, myPlayerName, isHost } = useMultiplayer();
   const {
     gameState,
+    currentPlayer,
+    isAITurn,
     resetGame,
     selectedCards,
     pendingPlacements,
@@ -149,6 +151,27 @@ function GameSession() {
     }
   }, [gameState?.phase, service]);
 
+  // Determine which player is "Me" at the local machine
+  const localPlayer = useMemo(() => {
+    if (!gameState) return null;
+    if (isMultiplayer && myPlayerName) {
+      return gameState.players.find((p) => p.name === myPlayerName) || null;
+    }
+    // In Hotseat mode, "Me" is the current human player.
+    // If it's an AI's turn, we show the first available human player.
+    if (!isAITurn) return currentPlayer;
+    return gameState.players.find((p) => !p.isAI) || null;
+  }, [gameState, isMultiplayer, myPlayerName, isAITurn, currentPlayer]);
+
+  // It's "My Turn" if the current active player matches my identity
+  const isMyTurn = useMemo(() => {
+    if (!gameState || !currentPlayer) return false;
+    if (isMultiplayer) {
+      return !myPlayerName || currentPlayer.name === myPlayerName;
+    }
+    return !isAITurn;
+  }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
+
   if (!gameState) {
     // If we're a multiplayer peer, wait a moment for game state to arrive
     if (isMultiplayerPeer) {
@@ -173,14 +196,6 @@ function GameSession() {
     }
     return <Navigate to="/" />;
   }
-
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  const isAITurn = currentPlayer?.isAI === true;
-
-  // In multiplayer, check if it's the current player's turn by comparing names
-  // myPlayerName should be set when joining/creating game
-  const isMyTurn =
-    !isMultiplayer || !myPlayerName || !currentPlayer || currentPlayer.name === myPlayerName;
 
   // Handle card selection (adapt for GameRenderer's onSelectCard interface)
   const handleSelectCard = (card: CardType, _index: number) => {
@@ -213,6 +228,7 @@ function GameSession() {
       onWildcardValue={setWildcardValueAtIndex}
       onRemoveCard={removePreviewPlacement}
       getValidWildcardValues={getValidWildcardValues}
+      localPlayer={localPlayer}
       settings={settings}
     />
   );

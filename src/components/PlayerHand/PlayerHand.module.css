@@ -24,3 +24,13 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.disabled .cards {
+  filter: grayscale(0.5);
+}

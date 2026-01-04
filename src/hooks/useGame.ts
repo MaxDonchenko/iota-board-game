@@ -38,6 +38,8 @@ export interface PlayerConfig {
 
 interface UseGameReturn {
   gameState: GameState | null;
+  currentPlayer: import('@/types/Game.types').Player | null;
+  isAITurn: boolean;
   startGame: (playerConfigs: PlayerConfig[], gameMode: GameMode, settings: GameSettings) => void;
   placeCards: (
     placements: Placement[],
@@ -88,6 +90,13 @@ export function useGame(): UseGameReturn {
   // UI selection state
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [pendingPlacements, setPendingPlacements] = useState<PreviewPlacement[]>([]);
+
+  const currentPlayer = useMemo(
+    () => (gameState ? gameState.players[gameState.currentPlayerIndex] : null),
+    [gameState]
+  );
+
+  const isAITurn = useMemo(() => currentPlayer?.isAI || false, [currentPlayer]);
 
   const nextCardIndex = useMemo(() => {
     const placedCards = new Set(pendingPlacements.map((p) => p.originalHandCard));
@@ -778,6 +787,8 @@ export function useGame(): UseGameReturn {
 
   return {
     gameState,
+    currentPlayer,
+    isAITurn,
     startGame,
     placeCards,
     passTurn,

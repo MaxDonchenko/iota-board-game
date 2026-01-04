@@ -24,6 +24,7 @@ export function GameControls({
 }: GameControlsProps) {
   return (
     <div
+      className="game-controls"
       style={{
         position: 'fixed',
         top: '1rem',
