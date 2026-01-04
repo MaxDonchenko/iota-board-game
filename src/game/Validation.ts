@@ -45,16 +45,17 @@ export class Validation {
       // Check horizontal line
       const hLine = this.getCompleteLine(placement.position, 'horizontal', grid, placements);
       if (hLine && hLine.cards.length >= 2) {
-        // If the line contains a wildcard without an assigned value, skip
-        // strict validation here. The wildcard's value may be chosen later
-        // during the same turn (preview). Wildcard consistency will be
-        // validated separately when a value is assigned.
         const hasUnvaluedWild = hLine.cards.some((c) => c.isWild && !c.wildValue);
-        if (!hasUnvaluedWild) {
-          const lineResult = this.validateLineRules(hLine.cards);
-          if (!lineResult.isValid) {
-            return lineResult;
-          }
+        if (hasUnvaluedWild) {
+          return {
+            isValid: false,
+            error: 'Wildcard value must be selected first',
+          };
+        }
+
+        const lineResult = this.validateLineRules(hLine.cards);
+        if (!lineResult.isValid) {
+          return lineResult;
         }
       }
 
@@ -62,11 +63,16 @@ export class Validation {
       const vLine = this.getCompleteLine(placement.position, 'vertical', grid, placements);
       if (vLine && vLine.cards.length >= 2) {
         const hasUnvaluedWild = vLine.cards.some((c) => c.isWild && !c.wildValue);
-        if (!hasUnvaluedWild) {
-          const lineResult = this.validateLineRules(vLine.cards);
-          if (!lineResult.isValid) {
-            return lineResult;
-          }
+        if (hasUnvaluedWild) {
+          return {
+            isValid: false,
+            error: 'Wildcard value must be selected first',
+          };
+        }
+
+        const lineResult = this.validateLineRules(vLine.cards);
+        if (!lineResult.isValid) {
+          return lineResult;
         }
       }
     }
@@ -138,10 +144,13 @@ export class Validation {
     for (const wildPlacement of wildPlacements) {
       const wildCard = wildPlacement.card;
 
-      // If wild card doesn't have a value set, we need to determine it from context
+      // If wild card doesn't have a value set, the entire set of placements is invalid
+      // because we cannot perform full validation until all wildcards are resolved.
       if (!wildCard.wildValue) {
-        // This will be set during placement based on line constraints
-        continue;
+        return {
+          isValid: false,
+          error: 'All wildcards must have an assigned value before validation can complete',
+        };
       }
 
       // Check all lines this wild card will belong to

@@ -61,7 +61,7 @@ describe('Validation - Wildcard Scenarios', () => {
     expect(result.error).toContain('unique');
   });
 
-  it('should allow placing additional cards in same turn when wildcard has no value yet', () => {
+  it('should NOT allow placing additional cards in same turn when wildcard has no value yet', () => {
     const grid = new Grid();
     grid.addCard(0, 0, new Card('Square', 1, 'Red'));
 
@@ -77,7 +77,8 @@ describe('Validation - Wildcard Scenarios', () => {
     ];
 
     const result = Validation.validatePlacement(placements, grid);
-    expect(result.isValid).toBe(true);
+    expect(result.isValid).toBe(false);
+    expect(result.error).toContain('Wildcard value');
   });
 
   it('should correctly handle the user-reported scenario: placeholder (wildcard as 2-red-triangle) then 3-red-triangle', () => {
@@ -102,5 +103,32 @@ describe('Validation - Wildcard Scenarios', () => {
 
     const result = Validation.validatePlacement(placements, grid);
     expect(result.isValid).toBe(true);
+  });
+
+  it('should mark all lines containing an unvalued wildcard as invalid (user reported scenario)', () => {
+    const grid = new Grid();
+    // Grid setup: (0,0) Green Triangle 4, (0,-1) Yellow Plus 4
+    grid.addCard(0, 0, new Card('Triangle', 4, 'Green'));
+    grid.addCard(0, -1, new Card('Plus', 4, 'Yellow'));
+
+    // (-1,0) Green Square 2, (-1,-1) Red Square 4
+    grid.addCard(-1, 0, new Card('Square', 2, 'Green'));
+    grid.addCard(-1, -1, new Card('Square', 4, 'Red'));
+
+    // 1. Place a Wildcard at (1, -1). It's to the right of (0, -1) Yellow Plus 4.
+    const wildcard = new Card(undefined, undefined, undefined, true);
+
+    // 2. Place a Green Circle 2 at (2, -1). It's to the right of the wildcard.
+    const greenCircle2 = new Card('Circle', 2, 'Green');
+
+    const placements = [
+      { card: wildcard, position: { x: 1, y: -1 } },
+      { card: greenCircle2, position: { x: 2, y: -1 } },
+    ];
+
+    const result = Validation.validatePlacement(placements, grid);
+
+    expect(result.isValid).toBe(false);
+    expect(result.error).toContain('Wildcard');
   });
 });
