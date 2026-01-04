@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:gh": "tsc && GITHUB_PAGES=true vite build && cp dist/index.html dist/404.html",
+    "build:gh": "node scripts/build-gh-pages.js",
     "preview": "vite preview",
     "deploy": "npm run build:gh && gh-pages -d dist",
     "preview:gh": "node scripts/serve-gh-pages.js",
