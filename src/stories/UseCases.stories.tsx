@@ -4,7 +4,7 @@ import { SettingsProvider, useSettings } from '../context/SettingsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { GameBoard } from '../components/GameBoard/GameBoard';
 import { PlayerHand } from '../components/PlayerHand/PlayerHand';
-import { useCases } from '../dev/gameUseCases';
+import { useCases } from './gameUseCases';
 
 const meta: Meta = {
   title: 'DevMode/UseCases',

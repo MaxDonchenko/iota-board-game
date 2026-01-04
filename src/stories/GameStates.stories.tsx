@@ -35,13 +35,8 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
       attributeFilter: ['data-theme'],
     });
 
-    const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
-    if (theme && theme !== settings.theme) {
-      updateSettings({ theme });
-    }
-
     return () => observer.disconnect();
-  }, [settings.theme, updateSettings]);
+  }, [settings.theme]); // Remove updateSettings from dependencies
 
   return <>{children}</>;
 }
