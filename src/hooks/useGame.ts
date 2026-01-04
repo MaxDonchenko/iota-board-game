@@ -740,7 +740,7 @@ export function useGame(): UseGameReturn {
       playersCount: gameState.players.length,
     });
     const serialized = serializeGameState(gameState, gameId);
-    const json = JSON.stringify(serialized, null, 2);
+    const json = JSON.stringify(serialized);
     console.log('[Game] exportGame: Serialization complete', { jsonLength: json.length });
     return json;
   }, [gameState, gameId]);
