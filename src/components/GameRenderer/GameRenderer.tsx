@@ -8,6 +8,8 @@ import { PlayerHand } from '@/components/PlayerHand/PlayerHand';
 import { ScoreDisplay } from '@/components/ScoreDisplay/ScoreDisplay';
 import { Card as CardComponent } from '@/components/Card/Card';
 import { Card } from '@/game/Card';
+import { useBoardScale } from '@/hooks/useBoardScale';
+import { GameControls } from '@/components/GameControls/GameControls';
 import type { GameState } from '@/types/Game.types';
 import type { Card as CardType } from '@/game/Card';
 import type { WildValue } from '@/types/Card.types';
@@ -71,6 +73,7 @@ export function GameRenderer({
 }: GameRendererProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const { scale, canZoomIn, canZoomOut, zoomIn, zoomOut } = useBoardScale();
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const actionsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -98,34 +101,16 @@ export function GameRenderer({
         buttonRef={settingsButtonRef}
       />
 
-      {/* Top-right controls */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 1000,
-          display: 'flex',
-          gap: '0.5rem',
-        }}
-      >
-        <button
-          ref={actionsButtonRef}
-          onClick={() => setShowActions(!showActions)}
-          className={styles.actionsButton}
-          title="Additional Actions"
-        >
-          ⋮
-        </button>
-        <button
-          ref={settingsButtonRef}
-          onClick={() => setShowSettings(!showSettings)}
-          className="settings-button"
-          style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-        >
-          Settings
-        </button>
-      </div>
+      <GameControls
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        canZoomIn={canZoomIn}
+        canZoomOut={canZoomOut}
+        onToggleActions={() => setShowActions(!showActions)}
+        onToggleSettings={() => setShowSettings(!showSettings)}
+        actionsButtonRef={actionsButtonRef}
+        settingsButtonRef={settingsButtonRef}
+      />
 
       {/* Left Sidebar */}
       <div className={styles.sidebar}>
@@ -434,18 +419,39 @@ export function GameRenderer({
         )}
       </div>
 
-      <div className={styles.content}>
-        <GameBoard
-          grid={gameState.grid}
-          selectedCards={selectedCards}
-          pendingPlacements={pendingPlacements}
-          nextCardIndex={nextCardIndex}
-          onPlaceCard={isMyTurn ? onPlaceCard : () => {}}
-          onRemoveCard={isMyTurn ? onRemoveCard : undefined}
-          settings={settings}
-          lastMovePlacements={gameState.lastMovePlacements}
-          lastMovePlayerIndex={gameState.lastMovePlayerIndex}
-        />
+      <div className={styles.content} style={{ overflow: 'auto' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'safe center',
+            justifyContent: 'safe center',
+            minWidth: '100%',
+            minHeight: '100%',
+            padding: '2rem',
+          }}
+        >
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: '0 0',
+              transition: 'transform 0.2s ease-out',
+              display: 'flex',
+              flexShrink: 0,
+            }}
+          >
+            <GameBoard
+              grid={gameState.grid}
+              selectedCards={selectedCards}
+              pendingPlacements={pendingPlacements}
+              nextCardIndex={nextCardIndex}
+              onPlaceCard={isMyTurn ? onPlaceCard : () => {}}
+              onRemoveCard={isMyTurn ? onRemoveCard : undefined}
+              settings={settings}
+              lastMovePlacements={gameState.lastMovePlacements}
+              lastMovePlayerIndex={gameState.lastMovePlayerIndex}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
