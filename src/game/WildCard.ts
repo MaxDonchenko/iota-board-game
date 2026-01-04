@@ -129,9 +129,9 @@ export class WildCardManager {
     }
 
     return {
-      shape: wildShape,
-      number: wildNumber,
-      color: wildColor,
+      shape: wildShape!,
+      number: wildNumber!,
+      color: wildColor!,
     };
   }
 }

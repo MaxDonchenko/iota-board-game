@@ -20,6 +20,7 @@ interface GameRendererProps {
   selectedCards: CardType[];
   pendingPlacements: Array<{
     card: CardType;
+    originalHandCard: CardType;
     position: { x: number; y: number };
     wildValue?: WildValue;
   }>;

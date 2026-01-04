@@ -60,4 +60,47 @@ describe('Validation - Wildcard Scenarios', () => {
     expect(result.isValid).toBe(false);
     expect(result.error).toContain('unique');
   });
+
+  it('should allow placing additional cards in same turn when wildcard has no value yet', () => {
+    const grid = new Grid();
+    grid.addCard(0, 0, new Card('Square', 1, 'Red'));
+
+    // Wildcard without an assigned value (preview phase)
+    const wildcard = new Card(undefined, undefined, undefined, true);
+
+    // Another card to place to the right of the wildcard
+    const card = new Card('Square', 2, 'Red');
+
+    const placements = [
+      { card: wildcard, position: { x: 1, y: 0 } },
+      { card, position: { x: 2, y: 0 } },
+    ];
+
+    const result = Validation.validatePlacement(placements, grid);
+    expect(result.isValid).toBe(true);
+  });
+
+  it('should correctly handle the user-reported scenario: placeholder (wildcard as 2-red-triangle) then 3-red-triangle', () => {
+    const grid = new Grid();
+    // Starter: Triangle-1-Red at (0,0)
+    grid.setStarterCard(0, 0, new Card('Triangle', 1, 'Red'));
+
+    // Card 1: Wildcard at (1,0) valued as Triangle-2-Red
+    const wildcard = new Card('Triangle', 2, 'Red', true, {
+      shape: 'Triangle',
+      number: 2,
+      color: 'Red',
+    });
+
+    // Card 2: Triangle-3-Red at (2,0)
+    const card3 = new Card('Triangle', 3, 'Red');
+
+    const placements = [
+      { card: wildcard, position: { x: 1, y: 0 } },
+      { card: card3, position: { x: 2, y: 0 } },
+    ];
+
+    const result = Validation.validatePlacement(placements, grid);
+    expect(result.isValid).toBe(true);
+  });
 });

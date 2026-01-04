@@ -38,9 +38,9 @@ interface SerializablePlayer {
 }
 
 interface SerializableCard {
-  shape: string;
-  number: number;
-  color: string;
+  shape?: string;
+  number?: number;
+  color?: string;
   isWild: boolean;
   wildValue?: {
     shape: string;
@@ -79,9 +79,9 @@ function serializeCard(card: Card): SerializableCard {
 
 function deserializeCard(serialized: SerializableCard): Card {
   const card = new Card(
-    serialized.shape as Shape,
-    serialized.number as Number,
-    serialized.color as Color,
+    serialized.shape as Shape | undefined,
+    serialized.number as Number | undefined,
+    serialized.color as Color | undefined,
     serialized.isWild
   );
   if (serialized.wildValue) {

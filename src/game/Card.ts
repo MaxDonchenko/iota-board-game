@@ -1,18 +1,36 @@
 import type { Shape, Number, Color, WildValue } from '@/types/Card.types';
 
 export class Card {
-  shape: Shape;
-  number: Number;
-  color: Color;
+  shape?: Shape;
+  number?: Number;
+  color?: Color;
   isWild: boolean;
   wildValue?: WildValue;
 
-  constructor(shape: Shape, number: Number, color: Color, isWild = false, wildValue?: WildValue) {
-    this.shape = shape;
-    this.number = number;
-    this.color = color;
-    this.isWild = isWild;
-    this.wildValue = wildValue;
+  // For wildcards we intentionally do not keep a default shape/number/color.
+  // The caller should assign `wildValue` when previewing/confirming the wildcard.
+  constructor(
+    shape?: Shape,
+    number?: Number,
+    color?: Color,
+    isWild = false,
+    wildValue?: WildValue
+  ) {
+    this.isWild = !!isWild;
+    if (!this.isWild) {
+      if (shape === undefined || number === undefined || color === undefined) {
+        throw new Error('Non-wild cards must have shape, number and color');
+      }
+      this.shape = shape;
+      this.number = number;
+      this.color = color;
+    } else if (wildValue) {
+      this.wildValue = wildValue;
+      // Synchronize properties with wildValue
+      this.shape = wildValue.shape;
+      this.number = wildValue.number;
+      this.color = wildValue.color;
+    }
   }
 
   equals(other: Card): boolean {
@@ -51,7 +69,7 @@ export class Card {
   }
 
   getValue(): number {
-    return this.isWild ? 0 : this.number;
+    return this.isWild ? 0 : (this.number as number);
   }
 
   setWildValue(value: WildValue): void {
@@ -72,32 +90,21 @@ export class Card {
     );
   }
 
-  getEffectiveValue(): Shape | Number | Color {
-    if (this.isWild && this.wildValue) {
-      return {
-        shape: this.wildValue.shape,
-        number: this.wildValue.number,
-        color: this.wildValue.color,
-      } as unknown as Shape | Number | Color;
-    }
-    return this.shape;
-  }
-
-  getEffectiveShape(): Shape {
+  getEffectiveShape(): Shape | undefined {
     if (this.isWild && this.wildValue) {
       return this.wildValue.shape;
     }
     return this.shape;
   }
 
-  getEffectiveNumber(): Number {
+  getEffectiveNumber(): Number | undefined {
     if (this.isWild && this.wildValue) {
       return this.wildValue.number;
     }
     return this.number;
   }
 
-  getEffectiveColor(): Color {
+  getEffectiveColor(): Color | undefined {
     if (this.isWild && this.wildValue) {
       return this.wildValue.color;
     }

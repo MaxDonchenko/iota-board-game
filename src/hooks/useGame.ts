@@ -25,6 +25,7 @@ export const PLAYER_COLORS = ['#FF4B2B', '#2B95FF', '#61BB46', '#F9A51B'];
 
 interface PreviewPlacement {
   card: Card;
+  originalHandCard: Card;
   position: Coordinate;
   wildValue?: WildValue;
 }
@@ -462,7 +463,9 @@ export function useGame(): UseGameReturn {
   // Sync pending placements with selected cards
   // This handles the case where a user unselects a card that was already placed on the board as a preview
   useEffect(() => {
-    const validPending = pendingPlacements.filter((p) => selectedCards.includes(p.card));
+    const validPending = pendingPlacements.filter((p) =>
+      selectedCards.includes(p.originalHandCard)
+    );
     if (validPending.length !== pendingPlacements.length) {
       setPendingPlacements(validPending);
       setNextCardIndex(validPending.length);
@@ -490,7 +493,7 @@ export function useGame(): UseGameReturn {
       if (nextCardIndex >= selectedCards.length) return;
 
       const card = selectedCards[nextCardIndex];
-      const newPlacements = [...pendingPlacements, { card, position }];
+      const newPlacements = [...pendingPlacements, { card, originalHandCard: card, position }];
       setPendingPlacements(newPlacements);
       setNextCardIndex(nextCardIndex + 1);
     },
@@ -499,19 +502,19 @@ export function useGame(): UseGameReturn {
 
   const confirmTurn = useCallback(() => {
     if (!gameState || pendingPlacements.length === 0) return;
-
+    // Ensure all wildcards have an assigned preview value before confirming
+    const missingWildValue = pendingPlacements.some((p) => p.card.isWild && !p.wildValue);
+    if (missingWildValue) {
+      alert('Please choose values for all wildcards before confirming your turn');
+      return;
+    }
     const cardMapping = new Map<Card, Card>();
     const placements = pendingPlacements.map((p: PreviewPlacement) => {
       let card = p.card;
-      const originalCard = p.card;
+      const originalCard = p.originalHandCard;
       if (card.isWild && p.wildValue) {
-        card = new Card(
-          p.wildValue.shape,
-          p.wildValue.number,
-          p.wildValue.color,
-          true,
-          p.wildValue
-        );
+        // Use the card that was already updated with the wild value in the preview phase
+        card = p.card;
         cardMapping.set(card, originalCard);
       }
       return { card, position: p.position };
@@ -570,7 +573,14 @@ export function useGame(): UseGameReturn {
 
   const setWildcardValueAtIndex = useCallback((index: number, value: WildValue) => {
     setPendingPlacements((current) =>
-      current.map((p, i) => (i === index ? { ...p, wildValue: value } : p))
+      current.map((p, i) => {
+        if (i === index) {
+          // Create a new card object with the given value so it gets correctly picked up by Validation
+          const updatedCard = new Card(value.shape, value.number, value.color, true, value);
+          return { ...p, card: updatedCard, wildValue: value };
+        }
+        return p;
+      })
     );
   }, []);
 

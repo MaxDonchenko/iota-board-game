@@ -16,6 +16,7 @@ interface GameBoardProps {
   selectedCards?: CardType[];
   pendingPlacements?: Array<{
     card: CardType;
+    originalHandCard: CardType;
     position: Coordinate;
     wildValue?: import('@/types/Card.types').WildValue;
   }>;

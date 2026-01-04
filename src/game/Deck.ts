@@ -59,10 +59,8 @@ export class Deck {
           ? WILD_CARD_COUNTS.SHORT
           : WILD_CARD_COUNTS.ULTRA_SHORT;
       for (let i = 0; i < wildCount; i++) {
-        // Create wildcard without a value - shape/number/color are just placeholders
-        const wildCard = new Card('Square', 1, 'Red', true);
-        // Ensure no default wildValue is set
-        wildCard.wildValue = undefined;
+        // Create wildcard without any values
+        const wildCard = new Card(undefined, undefined, undefined, true);
         this.cards.push(wildCard);
       }
     }

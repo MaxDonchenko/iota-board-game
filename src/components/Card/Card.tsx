@@ -188,10 +188,14 @@ export function Card({
   }
 
   // Regular card or wildcard with value
-  const colorStyle = ColorUtils.getGradient(card.color, settings.useGradients, settings.theme);
-  const shapeSymbol = getShapeSymbol(card.getEffectiveShape());
-  const numberDisplay = card.getEffectiveNumber();
-  const cardColor = ColorUtils.toHex(card.getEffectiveColor(), settings.theme);
+  const effectiveShape = card.getEffectiveShape()!;
+  const effectiveNumber = card.getEffectiveNumber()!;
+  const effectiveColor = card.getEffectiveColor()!;
+
+  const colorStyle = ColorUtils.getGradient(effectiveColor, settings.useGradients, settings.theme);
+  const shapeSymbol = getShapeSymbol(effectiveShape);
+  const numberDisplay = effectiveNumber;
+  const cardColor = ColorUtils.toHex(effectiveColor, settings.theme);
 
   // Dark mode: black text, Light mode: white text
   const textColor = settings.theme === 'dark' ? '#000000' : '#FFFFFF';
@@ -213,12 +217,12 @@ export function Card({
       >
         {isWild && <div className={styles.wildBadge}>WILD</div>}
         <div className={styles.shapeV2} style={{ color: cardColor }}>
-          {card.getEffectiveShape() === 'Plus' ? getPlusSVG(48, cardColor) : shapeSymbol}
+          {effectiveShape === 'Plus' ? getPlusSVG(48, cardColor) : shapeSymbol}
         </div>
         <div className={styles.tinyShapes} data-count={numberDisplay}>
           {Array.from({ length: numberDisplay }, (_, i) => (
             <div key={i} className={styles.tinyShape} style={{ color: oppositeColor }}>
-              {card.getEffectiveShape() === 'Plus' ? getPlusSVG(10, oppositeColor) : shapeSymbol}
+              {effectiveShape === 'Plus' ? getPlusSVG(10, oppositeColor) : shapeSymbol}
             </div>
           ))}
         </div>
