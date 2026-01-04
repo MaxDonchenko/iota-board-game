@@ -2,6 +2,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { ColorUtils } from '@/utils/colors';
 import styles from './Card.module.css';
 import type { Card as CardType } from '@/game/Card';
+import classNames from 'classnames';
 
 interface CardProps {
   card: CardType;
@@ -50,7 +51,7 @@ export function Card({
           <div className={styles.wildGridV2}>
             {(() => {
               const cornerColor =
-                settings.theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+                settings.theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : '#231e1f';
               return (
                 <>
                   <div
@@ -58,7 +59,7 @@ export function Card({
                     style={{ backgroundColor: ColorUtils.toHex('Yellow', settings.theme) }}
                   >
                     <div className={styles.wildShape} style={{ color: cornerColor }}>
-                      ■
+                      {getShapeSymbol('Square')}
                     </div>
                   </div>
                   <div
@@ -66,7 +67,7 @@ export function Card({
                     style={{ backgroundColor: ColorUtils.toHex('Red', settings.theme) }}
                   >
                     <div className={styles.wildShape} style={{ color: cornerColor }}>
-                      ●
+                      {getShapeSymbol('Circle')}
                     </div>
                   </div>
                   <div
@@ -74,7 +75,7 @@ export function Card({
                     style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}
                   >
                     <div className={styles.wildShape} style={{ color: cornerColor }}>
-                      {getPlusSVG(16, cornerColor)}
+                      {getShapeSymbol('Plus')}
                     </div>
                   </div>
                   <div
@@ -82,7 +83,7 @@ export function Card({
                     style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}
                   >
                     <div className={styles.wildShape} style={{ color: cornerColor }}>
-                      ▲
+                      {getShapeSymbol('Triangle')}
                     </div>
                   </div>
                 </>
@@ -93,28 +94,13 @@ export function Card({
             {(() => {
               const shapes = ['Square', 'Circle', 'Plus', 'Triangle'];
               const cobwebColor =
-                settings.theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
+                settings.theme === 'dark' ? 'rgba(0, 0, 0)' : 'rgba(255, 255, 255)';
 
               return (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gridTemplateRows: 'repeat(4, 1fr)',
-                    gap: '2px',
-                    padding: '8px',
-                    zIndex: 2,
-                    pointerEvents: 'none',
-                  }}
-                >
-                  {Array.from({ length: 16 }, (_, i) => {
-                    const row = Math.floor(i / 4);
-                    const col = i % 4;
+                <div className={styles.cobwebMatrixWrapper}>
+                  {Array.from({ length: 64 }, (_, i) => {
+                    const row = Math.floor(i / 8);
+                    const col = i % 8;
                     const shapeIndex = (row + col) % 4;
                     const shape = shapes[shapeIndex];
 
@@ -122,18 +108,11 @@ export function Card({
                       <div
                         key={i}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '6px',
                           color: cobwebColor,
-                          fontWeight: 'bold',
                         }}
+                        className={classNames(styles.cobwebCell, styles[shape])}
                       >
-                        {shape === 'Square' && '■'}
-                        {shape === 'Circle' && '●'}
-                        {shape === 'Plus' && getPlusSVG(8, cobwebColor)}
-                        {shape === 'Triangle' && '▲'}
+                        {getShapeSymbol(shape)}
                       </div>
                     );
                   })}
@@ -162,25 +141,25 @@ export function Card({
             className={styles.wildCell}
             style={{ backgroundColor: ColorUtils.toHex('Yellow', settings.theme) }}
           >
-            ■
+            {getShapeSymbol('Square')}
           </div>
           <div
             className={styles.wildCell}
             style={{ backgroundColor: ColorUtils.toHex('Red', settings.theme) }}
           >
-            ●
+            {getShapeSymbol('Circle')}
           </div>
           <div
             className={styles.wildCell}
             style={{ backgroundColor: ColorUtils.toHex('Blue', settings.theme) }}
           >
-            +
+            {getShapeSymbol('Plus')}
           </div>
           <div
             className={styles.wildCell}
             style={{ backgroundColor: ColorUtils.toHex('Green', settings.theme) }}
           >
-            ▲
+            {getShapeSymbol('Triangle')}
           </div>
         </div>
       </div>
@@ -256,7 +235,7 @@ function getShapeSymbol(shape: string): string {
     case 'Circle':
       return '●';
     case 'Plus':
-      return '+';
+      return '✚';
     case 'Triangle':
       return '▲';
     default:
