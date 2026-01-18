@@ -19,7 +19,8 @@ export class RoutingService {
   static getPathname(): string {
     const path = window.location.pathname;
     const basePath = this.getBasePath();
-    if (basePath && path.startsWith(basePath)) {
+    // If we have a non-root base path, strip it from the start of the pathname
+    if (basePath !== '/' && path.startsWith(basePath)) {
       return path.slice(basePath.length - 1) || '/';
     }
     return path || '/';
@@ -70,7 +71,7 @@ export class RoutingService {
     const fullPath = `${basePath}${cleanPath}`.replace(/\/+/g, '/');
     url.pathname = fullPath;
 
-    // Hard navigation to ensure we stay within the configured base
+    // Use window.location.href for hard navigation
     window.location.href = url.toString();
   }
 
