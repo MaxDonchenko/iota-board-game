@@ -1,5 +1,6 @@
 import { Deck } from './Deck';
 import { Grid } from './Grid';
+import { Card } from './Card';
 import { Validation } from './Validation';
 import type { GameState, Player, GameSettings, GameMode, AIDifficulty } from '@/types/Game.types';
 
@@ -23,10 +24,23 @@ export class GameStateManager {
       score: 0,
     }));
 
-    // Place starter card
-    const starterCard = deck.drawCard();
+    // Place starter card (must not be a wildcard)
+    let starterCard = deck.drawCard();
+    const tempPiles: Card[] = [];
+
+    while (starterCard && starterCard.isWild) {
+      tempPiles.push(starterCard);
+      starterCard = deck.drawCard();
+    }
+
     if (starterCard) {
       grid.setStarterCard(0, 0, starterCard);
+    }
+
+    // Put wildcards back and reshuffle or just put them back (shuffling is better)
+    tempPiles.forEach((card) => deck.addToDrawPile(card));
+    if (tempPiles.length > 0) {
+      deck.shuffle();
     }
 
     return {

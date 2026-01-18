@@ -183,9 +183,13 @@ describe('No Valid Moves - Auto Draw', () => {
       gameState.currentPlayerIndex = 0;
       gameState.turnPhase = 'pass';
 
+      // Ensure a fixed starter card at 0,0 that is compatible with Player 2's card
+      gameState.grid.positions.clear();
+      gameState.grid.setStarterCard(0, 0, new CardClass('Circle', 1, 'Red'));
+
       // Player 1 can't move, but Player 2 can still place next to starter
-      gameState.players[0].hand = [new CardClass('Circle', 4, 'Yellow')]; // no valid moves
-      gameState.players[1].hand = [new CardClass('Square', 1, 'Red')]; // can place next to starter
+      gameState.players[0].hand = [new CardClass('Circle', 4, 'Yellow')]; // non-matching card
+      gameState.players[1].hand = [new CardClass('Square', 1, 'Red')]; // matches color and number with starter
 
       const newState = GameStateManager.nextTurn(gameState);
 
