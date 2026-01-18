@@ -7,6 +7,7 @@ import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 import { Welcome } from './components/Welcome/Welcome';
 import { HotseatSetup } from './components/GameSetup/HotseatSetup';
 import { MultiplayerSetup } from './components/MultiplayerSetup/MultiplayerSetup';
+import { BoardEditor } from './components/BoardEditor/BoardEditor';
 import { Info } from './components/Info/Info';
 import { GameRenderer } from './components/GameRenderer/GameRenderer';
 import { SettingsDialog } from './components/Settings/SettingsDialog';
@@ -173,8 +174,11 @@ function GameSession() {
   }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
 
   if (!gameState) {
-    // If we're a multiplayer peer, wait a moment for game state to arrive
-    if (isMultiplayerPeer) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasGameId = !!urlParams.get('game');
+
+    // If we're a multiplayer peer OR if we're loading a specific game, wait a moment
+    if (isMultiplayerPeer || hasGameId) {
       // Return loading state instead of redirecting immediately
       return (
         <div
@@ -187,9 +191,9 @@ function GameSession() {
             gap: '1rem',
           }}
         >
-          <div>Waiting for game state...</div>
+          <div>Loading game...</div>
           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            If this persists, the host may not have started the game yet.
+            {isMultiplayerPeer ? 'Waiting for game state from host...' : 'Restoring session...'}
           </div>
         </div>
       );
@@ -281,6 +285,7 @@ function App() {
               />
               <Route path="/multiplayer/setup/:gameId?" element={<MultiplayerSetup />} />
               <Route path="/multiplayer/game" element={<GameSession />} />
+              <Route path="/editor" element={<BoardEditor />} />
               <Route path="/info" element={<Info />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

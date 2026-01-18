@@ -63,6 +63,22 @@
   transform: translateY(-1px);
 }
 
+.boardContainer {
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+  min-width: 100%;
+  min-height: 100%;
+  padding-top: 3.25rem;
+}
+
+.boardScaleWrapper {
+  transform-origin: 0 0;
+  transition: transform 0.2s ease-out;
+  display: flex;
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

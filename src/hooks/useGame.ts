@@ -15,7 +15,7 @@ import {
   type SerializableGameState,
 } from '@/utils/gamePersistence';
 import { AIEngine } from '@/ai/AIEngine';
-import type { GameState, GameSettings, AIDifficulty, GameMode } from '@/types/Game.types';
+import type { GameState, GameSettings, GameMode, PlayerConfig } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
 import type { Coordinate } from '@/types/Grid.types';
@@ -28,12 +28,6 @@ interface PreviewPlacement {
   originalHandCard: Card;
   position: Coordinate;
   wildValue?: WildValue;
-}
-
-export interface PlayerConfig {
-  name: string;
-  isAI?: boolean;
-  difficulty?: AIDifficulty;
 }
 
 interface UseGameReturn {
@@ -104,6 +98,8 @@ export function useGame(): UseGameReturn {
     return index === -1 ? selectedCards.length : index;
   }, [selectedCards, pendingPlacements]);
 
+  const { pathname } = useLocation();
+
   // Load game from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -121,7 +117,7 @@ export function useGame(): UseGameReturn {
         window.history.replaceState({}, '', url.toString());
       }
     }
-  }, [gameId]); // Runs when gameId changes, but also we want it to run when the user navigates (popstate)
+  }, [gameId, pathname]);
 
   // Also listen to popstate for back/forward navigation
   useEffect(() => {
@@ -138,9 +134,7 @@ export function useGame(): UseGameReturn {
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [gameId]);
-
-  const { pathname } = useLocation();
+  }, [gameId, pathname]);
 
   // Sync gameId to URL search params
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { useGame, PLAYER_COLORS, type PlayerConfig } from '../hooks/useGame';
+import { useGame, PLAYER_COLORS } from '../hooks/useGame';
+import type { PlayerConfig } from '@/types/Game.types';
 export { PLAYER_COLORS };
 export type { PlayerConfig };
 
