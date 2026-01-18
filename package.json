@@ -18,7 +18,8 @@
     "build-storybook:gh": "GITHUB_PAGES=true storybook build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "pre-push": "npm run lint && npm run build && npm run build:gh && npm test && npm run build-storybook && npm run build-storybook:gh"
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx,json,css,md}": "prettier --write"
