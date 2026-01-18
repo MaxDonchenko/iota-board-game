@@ -18,12 +18,38 @@ import appStyles from '@/App.module.css';
 
 export function BoardEditor() {
   const navigate = useNavigate();
-  const { settings } = useSettings();
-
   const [setupConfig, setSetupConfig] = useState<{
     players: PlayerConfig[];
     mode: GameMode;
   } | null>(null);
+
+  if (!setupConfig) {
+    return (
+      <EditorSetup
+        onBack={() => navigate('/')}
+        onStartEditor={(players, mode) => setSetupConfig({ players, mode })}
+      />
+    );
+  }
+
+  return (
+    <BoardEditorWorkspace
+      playerConfigs={setupConfig.players}
+      gameMode={setupConfig.mode}
+      onBackToSetup={() => setSetupConfig(null)}
+    />
+  );
+}
+
+interface WorkspaceProps {
+  playerConfigs: PlayerConfig[];
+  gameMode: GameMode;
+  onBackToSetup: () => void;
+}
+
+function BoardEditorWorkspace({ playerConfigs, gameMode, onBackToSetup }: WorkspaceProps) {
+  const navigate = useNavigate();
+  const { settings } = useSettings();
 
   const {
     gameState,
@@ -36,7 +62,7 @@ export function BoardEditor() {
     exportEditorGame,
     importEditorGame,
     continueGame,
-  } = useBoardEditor(setupConfig?.players, setupConfig?.mode);
+  } = useBoardEditor(playerConfigs, gameMode);
 
   const { scale, canZoomIn, canZoomOut, zoomIn, zoomOut } = useBoardScale();
   const [showSettings, setShowSettings] = useState(false);
@@ -66,21 +92,12 @@ export function BoardEditor() {
     navigate(`/hotseat/game?game=${gameId}`);
   };
 
-  if (!setupConfig) {
-    return (
-      <EditorSetup
-        onBack={() => navigate('/')}
-        onStartEditor={(players, mode) => setSetupConfig({ players, mode })}
-      />
-    );
-  }
-
   const sidebar = (
     <div className={styles.editorSidebar}>
       <header>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
           <button
-            onClick={() => setSetupConfig(null)}
+            onClick={onBackToSetup}
             className={styles.secondaryButton}
             style={{ padding: '0.2rem 0.6rem' }}
             title="Back to Editor Setup"
