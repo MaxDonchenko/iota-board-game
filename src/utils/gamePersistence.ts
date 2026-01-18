@@ -202,15 +202,20 @@ export function saveGameToStorage(gameState: GameState, gameId: string): void {
 }
 
 export function loadGameFromStorage(gameId: string): GameState | null {
-  const stored = localStorage.getItem(`iota-game-${gameId}`);
+  const key = `iota-game-${gameId}`;
+  const stored = localStorage.getItem(key);
   if (!stored) {
+    console.warn(`[Persistence] No data found in localStorage for key: ${key}`);
     return null;
   }
 
   try {
     const serialized = JSON.parse(stored) as SerializableGameState;
-    return deserializeGameState(serialized);
-  } catch {
+    const state = deserializeGameState(serialized);
+    console.log(`[Persistence] Successfully loaded and deserialized game: ${gameId}`);
+    return state;
+  } catch (e) {
+    console.error(`[Persistence] Failed to parse or deserialize game: ${gameId}`, e);
     return null;
   }
 }

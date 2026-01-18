@@ -14,6 +14,7 @@ import { SettingsDialog } from './components/Settings/SettingsDialog';
 import { GameProvider, useGameContext, type PlayerConfig } from './context/GameContext';
 import type { GameMode } from './types/Game.types';
 import type { Card as CardType } from './game/Card';
+import { RoutingService } from './services/routing/RoutingService';
 
 import './styles/index.css';
 import './styles/themes.css';
@@ -174,12 +175,11 @@ function GameSession() {
   }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
 
   if (!gameState) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasGameId = !!urlParams.get('game');
+    const hasGameId = !!RoutingService.getGameIdFromUrl();
 
-    // If we're a multiplayer peer OR if we're loading a specific game, wait a moment
+    // If we have a game ID in URL, stay on the loading screen
+    // It will either load, or remain here until the user chooses to go back
     if (isMultiplayerPeer || hasGameId) {
-      // Return loading state instead of redirecting immediately
       return (
         <div
           style={{
@@ -195,9 +195,17 @@ function GameSession() {
           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
             {isMultiplayerPeer ? 'Waiting for game state from host...' : 'Restoring session...'}
           </div>
+          <button
+            onClick={() => navigate('/')}
+            className="secondary-button"
+            style={{ marginTop: '1rem' }}
+          >
+            Cancel and Return Home
+          </button>
         </div>
       );
     }
+    // Only redirect to home if there is NO game ID and NO game state
     return <Navigate to="/" />;
   }
 

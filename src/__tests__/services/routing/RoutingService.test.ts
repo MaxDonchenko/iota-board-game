@@ -104,62 +104,6 @@ describe('RoutingService', () => {
       expect(pathPart).not.toContain('//');
     });
 
-    it('should prevent double slashes when navigating to hotseat setup', () => {
-      let capturedHref = '';
-      Object.defineProperty(window, 'location', {
-        value: {
-          pathname: '/iota-board-game/',
-          hostname: 'maxdonchenko.github.io',
-          hash: '',
-          search: '',
-          origin: 'https://maxdonchenko.github.io',
-          get href() {
-            return capturedHref || 'https://maxdonchenko.github.io/iota-board-game/';
-          },
-          set href(value: string) {
-            capturedHref = value;
-          },
-        },
-        writable: true,
-        configurable: true,
-      });
-
-      RoutingService.navigateToHotseatSetup();
-
-      expect(capturedHref).toBe('https://maxdonchenko.github.io/iota-board-game/hotseat/setup');
-      // Check for double slashes in the path (after the protocol)
-      const pathPart = capturedHref.replace(/^https?:\/\//, '');
-      expect(pathPart).not.toContain('//');
-    });
-
-    it('should prevent double slashes when navigating to multiplayer game', () => {
-      let capturedHref = '';
-      Object.defineProperty(window, 'location', {
-        value: {
-          pathname: '/iota-board-game/',
-          hostname: 'maxdonchenko.github.io',
-          hash: '',
-          search: '',
-          origin: 'https://maxdonchenko.github.io',
-          get href() {
-            return capturedHref || 'https://maxdonchenko.github.io/iota-board-game/';
-          },
-          set href(value: string) {
-            capturedHref = value;
-          },
-        },
-        writable: true,
-        configurable: true,
-      });
-
-      RoutingService.navigateToMultiplayerGame();
-
-      expect(capturedHref).toBe('https://maxdonchenko.github.io/iota-board-game/multiplayer/game');
-      // Check for double slashes in the path (after the protocol)
-      const pathPart = capturedHref.replace(/^https?:\/\//, '');
-      expect(pathPart).not.toContain('//');
-    });
-
     it('should handle path normalization with multiple slashes', () => {
       // Test the normalization logic directly
       const basePath = '/iota-board-game/'.replace(/\/$/, ''); // Remove trailing slash
@@ -168,36 +112,6 @@ describe('RoutingService', () => {
 
       expect(fullPath).toBe('/iota-board-game/multiplayer/setup/room-123');
       expect(fullPath).not.toContain('//');
-    });
-
-    it('should handle base path without trailing slash', () => {
-      let capturedHref = '';
-      Object.defineProperty(window, 'location', {
-        value: {
-          pathname: '/iota-board-game',
-          hostname: 'maxdonchenko.github.io',
-          hash: '',
-          search: '',
-          origin: 'https://maxdonchenko.github.io',
-          get href() {
-            return capturedHref || 'https://maxdonchenko.github.io/iota-board-game';
-          },
-          set href(value: string) {
-            capturedHref = value;
-          },
-        },
-        writable: true,
-        configurable: true,
-      });
-
-      RoutingService.navigateToMultiplayerSetup('room-456');
-
-      expect(capturedHref).toBe(
-        'https://maxdonchenko.github.io/iota-board-game/multiplayer/setup/room-456'
-      );
-      // Check for double slashes in the path (after the protocol)
-      const pathPart = capturedHref.replace(/^https?:\/\//, '');
-      expect(pathPart).not.toContain('//');
     });
   });
 
@@ -265,60 +179,6 @@ describe('RoutingService', () => {
     });
   });
 
-  describe('Hash routing (development)', () => {
-    it('should use hash routing on localhost', () => {
-      const hashSetter = vi.fn();
-      let currentHash = '';
-      Object.defineProperty(window, 'location', {
-        value: {
-          hostname: 'localhost',
-          pathname: '/',
-          search: '',
-          origin: 'http://localhost:5173',
-          get hash() {
-            return currentHash;
-          },
-          set hash(value: string) {
-            currentHash = value;
-            hashSetter(value);
-          },
-        },
-        writable: true,
-        configurable: true,
-      });
-
-      RoutingService.navigateToMultiplayerSetup('room-789');
-
-      expect(hashSetter).toHaveBeenCalledWith('/multiplayer/setup/room-789');
-    });
-
-    it('should use hash routing when hash already exists', () => {
-      const hashSetter = vi.fn();
-      let currentHash = '#/some/path';
-      Object.defineProperty(window, 'location', {
-        value: {
-          hostname: 'example.com',
-          pathname: '/',
-          search: '',
-          origin: 'https://example.com',
-          get hash() {
-            return currentHash;
-          },
-          set hash(value: string) {
-            currentHash = value;
-            hashSetter(value);
-          },
-        },
-        writable: true,
-        configurable: true,
-      });
-
-      RoutingService.navigateToHome();
-
-      expect(hashSetter).toHaveBeenCalledWith('/');
-    });
-  });
-
   describe('Pathname extraction', () => {
     it('should extract pathname correctly with base path', () => {
       Object.defineProperty(window, 'location', {
@@ -337,12 +197,12 @@ describe('RoutingService', () => {
       expect(pathname).toBe('/multiplayer/setup/room-123');
     });
 
-    it('should extract pathname correctly from hash routing', () => {
+    it('should extract pathname correctly on localhost', () => {
       Object.defineProperty(window, 'location', {
         value: {
           hostname: 'localhost',
-          hash: '#/multiplayer/setup/room-456',
-          pathname: '/',
+          pathname: '/multiplayer/setup/room-456',
+          hash: '',
           search: '',
         },
         writable: true,

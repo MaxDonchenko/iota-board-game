@@ -6,6 +6,7 @@ import {
   serializeGameState,
   deserializeGameState,
   generateGameId,
+  saveGameToStorage,
   type SerializableGameState,
 } from '@/utils/gamePersistence';
 import type { GameState, GameSettings, GameMode, PlayerConfig } from '@/types/Game.types';
@@ -51,6 +52,11 @@ export function useBoardEditor(
           const [x, y] = key.split(',').map(Number);
           newGrid.addCard(x, y, card);
         }
+        // Preserve starter card and position
+        if (prev.grid.starterCard) {
+          newGrid.starterCard = prev.grid.starterCard;
+          newGrid.starterPosition = prev.grid.starterPosition;
+        }
 
         // Add or replace card
         newGrid.addCard(position.x, position.y, selectedEditorCard);
@@ -71,6 +77,11 @@ export function useBoardEditor(
         const [x, y] = key.split(',').map(Number);
         if (x === position.x && y === position.y) continue;
         newGrid.addCard(x, y, card);
+      }
+      // Preserve starter card and position
+      if (prev.grid.starterCard) {
+        newGrid.starterCard = prev.grid.starterCard;
+        newGrid.starterPosition = prev.grid.starterPosition;
       }
       return {
         ...prev,
@@ -105,10 +116,8 @@ export function useBoardEditor(
   const continueGame = useCallback(() => {
     // Ensure game state is ready for playing
     const gameId = generateGameId();
-    localStorage.setItem(
-      `iota-game-${gameId}`,
-      JSON.stringify(serializeGameState(gameState, gameId))
-    );
+    console.log('[BoardEditor] Continuing game with ID:', gameId);
+    saveGameToStorage(gameState, gameId);
     return gameId;
   }, [gameState]);
 

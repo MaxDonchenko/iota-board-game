@@ -8,6 +8,7 @@ import {
   SetupSection,
 } from '@/components/Setup/SetupComponents';
 import styles from './HotseatSetup.module.css';
+import { RoutingService } from '@/services/routing/RoutingService';
 
 interface HotseatSetupProps {
   onStartGame: (playerConfigs: PlayerConfig[], gameMode: GameMode) => void;
@@ -17,12 +18,10 @@ interface HotseatSetupProps {
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const { settings, updateSettings } = useSettings();
   const [playerCount, setPlayerCount] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('vs') === 'ai' ? 2 : 2;
+    return RoutingService.getQueryParam('vs') === 'ai' ? 2 : 2;
   });
   const [configs, setConfigs] = useState<PlayerConfig[]>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('vs');
+    const mode = RoutingService.getQueryParam('vs');
     if (mode === 'ai') {
       return [
         { name: 'Player 1', isAI: false },
