@@ -71,6 +71,13 @@ export function Welcome() {
               <p>Play with anyone, anywhere.</p>
               <button className={styles.modeButton}>Play Multiplayer</button>
             </div>
+
+            <div className={styles.modeCard} onClick={() => navigate('/editor')}>
+              <div className={styles.modeIcon}>🛠️</div>
+              <h3>Board Editor</h3>
+              <p>Test scenarios and custom setups.</p>
+              <button className={styles.modeButton}>Open Editor</button>
+            </div>
           </div>
         </section>
       </main>

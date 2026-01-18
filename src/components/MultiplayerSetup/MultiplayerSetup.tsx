@@ -23,8 +23,7 @@ export function MultiplayerSetup() {
   const { sendGameStateToPeers } = useMultiplayerGame();
   // Initialize backend from URL or default to peerjs
   const [backend, setBackend] = useState<'supabase' | 'peerjs'>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
+    const mode = RoutingService.getQueryParam('mode');
     return mode === 'supabase' || mode === 'peerjs' ? mode : 'peerjs';
   });
 

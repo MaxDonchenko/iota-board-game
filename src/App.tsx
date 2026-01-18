@@ -7,12 +7,14 @@ import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 import { Welcome } from './components/Welcome/Welcome';
 import { HotseatSetup } from './components/GameSetup/HotseatSetup';
 import { MultiplayerSetup } from './components/MultiplayerSetup/MultiplayerSetup';
+import { BoardEditor } from './components/BoardEditor/BoardEditor';
 import { Info } from './components/Info/Info';
 import { GameRenderer } from './components/GameRenderer/GameRenderer';
 import { SettingsDialog } from './components/Settings/SettingsDialog';
 import { GameProvider, useGameContext, type PlayerConfig } from './context/GameContext';
 import type { GameMode } from './types/Game.types';
 import type { Card as CardType } from './game/Card';
+import { RoutingService } from './services/routing/RoutingService';
 
 import './styles/index.css';
 import './styles/themes.css';
@@ -173,9 +175,11 @@ function GameSession() {
   }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
 
   if (!gameState) {
-    // If we're a multiplayer peer, wait a moment for game state to arrive
-    if (isMultiplayerPeer) {
-      // Return loading state instead of redirecting immediately
+    const hasGameId = !!RoutingService.getGameIdFromUrl();
+
+    // If we have a game ID in URL, stay on the loading screen
+    // It will either load, or remain here until the user chooses to go back
+    if (isMultiplayerPeer || hasGameId) {
       return (
         <div
           style={{
@@ -187,13 +191,21 @@ function GameSession() {
             gap: '1rem',
           }}
         >
-          <div>Waiting for game state...</div>
+          <div>Loading game...</div>
           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            If this persists, the host may not have started the game yet.
+            {isMultiplayerPeer ? 'Waiting for game state from host...' : 'Restoring session...'}
           </div>
+          <button
+            onClick={() => navigate('/')}
+            className="secondary-button"
+            style={{ marginTop: '1rem' }}
+          >
+            Cancel and Return Home
+          </button>
         </div>
       );
     }
+    // Only redirect to home if there is NO game ID and NO game state
     return <Navigate to="/" />;
   }
 
@@ -281,6 +293,7 @@ function App() {
               />
               <Route path="/multiplayer/setup/:gameId?" element={<MultiplayerSetup />} />
               <Route path="/multiplayer/game" element={<GameSession />} />
+              <Route path="/editor" element={<BoardEditor />} />
               <Route path="/info" element={<Info />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

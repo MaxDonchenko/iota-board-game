@@ -1,9 +1,14 @@
 import { useState, useCallback } from 'react';
-import classNames from 'classnames';
 import { useSettings } from '@/context/SettingsContext';
-import type { GameMode, AIDifficulty } from '@/types/Game.types';
-import type { PlayerConfig } from '@/hooks/useGame';
+import type { GameMode, PlayerConfig } from '@/types/Game.types';
+import {
+  PlayerCountSelector,
+  GameModeSelector,
+  PlayerConfigList,
+  SetupSection,
+} from '@/components/Setup/SetupComponents';
 import styles from './HotseatSetup.module.css';
+import { RoutingService } from '@/services/routing/RoutingService';
 
 interface HotseatSetupProps {
   onStartGame: (playerConfigs: PlayerConfig[], gameMode: GameMode) => void;
@@ -13,12 +18,10 @@ interface HotseatSetupProps {
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
   const { settings, updateSettings } = useSettings();
   const [playerCount, setPlayerCount] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('vs') === 'ai' ? 2 : 2;
+    return RoutingService.getQueryParam('vs') === 'ai' ? 2 : 2;
   });
   const [configs, setConfigs] = useState<PlayerConfig[]>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('vs');
+    const mode = RoutingService.getQueryParam('vs');
     if (mode === 'ai') {
       return [
         { name: 'Player 1', isAI: false },
@@ -35,7 +38,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
 
   const handlePlayerCountChange = useCallback(
     (count: number) => {
-      // Limit to 2 players for ultra-short mode
       if (gameMode === 'ultra-short' && count > 2) {
         return;
       }
@@ -55,7 +57,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
     [gameMode]
   );
 
-  // When game mode changes to ultra-short, limit to 2 players
   const handleGameModeChange = useCallback((mode: GameMode) => {
     setGameMode(mode);
     if (mode === 'ultra-short') {
@@ -96,35 +97,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
     }
   }, [configs, onStartGame, gameMode]);
 
-  const handleNameChange = useCallback(
-    (index: number, name: string) => {
-      handleConfigChange(index, { name });
-    },
-    [handleConfigChange]
-  );
-
-  const handleAIToggle = useCallback((index: number) => {
-    setConfigs((prev) => {
-      const config = prev[index];
-      const isAI = !config.isAI;
-      const newConfigs = [...prev];
-      newConfigs[index] = {
-        ...config,
-        isAI,
-        difficulty: isAI ? 'medium' : undefined,
-        name: isAI ? `Computer ${index + 1}` : `Player ${index + 1}`,
-      };
-      return newConfigs;
-    });
-  }, []);
-
-  const handleDifficultyChange = useCallback(
-    (index: number, difficulty: AIDifficulty) => {
-      handleConfigChange(index, { difficulty });
-    },
-    [handleConfigChange]
-  );
-
   return (
     <div className={styles.setup}>
       <header className={styles.header}>
@@ -134,49 +106,19 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
         <h2 className={styles.title}>Game Setup</h2>
       </header>
 
-      <div className={styles.section}>
-        <label className={styles.label}>
-          Number of Players {gameMode === 'ultra-short' ? '(2 only)' : '(2-4)'}
-        </label>
-        <div className={styles.buttonGroup}>
-          {(gameMode === 'ultra-short' ? [2] : [2, 3, 4]).map((count) => (
-            <button
-              key={count}
-              onClick={() => handlePlayerCountChange(count)}
-              className={classNames(styles.button, { [styles.active]: playerCount === count })}
-            >
-              {count}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PlayerCountSelector
+        playerCount={playerCount}
+        gameMode={gameMode}
+        onCountChange={handlePlayerCountChange}
+      />
 
-      <div className={styles.section}>
-        <label className={styles.label}>Deck Size</label>
-        <div className={styles.buttonGroup}>
-          <button
-            onClick={() => handleGameModeChange('ultra-short')}
-            className={classNames(styles.button, { [styles.active]: gameMode === 'ultra-short' })}
-          >
-            Ultra Short (16 cards)
-          </button>
-          <button
-            onClick={() => handleGameModeChange('short')}
-            className={classNames(styles.button, { [styles.active]: gameMode === 'short' })}
-          >
-            Short (32 cards)
-          </button>
-          <button
-            onClick={() => handleGameModeChange('full')}
-            className={classNames(styles.button, { [styles.active]: gameMode === 'full' })}
-          >
-            Full (64 cards)
-          </button>
-        </div>
-      </div>
+      <GameModeSelector gameMode={gameMode} onModeChange={handleGameModeChange} />
 
-      <div className={styles.section}>
-        <label className={styles.label}>
+      <SetupSection label="Wildcards">
+        <label
+          className={styles.label}
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        >
           <input
             type="checkbox"
             checked={enableWildcards}
@@ -186,56 +128,12 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
           />
           Enable Wildcards
         </label>
-        <p
-          className={styles.description}
-          style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}
-        >
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
           Include wildcard cards in the deck that can represent any shape, number, or color
         </p>
-      </div>
+      </SetupSection>
 
-      <div className={classNames(styles.section, styles.namesSection)}>
-        <label className={styles.label}>Players</label>
-        <div className={styles.playerList}>
-          {configs.map((config, index) => (
-            <div key={index} className={styles.playerRow}>
-              <div className={styles.playerMain}>
-                <input
-                  type="text"
-                  value={config.name}
-                  onChange={(e) => handleNameChange(index, e.target.value)}
-                  placeholder={`Player ${index + 1}`}
-                  className={styles.input}
-                />
-                <button
-                  type="button"
-                  className={classNames(styles.aiToggle, { [styles.aiActive]: config.isAI })}
-                  onClick={() => handleAIToggle(index)}
-                  title={config.isAI ? 'Change to Human' : 'Change to AI'}
-                >
-                  {config.isAI ? '🤖' : '👤'}
-                </button>
-              </div>
-              {config.isAI && (
-                <div className={styles.difficultyGroup}>
-                  {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((diff) => (
-                    <button
-                      key={diff}
-                      type="button"
-                      className={classNames(styles.diffButton, {
-                        [styles.diffActive]: config.difficulty === diff,
-                      })}
-                      onClick={() => handleDifficultyChange(index, diff)}
-                    >
-                      {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      <PlayerConfigList configs={configs} onConfigChange={handleConfigChange} />
 
       <button onClick={handleStart} className={styles.startButton}>
         Start Game

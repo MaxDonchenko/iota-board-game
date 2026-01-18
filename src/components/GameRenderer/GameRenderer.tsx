@@ -423,25 +423,8 @@ export function GameRenderer({
       </div>
 
       <div className={styles.content} style={{ overflow: 'auto' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'safe center',
-            justifyContent: 'safe center',
-            minWidth: '100%',
-            minHeight: '100%',
-            paddingTop: '3.25rem',
-          }}
-        >
-          <div
-            style={{
-              transform: `scale(${scale})`,
-              transformOrigin: '0 0',
-              transition: 'transform 0.2s ease-out',
-              display: 'flex',
-              flexShrink: 0,
-            }}
-          >
+        <div className={styles.boardContainer}>
+          <div className={styles.boardScaleWrapper} style={{ transform: `scale(${scale})` }}>
             <GameBoard
               grid={gameState.grid}
               selectedCards={selectedCards}

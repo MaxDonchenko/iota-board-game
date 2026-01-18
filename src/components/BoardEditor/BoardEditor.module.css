@@ -1,0 +1,79 @@
+.cardPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cardWrapper {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardWrapper:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.cardWrapper.selected {
+  border-color: var(--accent-primary, #2b95ff);
+  background-color: var(--bg-tertiary);
+}
+
+.editorSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.handEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.playerHand {
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.primaryButton {
+  padding: 0.75rem 1rem;
+  background-color: var(--accent-primary, #2b95ff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.secondaryButton {
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+}

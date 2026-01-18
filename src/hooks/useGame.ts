@@ -7,19 +7,20 @@ import { WildCardManager } from '@/game/WildCard';
 import { Card } from '@/game/Card';
 import { Grid } from '@/game/Grid';
 import {
-  generateGameId,
-  saveGameToStorage,
-  loadGameFromStorage,
   serializeGameState,
   deserializeGameState,
+  generateGameId,
+  saveGameToStorage,
+  loadGameFromStorage, // Keep loadGameFromStorage as it's used in this file
   type SerializableGameState,
 } from '@/utils/gamePersistence';
 import { AIEngine } from '@/ai/AIEngine';
-import type { GameState, GameSettings, AIDifficulty, GameMode } from '@/types/Game.types';
+import type { GameState, GameSettings, GameMode, PlayerConfig } from '@/types/Game.types';
 import type { Placement } from '@/game/Validation';
 import type { WildCardReplacement } from '@/game/WildCard';
 import type { Coordinate } from '@/types/Grid.types';
 import type { WildValue } from '@/types/Card.types';
+import { RoutingService } from '@/services/routing/RoutingService';
 
 export const PLAYER_COLORS = ['#FF4B2B', '#2B95FF', '#61BB46', '#F9A51B'];
 
@@ -28,12 +29,6 @@ interface PreviewPlacement {
   originalHandCard: Card;
   position: Coordinate;
   wildValue?: WildValue;
-}
-
-export interface PlayerConfig {
-  name: string;
-  isAI?: boolean;
-  difficulty?: AIDifficulty;
 }
 
 interface UseGameReturn {
@@ -74,13 +69,11 @@ interface UseGameReturn {
 
 export function useGame(): UseGameReturn {
   const [gameId, setGameId] = useState<string | null>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('game');
+    return RoutingService.getGameIdFromUrl();
   });
 
   const [gameState, setGameState] = useState<GameState | null>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameIdFromUrl = urlParams.get('game');
+    const gameIdFromUrl = RoutingService.getGameIdFromUrl();
     if (gameIdFromUrl) {
       return loadGameFromStorage(gameIdFromUrl);
     }
@@ -104,30 +97,30 @@ export function useGame(): UseGameReturn {
     return index === -1 ? selectedCards.length : index;
   }, [selectedCards, pendingPlacements]);
 
+  const { pathname } = useLocation();
+
   // Load game from URL
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameIdFromUrl = urlParams.get('game');
+    const gameIdFromUrl = RoutingService.getGameIdFromUrl();
 
     if (gameIdFromUrl && gameIdFromUrl !== gameId) {
+      console.log('[Game] Game ID changed in URL:', gameIdFromUrl, 'Current:', gameId);
       const loadedState = loadGameFromStorage(gameIdFromUrl);
       if (loadedState) {
+        console.log('[Game] Successfully loaded state from storage for:', gameIdFromUrl);
         setGameState(loadedState);
         setGameId(gameIdFromUrl);
       } else {
-        // Clear invalid game ID from URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('game');
-        window.history.replaceState({}, '', url.toString());
+        console.warn('[Game] Failed to load state from storage for:', gameIdFromUrl);
+        // We don't clear the URL immediately to avoid race conditions during navigation
       }
     }
-  }, [gameId]); // Runs when gameId changes, but also we want it to run when the user navigates (popstate)
+  }, [gameId, pathname]);
 
   // Also listen to popstate for back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const gameIdFromUrl = urlParams.get('game');
+      const gameIdFromUrl = RoutingService.getGameIdFromUrl();
       if (gameIdFromUrl && gameIdFromUrl !== gameId) {
         const loadedState = loadGameFromStorage(gameIdFromUrl);
         if (loadedState) {
@@ -138,27 +131,22 @@ export function useGame(): UseGameReturn {
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [gameId]);
+  }, [gameId, pathname]);
 
-  const { pathname } = useLocation();
-
-  // Sync gameId to URL search params
+  // Sync gameId to URL query params
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const idInUrl = url.searchParams.get('game');
+    const idInUrl = RoutingService.getGameIdFromUrl();
 
     // Only sync game ID for game paths
     if (pathname.includes('/game')) {
       if (gameId && idInUrl !== gameId) {
-        url.searchParams.set('game', gameId);
-        window.history.replaceState({}, '', url.toString());
+        RoutingService.setGameIdInUrl(gameId);
       }
     } else {
       // Don't remove game ID from URL if we're on multiplayer setup page
       // (it's used for the lobby connection)
       if (idInUrl && !pathname.includes('/multiplayer/setup')) {
-        url.searchParams.delete('game');
-        window.history.replaceState({}, '', url.toString());
+        RoutingService.removeGameIdFromUrl();
       }
     }
   }, [gameId, pathname]);
@@ -466,7 +454,7 @@ export function useGame(): UseGameReturn {
     setGameId(null);
 
     // Clear URL
-    window.history.replaceState({}, '', window.location.pathname);
+    RoutingService.removeGameIdFromUrl();
 
     // Clear from storage
     if (gameId) {
@@ -775,9 +763,7 @@ export function useGame(): UseGameReturn {
       setGameId(serialized.id);
 
       // Update URL
-      const url = new URL(window.location.href);
-      url.searchParams.set('game', serialized.id);
-      window.history.pushState({}, '', url.toString());
+      RoutingService.setGameIdInUrl(serialized.id);
 
       return { success: true };
     } catch (e) {

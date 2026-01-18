@@ -301,16 +301,32 @@ export function GameBoard({
       return;
     }
 
+    // In Board Editor mode, we want to be able to remove existing cards too
+    if (hasCard && onRemoveCard && !pendingPlacements.length && !selectedCards.length) {
+      onRemoveCard({ x, y });
+      return;
+    }
+
     if (hasCard || isNotAllowed || isInvalid) {
       return;
     }
 
-    if (selectedCards.length > 0 && nextCardIndex < selectedCards.length && onPlaceCard) {
+    if (
+      (selectedCards.length > 0 && nextCardIndex < selectedCards.length && onPlaceCard) ||
+      (onPlaceCard && !selectedCards.length)
+    ) {
       if (!pendingPlacement) {
         onPlaceCard({ x, y });
       }
     }
     onCellClick?.(x, y);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, x: number, y: number) => {
+    if (onRemoveCard) {
+      e.preventDefault();
+      onRemoveCard({ x, y });
+    }
   };
 
   const cells: JSX.Element[] = [];
@@ -379,6 +395,7 @@ export function GameBoard({
               : undefined
           }
           onClick={() => handleCellClick(x, y, hasCard, isNotAllowed, isInvalidPlacement)}
+          onContextMenu={(e) => handleContextMenu(e, x, y)}
           onMouseEnter={() => setHoveredCell({ x, y })}
           onMouseLeave={() => setHoveredCell(null)}
         >

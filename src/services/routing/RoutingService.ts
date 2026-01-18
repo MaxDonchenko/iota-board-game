@@ -1,49 +1,44 @@
 /**
  * Routing service for managing navigation and URL parameters
  * Centralizes route handling to avoid duplication and ensure consistency
- * Supports both hash routing (for development) and regular routing (for gh-pages)
  */
 
 const BASE_PATH = '/iota-board-game/';
 
 export class RoutingService {
   /**
-   * Check if we should use hash routing (development) or regular routing (gh-pages)
-   */
-  private static useHashRouting(): boolean {
-    // Use hash routing if we're on localhost or if hash routing is already in use
-    return (
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hash.startsWith('#/')
-    );
-  }
-
-  /**
-   * Get the base path for regular routing (gh-pages)
+   * Get the base path for routing
    */
   private static getBasePath(): string {
-    return this.useHashRouting() ? '' : BASE_PATH;
+    return BASE_PATH;
   }
 
   /**
-   * Get the current pathname (hash route or regular route)
+   * Get the current pathname
    */
   static getPathname(): string {
-    if (this.useHashRouting()) {
-      return window.location.hash.replace('#', '') || '/';
-    }
-    // Regular routing - remove base path
     const path = window.location.pathname;
-    return path.startsWith(BASE_PATH) ? path.slice(BASE_PATH.length - 1) || '/' : path || '/';
+    const basePath = this.getBasePath();
+    // If we have a non-root base path, strip it from the start of the pathname
+    if (basePath !== '/' && path.startsWith(basePath)) {
+      return path.slice(basePath.length - 1) || '/';
+    }
+    return path || '/';
+  }
+
+  /**
+   * Get a query parameter value from the URL
+   */
+  static getQueryParam(name: string): string | null {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
   }
 
   /**
    * Get game ID from URL query parameters
    */
   static getGameIdFromUrl(): string | null {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('game');
+    return this.getQueryParam('game');
   }
 
   /**
@@ -65,21 +60,19 @@ export class RoutingService {
   }
 
   /**
-   * Navigate to a path (handles both hash and regular routing)
+   * Navigate to a path
    */
   private static navigateToPath(path: string): void {
-    if (this.useHashRouting()) {
-      window.location.hash = path;
-    } else {
-      // Regular routing with base path - use URL constructor to handle path joining correctly
-      const url = new URL(window.location.href);
-      const basePath = this.getBasePath().replace(/\/$/, ''); // Remove trailing slash
-      const cleanPath = path.startsWith('/') ? path : `/${path}`; // Ensure path starts with /
-      // Join basePath and cleanPath, ensuring no double slashes
-      const fullPath = `${basePath}${cleanPath}`.replace(/\/+/g, '/');
-      url.pathname = fullPath;
-      window.location.href = url.toString();
-    }
+    const url = new URL(window.location.href);
+    const basePath = this.getBasePath().replace(/\/$/, ''); // Remove trailing slash
+    const cleanPath = path.startsWith('/') ? path : `/${path}`; // Ensure path starts with /
+
+    // Join basePath and cleanPath, ensuring no double slashes
+    const fullPath = `${basePath}${cleanPath}`.replace(/\/+/g, '/');
+    url.pathname = fullPath;
+
+    // Use window.location.href for hard navigation
+    window.location.href = url.toString();
   }
 
   /**
@@ -93,7 +86,6 @@ export class RoutingService {
 
   /**
    * Navigate to multiplayer game page
-   * The game ID should already be in the URL query params from importGame/startGame
    */
   static navigateToMultiplayerGame(): void {
     this.navigateToPath('/multiplayer/game');

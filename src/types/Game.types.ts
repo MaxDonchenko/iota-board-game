@@ -9,6 +9,12 @@ export type GameMode = 'ultra-short' | 'short' | 'full';
 export type AIDifficulty = 'easy' | 'medium' | 'hard';
 export type DrawReason = 'threefold-repetition' | 'no-valid-moves';
 
+export interface PlayerConfig {
+  name: string;
+  isAI?: boolean;
+  difficulty?: AIDifficulty;
+}
+
 export interface Player {
   id: string;
   name: string;
