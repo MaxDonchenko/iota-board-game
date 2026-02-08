@@ -9,6 +9,7 @@ import { finalTurn } from './FinalTurn';
 import { complexGrid } from './ComplexGrid';
 import { impossiblePlacement } from './ImpossiblePlacement';
 import { edgeCaseValidation } from './EdgeCaseValidation';
+import { finalRound } from './FinalRound';
 import type { UseCase } from './types';
 
 export type UseCaseName =
@@ -22,7 +23,8 @@ export type UseCaseName =
   | 'FinalTurn'
   | 'ComplexGrid'
   | 'ImpossiblePlacement'
-  | 'EdgeCaseValidation';
+  | 'EdgeCaseValidation'
+  | 'FinalRound';
 
 export type { UseCase };
 
@@ -38,4 +40,5 @@ export const useCases: Record<UseCaseName, UseCase> = {
   ComplexGrid: complexGrid,
   ImpossiblePlacement: impossiblePlacement,
   EdgeCaseValidation: edgeCaseValidation,
+  FinalRound: finalRound,
 };

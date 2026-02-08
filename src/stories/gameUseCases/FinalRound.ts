@@ -15,49 +15,58 @@ grid.setStarterCard(0, 0, starterCard);
 grid.addCard(1, 0, new Card('Square', 2, 'Red'));
 grid.addCard(2, 0, new Card('Square', 3, 'Red'));
 
-// Empty the deck to simulate final turn
+// Empty the deck to simulate final round transition
 while (deck.drawPile.length > 0) {
   deck.drawCard();
 }
 
 const gameState: GameState = {
   phase: 'playing',
-  currentPlayerIndex: 0,
+  currentPlayerIndex: 1, // Player 2's turn
   turnPhase: 'cardPlacement',
   players: [
     {
       id: 'player-0',
       name: 'Player 1',
-      hand: [new Card('Square', 4, 'Red'), new Card('Circle', 1, 'Blue')],
-      score: 0,
+      hand: [], // Player 1 finished their hand
+      score: 120,
+      color: '#FF4B2B',
     },
     {
       id: 'player-1',
       name: 'Player 2',
-      hand: [],
-      score: 5,
+      hand: [new Card('Circle', 1, 'Blue'), new Card('Circle', 2, 'Blue')],
+      score: 100,
+      color: '#2B95FF',
+    },
+    {
+      id: 'player-2',
+      name: 'Player 3',
+      hand: [new Card('Triangle', 1, 'Green')],
+      score: 80,
+      color: '#61BB46',
     },
   ],
   grid,
   deck,
-  isFinalTurn: true, // Final turn - deck is empty
+  isFinalTurn: false,
+  isFinalRound: true, // Marked as final round
   gameMode: 'full',
   settings: {
     theme: 'light',
     useGradients: true,
     gameMode: 'full',
-    showInvalidPlacements: false,
-
+    showInvalidPlacements: true,
     wildcardVariant: 'modern',
     cardVariant: 'modern',
     enableWildcards: true,
-    triggerFinalRound: false,
+    triggerFinalRound: true,
   },
 };
 
-export const finalTurn: UseCase = {
-  name: 'Final Turn',
+export const finalRound: UseCase = {
+  name: 'Final Round (Equal Turns)',
   description:
-    'Draw pile is empty. This is the final turn - all scores are doubled. Player 2 has no cards left.',
+    'Player 1 has finished their hand, but because "Equalize Turns" is enabled, other players continue their turns until the round is complete.',
   gameState,
 };

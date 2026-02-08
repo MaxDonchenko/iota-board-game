@@ -8,6 +8,7 @@ interface SettingsContextType {
   toggleShowInvalidPlacements: () => void;
   setWildcardVariant: (variant: 'modern' | 'original') => void;
   setCardVariant: (variant: 'modern' | 'original') => void;
+  toggleTriggerFinalRound: () => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -20,6 +21,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   wildcardVariant: 'modern',
   cardVariant: 'modern',
   enableWildcards: true,
+  triggerFinalRound: false,
 };
 
 const STORAGE_KEY = 'iota-game-settings';
@@ -64,6 +66,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     updateSettings({ wildcardVariant: variant });
   const setCardVariant = (variant: 'modern' | 'original') =>
     updateSettings({ cardVariant: variant });
+  const toggleTriggerFinalRound = () =>
+    updateSettings({ triggerFinalRound: !settings.triggerFinalRound });
 
   return (
     <SettingsContext.Provider
@@ -74,6 +78,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         toggleShowInvalidPlacements,
         setWildcardVariant,
         setCardVariant,
+        toggleTriggerFinalRound,
       }}
     >
       {children}

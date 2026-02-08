@@ -12,6 +12,7 @@ export function Settings() {
     toggleShowInvalidPlacements,
     setWildcardVariant,
     setCardVariant,
+    toggleTriggerFinalRound,
   } = useSettings();
 
   return (
@@ -49,6 +50,21 @@ export function Settings() {
         </label>
         <p className={styles.description}>
           Visually mark empty slots where card placement isn't allowed
+        </p>
+      </div>
+
+      <div className={styles.section}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={settings.triggerFinalRound}
+            onChange={toggleTriggerFinalRound}
+            className={styles.checkbox}
+          />
+          Equalize Turns (Final Round)
+        </label>
+        <p className={styles.description}>
+          When a player finishes, continue the round so everyone has the same number of turns
         </p>
       </div>
 

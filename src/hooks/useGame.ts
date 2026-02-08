@@ -216,14 +216,17 @@ export function useGame(): UseGameReturn {
           )
         );
 
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      const isFinishingHand = placements.length === currentPlayer.hand.length;
+      const isFinalTurnForPlayer = isFinishingHand && gameState.deck.isEmpty();
+
       const scoreResult = Scoring.calculateTurnScore(
         affectedLines,
         placements.length,
-        gameState.isFinalTurn
+        isFinalTurnForPlayer || gameState.isFinalTurn
       );
 
       // Update player score
-      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
       const newState = GameStateManager.updatePlayerScore(
         gameState,
         currentPlayer.id,

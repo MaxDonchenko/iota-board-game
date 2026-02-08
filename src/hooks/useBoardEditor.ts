@@ -31,6 +31,7 @@ export function useBoardEditor(
       wildcardVariant: 'modern',
       cardVariant: 'modern',
       enableWildcards: true,
+      triggerFinalRound: false,
     };
     const configsWithColors = playerConfigs.map((c, i) => ({
       ...c,

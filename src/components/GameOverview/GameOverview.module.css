@@ -19,3 +19,15 @@
 .value {
   font-weight: 600;
 }
+
+.finalRound {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #ff4b2b;
+  color: white;
+  font-weight: bold;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  text-align: center;
+  width: 100%;
+}
