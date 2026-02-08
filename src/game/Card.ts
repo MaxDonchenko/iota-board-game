@@ -69,7 +69,7 @@ export class Card {
   }
 
   getValue(): number {
-    return this.isWild ? 0 : (this.number as number);
+    return this.number ?? 0;
   }
 
   setWildValue(value: WildValue): void {
@@ -77,6 +77,10 @@ export class Card {
       throw new Error('Cannot set wild value on non-wild card');
     }
     this.wildValue = value;
+    // Synchronize properties with wildValue
+    this.shape = value.shape;
+    this.number = value.number;
+    this.color = value.color;
   }
 
   matchesWild(other: Card): boolean {

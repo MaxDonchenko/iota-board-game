@@ -73,7 +73,7 @@ function UseCaseStory({ useCaseName }: { useCaseName: string }) {
         {showHand && currentPlayer && (
           <div style={{ marginTop: '2rem' }}>
             <h4>Player Hand:</h4>
-            <PlayerHand cards={currentPlayer.hand} onCardSelect={() => {}} />
+            <PlayerHand cards={currentPlayer.hand} onSelectionChange={() => {}} />
           </div>
         )}
       </div>
@@ -96,6 +96,16 @@ export const LotCreation: StoryObj = {
     <SettingsProvider>
       <ThemeProvider>
         <UseCaseStory useCaseName="LotCreation" />
+      </ThemeProvider>
+    </SettingsProvider>
+  ),
+};
+
+export const MultipleLots: StoryObj = {
+  render: () => (
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="MultipleLots" />
       </ThemeProvider>
     </SettingsProvider>
   ),

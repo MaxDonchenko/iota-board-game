@@ -16,13 +16,13 @@ describe('Card', () => {
     expect(card.getValue()).toBe(3);
   });
 
-  it('should return 0 for wild card', () => {
-    const card = new Card('Square', 1, 'Red', true);
+  it('should return 0 for wild card in hand (no value)', () => {
+    const card = new Card(undefined, undefined, undefined, true);
     expect(card.getValue()).toBe(0);
   });
 
-  it('should set wild value correctly', () => {
-    const card = new Card('Square', 1, 'Red', true);
+  it('should set wild value and synchronize properties', () => {
+    const card = new Card(undefined, undefined, undefined, true);
     const wildValue: WildValue = {
       shape: 'Triangle',
       number: 2,
@@ -30,6 +30,10 @@ describe('Card', () => {
     };
     card.setWildValue(wildValue);
     expect(card.wildValue).toEqual(wildValue);
+    expect(card.getValue()).toBe(2);
+    expect(card.shape).toBe('Triangle');
+    expect(card.number).toBe(2);
+    expect(card.color).toBe('Blue');
   });
 
   it('should compare cards correctly', () => {
