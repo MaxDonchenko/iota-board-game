@@ -9,6 +9,7 @@ interface SettingsContextType {
   setWildcardVariant: (variant: 'modern' | 'original') => void;
   setCardVariant: (variant: 'modern' | 'original') => void;
   toggleTriggerFinalRound: () => void;
+  toggleEnableWildcards: () => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -68,6 +69,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     updateSettings({ cardVariant: variant });
   const toggleTriggerFinalRound = () =>
     updateSettings({ triggerFinalRound: !settings.triggerFinalRound });
+  const toggleEnableWildcards = () =>
+    updateSettings({ enableWildcards: !settings.enableWildcards });
 
   return (
     <SettingsContext.Provider
@@ -79,6 +82,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setWildcardVariant,
         setCardVariant,
         toggleTriggerFinalRound,
+        toggleEnableWildcards,
       }}
     >
       {children}

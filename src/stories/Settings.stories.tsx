@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Settings } from '../components/Settings/Settings';
 import { SettingsProvider } from '../context/SettingsContext';
@@ -64,11 +65,13 @@ const meta: Meta<typeof Settings> = {
   component: Settings,
   decorators: [
     (Story) => (
-      <SettingsProvider>
-        <ThemeProvider>
-          <Story />
-        </ThemeProvider>
-      </SettingsProvider>
+      <MemoryRouter>
+        <SettingsProvider>
+          <ThemeProvider>
+            <Story />
+          </ThemeProvider>
+        </SettingsProvider>
+      </MemoryRouter>
     ),
   ],
 };
