@@ -68,6 +68,7 @@ function GameSession() {
     removePreviewPlacement,
     exportGame,
     importGame,
+    isGameActive,
   } = useGameContext();
   const { sendGameStateToPeers, sendGameStateToHost } = useMultiplayerGame();
 
@@ -105,7 +106,7 @@ function GameSession() {
   ]);
 
   const handleNewGame = () => {
-    if (gameState && gameState.phase !== 'ended') {
+    if (isGameActive && gameState?.phase !== 'ended') {
       if (
         !window.confirm(
           'Are you sure you want to start a new game? This will end the current game.'
@@ -167,14 +168,14 @@ function GameSession() {
 
   // It's "My Turn" if the current active player matches my identity
   const isMyTurn = useMemo(() => {
-    if (!gameState || !currentPlayer) return false;
+    if (!isGameActive || !currentPlayer) return false;
     if (isMultiplayer) {
       return !myPlayerName || currentPlayer.name === myPlayerName;
     }
     return !isAITurn;
-  }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
+  }, [isGameActive, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
 
-  if (!gameState) {
+  if (!isGameActive || !gameState) {
     const hasGameId = !!RoutingService.getGameIdFromUrl();
 
     // If we have a game ID in URL, stay on the loading screen

@@ -18,7 +18,7 @@ export function MultiplayerSetup() {
   const [, setSearchParams] = useSearchParams();
   const routing = useRouting();
   const { initializeService, isHost, setIsHost, setMyPlayerName, service } = useMultiplayer();
-  const { startGame, resetSelection, gameState } = useGameContext();
+  const { startGame, resetSelection, isGameActive } = useGameContext();
   const { settings } = useSettings();
   const { sendGameStateToPeers } = useMultiplayerGame();
   // Initialize backend from URL or default to peerjs
@@ -72,14 +72,14 @@ export function MultiplayerSetup() {
 
   // Watch for gameState to become available after starting game
   useEffect(() => {
-    if (isStartingGame && gameState && isHost) {
+    if (isStartingGame && isGameActive && isHost) {
       console.log('[Multiplayer] gameState became available, sending to peers...');
       sendGameStateToPeers();
       routing.navigateToMultiplayerGame();
       console.log('[Multiplayer] Navigation triggered to game page');
       // Don't reset isStartingGame - we're navigating away
     }
-  }, [gameState, isStartingGame, isHost, sendGameStateToPeers, routing]);
+  }, [isGameActive, isStartingGame, isHost, sendGameStateToPeers, routing]);
 
   const handleBack = () => {
     routing.navigateToHome();

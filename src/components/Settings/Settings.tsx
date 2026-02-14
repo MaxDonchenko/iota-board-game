@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { ThemeToggle } from './ThemeToggle';
 import { GameModeSelector } from './GameModeSelector';
 import { useSettings } from '@/context/SettingsContext';
@@ -16,8 +17,7 @@ export function Settings() {
     toggleTriggerFinalRound,
   } = useSettings();
 
-  const { gameState } = useGame();
-  const isGameActive = !!gameState;
+  const { isGameActive } = useGame();
 
   return (
     <div className={styles.settings}>
@@ -30,11 +30,11 @@ export function Settings() {
         </div>
       )}
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <ThemeToggle disabled={isGameActive} />
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <label className={styles.label}>
           <input
             type="checkbox"
@@ -50,7 +50,7 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <label className={styles.label}>
           <input
             type="checkbox"
@@ -66,7 +66,7 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <label className={styles.label}>
           <input
             type="checkbox"
@@ -82,11 +82,11 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <GameModeSelector disabled={isGameActive} />
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
           Wildcard Style
         </div>
@@ -124,7 +124,7 @@ export function Settings() {
         </div>
       </div>
 
-      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
         <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
           Card Style
         </div>

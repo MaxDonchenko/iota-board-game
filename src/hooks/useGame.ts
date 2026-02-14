@@ -44,6 +44,7 @@ interface UseGameReturn {
   discardCards: (cards: Card[]) => { success: boolean; error?: string };
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
   resetGame: () => void;
+  isGameActive: boolean;
 
   // UI selection / preview helpers
   selectedCards: Card[];
@@ -88,6 +89,8 @@ export function useGame(): UseGameReturn {
     () => (gameState ? gameState.players[gameState.currentPlayerIndex] : null),
     [gameState]
   );
+
+  const isGameActive = !!gameState;
 
   const isAITurn = useMemo(() => currentPlayer?.isAI || false, [currentPlayer]);
 
@@ -784,6 +787,7 @@ export function useGame(): UseGameReturn {
     discardCards,
     recycleWildCard,
     resetGame,
+    isGameActive,
 
     selectedCards,
     pendingPlacements,
