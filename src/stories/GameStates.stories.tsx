@@ -10,8 +10,9 @@ import { Grid } from '../game/Grid';
 import { Deck } from '../game/Deck';
 import { GameStateManager } from '../game/GameState';
 import { Card as CardClass } from '../game/Card';
-import type { GameState } from '../types/Game.types';
+import type { GameState, Player } from '../types/Game.types';
 import type { WildValue } from '../types/Card.types';
+import { GameOver } from '../components/GameOver/GameOver';
 
 const meta: Meta = {
   title: 'DevMode/GameStates',
@@ -83,6 +84,7 @@ function WildcardConfirmationStory() {
             pendingPlacements={[
               {
                 card: wildcard,
+                originalHandCard: wildcard,
                 position: { x: 3, y: 0 },
                 wildValue: selectedWildValue || undefined,
               },
@@ -190,8 +192,8 @@ function GameEndedStory() {
     currentPlayerIndex: 0,
     turnPhase: 'cardPlacement',
     players: [
-      { id: 'player-0', name: 'Player 1', hand: [], score: 45 },
-      { id: 'player-1', name: 'Player 2', hand: [], score: 32 },
+      { id: 'player-0', name: 'Player 1', hand: [], score: 45, color: 'red' },
+      { id: 'player-1', name: 'Player 2', hand: [], score: 32, color: 'blue' },
     ],
     grid,
     deck,
@@ -204,19 +206,15 @@ function GameEndedStory() {
       showInvalidPlacements: false,
       wildcardVariant: 'modern',
       cardVariant: 'modern',
+      enableWildcards: true,
+      triggerFinalRound: false,
     },
   };
 
   return (
     <ThemeSync>
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1 style={{ color: 'var(--text-primary)' }}>Game Over!</h1>
-        <h2 style={{ color: 'var(--text-primary)' }}>
-          Winner: {gameState.players[0].name} with {gameState.players[0].score} points
-        </h2>
-        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
-          <ScoreDisplay gameState={gameState} />
-        </div>
+      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+        <GameOver gameState={gameState} onNewGame={() => {}} />
       </div>
     </ThemeSync>
   );
@@ -251,8 +249,9 @@ function FinalTurnStory() {
         name: 'Player 1',
         hand: [new CardClass('Square', 4, 'Red'), new CardClass('Circle', 1, 'Blue')],
         score: 25,
+        color: 'red',
       },
-      { id: 'player-1', name: 'Player 2', hand: [], score: 18 },
+      { id: 'player-1', name: 'Player 2', hand: [], score: 18, color: 'blue' },
     ],
     grid,
     deck,
@@ -265,6 +264,8 @@ function FinalTurnStory() {
       showInvalidPlacements: false,
       wildcardVariant: 'modern',
       cardVariant: 'modern',
+      enableWildcards: true,
+      triggerFinalRound: false,
     },
   };
 
@@ -330,6 +331,7 @@ function WildcardRecycleStory() {
           new CardClass('Circle', 1, 'Blue'),
         ],
         score: 15,
+        color: 'red',
       },
     ],
     grid,
@@ -343,6 +345,8 @@ function WildcardRecycleStory() {
       showInvalidPlacements: false,
       wildcardVariant: 'modern',
       cardVariant: 'modern',
+      enableWildcards: true,
+      triggerFinalRound: false,
     },
   };
 
@@ -390,7 +394,7 @@ function ThreefoldRepetitionStory() {
       }
     );
 
-    initial.players.forEach((p) => (p.passCount = 3));
+    initial.players.forEach((p: Player) => (p.passCount = 3));
     initial.phase = 'draw';
     initial.turnPhase = 'pass';
     return initial;
