@@ -9,9 +9,13 @@ interface GameOverProps {
 
 export function GameOver({ gameState, onNewGame }: GameOverProps) {
   const isDraw = gameState.phase === 'draw';
-  const winner = !isDraw
-    ? gameState.players.reduce((prev, current) => (current.score > prev.score ? current : prev))
-    : null;
+
+  const winners = !isDraw
+    ? (() => {
+        const maxScore = Math.max(...gameState.players.map((p) => p.score));
+        return gameState.players.filter((p) => p.score === maxScore);
+      })()
+    : [];
 
   const getDrawReason = () => {
     if (gameState.drawReason === 'no-valid-moves') {
@@ -43,9 +47,11 @@ export function GameOver({ gameState, onNewGame }: GameOverProps) {
         </div>
       ) : (
         <div className={styles.winnerInfo}>
-          <p className={styles.winnerLabel}>Winner</p>
-          <p className={styles.winnerName}>{winner?.name}</p>
-          <p className={styles.winnerScore}>{winner?.score} points</p>
+          <p className={styles.winnerLabel}>{winners.length > 1 ? 'Winners' : 'Winner'}</p>
+          <p className={styles.winnerName} data-testid="winner-name">
+            {winners.map((w) => w.name).join(', ')}
+          </p>
+          <p className={styles.winnerScore}>{winners[0]?.score} points</p>
         </div>
       )}
 
