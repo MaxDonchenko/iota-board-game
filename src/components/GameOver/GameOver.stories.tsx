@@ -35,6 +35,7 @@ const mockGameState: GameState = {
     wildcardVariant: 'modern',
     cardVariant: 'modern',
     enableWildcards: true,
+    triggerFinalRound: false,
   },
 };
 

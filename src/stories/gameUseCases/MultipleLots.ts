@@ -53,6 +53,8 @@ const gameState: GameState = {
     showInvalidPlacements: false,
     wildcardVariant: 'modern',
     cardVariant: 'modern',
+    enableWildcards: true,
+    triggerFinalRound: false,
   },
 };
 

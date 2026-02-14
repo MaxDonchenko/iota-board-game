@@ -261,6 +261,7 @@ export const storyGameStates: Record<string, SerializableGameState> = {
       wildcardVariant: 'modern',
       cardVariant: 'modern',
       enableWildcards: true,
+      triggerFinalRound: false,
     },
   },
 
@@ -314,6 +315,7 @@ export const storyGameStates: Record<string, SerializableGameState> = {
       wildcardVariant: 'modern',
       cardVariant: 'modern',
       enableWildcards: true,
+      triggerFinalRound: false,
     },
   },
 };
@@ -596,6 +598,7 @@ export const noPlacableCardAfterWildcard: SerializableGameState = {
     wildcardVariant: 'modern',
     cardVariant: 'modern',
     enableWildcards: true,
+    triggerFinalRound: false,
   },
   startTime: '2026-01-04T01:34:39.666Z',
 };

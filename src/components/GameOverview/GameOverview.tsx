@@ -32,19 +32,22 @@ export function GameOverview({ gameState, gameStartTime }: GameOverviewProps) {
   };
 
   return (
-    <div className={styles.overview}>
-      <div className={styles.stat}>
-        <span className={styles.label}>Cards Played:</span>
-        <span className={styles.value}>{cardsPlayed}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '0.5rem' }}>
+      <div className={styles.overview}>
+        <div className={styles.stat}>
+          <span className={styles.label}>Cards Played:</span>
+          <span className={styles.value}>{cardsPlayed}</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.label}>Deck:</span>
+          <span className={styles.value}>{cardsInDeck}</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.label}>Duration:</span>
+          <span className={styles.value}>{formatDuration(gameStartTime)}</span>
+        </div>
       </div>
-      <div className={styles.stat}>
-        <span className={styles.label}>Deck:</span>
-        <span className={styles.value}>{cardsInDeck}</span>
-      </div>
-      <div className={styles.stat}>
-        <span className={styles.label}>Duration:</span>
-        <span className={styles.value}>{formatDuration(gameStartTime)}</span>
-      </div>
+      {gameState.isFinalRound && <div className={styles.finalRound}>FINAL ROUND</div>}
     </div>
   );
 }

@@ -34,6 +34,7 @@ export interface GameSettings {
   wildcardVariant: 'modern' | 'original';
   cardVariant: 'modern' | 'original';
   enableWildcards: boolean;
+  triggerFinalRound: boolean;
 }
 
 export interface GameState {
@@ -50,4 +51,5 @@ export interface GameState {
   lastMovePlacements?: { card: Card; position: Coordinate }[];
   lastMovePlayerIndex?: number | null;
   drawReason?: DrawReason;
+  isFinalRound?: boolean;
 }

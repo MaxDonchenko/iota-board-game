@@ -48,8 +48,11 @@ const gameState: GameState = {
     useGradients: true,
     gameMode: 'full',
     showInvalidPlacements: false,
+
     wildcardVariant: 'modern',
     cardVariant: 'modern',
+    enableWildcards: true,
+    triggerFinalRound: false,
   },
 };
 

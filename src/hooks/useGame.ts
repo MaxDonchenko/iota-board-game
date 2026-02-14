@@ -31,7 +31,7 @@ interface PreviewPlacement {
   wildValue?: WildValue;
 }
 
-interface UseGameReturn {
+export interface UseGameReturn {
   gameState: GameState | null;
   currentPlayer: import('@/types/Game.types').Player | null;
   isAITurn: boolean;
@@ -44,6 +44,7 @@ interface UseGameReturn {
   discardCards: (cards: Card[]) => { success: boolean; error?: string };
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
   resetGame: () => void;
+  isGameActive: boolean;
 
   // UI selection / preview helpers
   selectedCards: Card[];
@@ -67,7 +68,10 @@ interface UseGameReturn {
   importGame: (json: string) => { success: boolean; error?: string };
 }
 
-export function useGame(): UseGameReturn {
+// This is the actual logic that runs the game.
+// Most components should use useGame() which will correctly
+// proxy to the context if we are inside a provider (like in Storybook).
+export function useGameImplementation(): UseGameReturn {
   const [gameId, setGameId] = useState<string | null>(() => {
     return RoutingService.getGameIdFromUrl();
   });
@@ -88,6 +92,8 @@ export function useGame(): UseGameReturn {
     () => (gameState ? gameState.players[gameState.currentPlayerIndex] : null),
     [gameState]
   );
+
+  const isGameActive = !!gameState;
 
   const isAITurn = useMemo(() => currentPlayer?.isAI || false, [currentPlayer]);
 
@@ -216,14 +222,17 @@ export function useGame(): UseGameReturn {
           )
         );
 
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      const isFinishingHand = placements.length === currentPlayer.hand.length;
+      const isFinalTurnForPlayer = isFinishingHand && gameState.deck.isEmpty();
+
       const scoreResult = Scoring.calculateTurnScore(
         affectedLines,
         placements.length,
-        gameState.isFinalTurn
+        isFinalTurnForPlayer || gameState.isFinalTurn
       );
 
       // Update player score
-      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
       const newState = GameStateManager.updatePlayerScore(
         gameState,
         currentPlayer.id,
@@ -781,6 +790,7 @@ export function useGame(): UseGameReturn {
     discardCards,
     recycleWildCard,
     resetGame,
+    isGameActive,
 
     selectedCards,
     pendingPlacements,
@@ -801,4 +811,18 @@ export function useGame(): UseGameReturn {
     exportGame,
     importGame,
   };
+}
+
+import { useContext } from 'react';
+import { GameContext } from '@/context/GameContext';
+
+/**
+ * Proxy hook that allows mocking game logic in Storybook/Tests
+ * via GameContext.Provider, but falls back to real logic otherwise.
+ */
+export function useGame(): UseGameReturn {
+  const context = useContext(GameContext);
+  const implementation = useGameImplementation();
+
+  return context || implementation;
 }

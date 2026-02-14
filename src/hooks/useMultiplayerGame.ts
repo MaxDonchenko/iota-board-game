@@ -13,7 +13,7 @@ import type { SerializableGameState } from '@/utils/gamePersistence';
 
 export function useMultiplayerGame() {
   const { service, isHost } = useMultiplayer();
-  const { gameState, exportGame, importGame } = useGameContext();
+  const { isGameActive, exportGame, importGame } = useGameContext();
   const routing = useRouting();
   const hasImportedInitialState = useRef(false);
   const lastSentStateRef = useRef<string | null>(null);
@@ -78,11 +78,11 @@ export function useMultiplayerGame() {
    * Only sends if state has actually changed to avoid unnecessary network traffic
    */
   const sendGameStateToPeers = useCallback(() => {
-    if (!service || !isHost || !gameState) {
+    if (!service || !isHost || !isGameActive) {
       console.log('[Multiplayer] sendGameStateToPeers skipped:', {
         hasService: !!service,
         isHost,
-        hasGameState: !!gameState,
+        hasGameState: isGameActive,
       });
       return;
     }
@@ -106,7 +106,7 @@ export function useMultiplayerGame() {
     } else {
       console.warn('[Multiplayer] exportGame() returned null, cannot send to peers');
     }
-  }, [service, isHost, gameState, exportGame]);
+  }, [service, isHost, isGameActive, exportGame]);
 
   /**
    * Send game action to host (for peers)
@@ -135,11 +135,11 @@ export function useMultiplayerGame() {
    * Peers send their updated state to the host after making a move
    */
   const sendGameStateToHost = useCallback(() => {
-    if (!service || isHost || !gameState) {
+    if (!service || isHost || !isGameActive) {
       console.log('[Multiplayer] sendGameStateToHost skipped:', {
         hasService: !!service,
         isHost,
-        hasGameState: !!gameState,
+        hasGameState: isGameActive,
       });
       return;
     }
@@ -162,7 +162,7 @@ export function useMultiplayerGame() {
     } else {
       console.warn('[Multiplayer] exportGame() returned null, cannot send to host');
     }
-  }, [service, isHost, gameState, exportGame]);
+  }, [service, isHost, isGameActive, exportGame]);
 
   /**
    * Handle receiving actions from peers (for host)

@@ -21,6 +21,7 @@ describe('No Valid Moves - Auto Draw', () => {
         wildcardVariant: 'modern',
         cardVariant: 'modern',
         enableWildcards: true,
+        triggerFinalRound: false,
       }
     );
   });

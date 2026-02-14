@@ -11,7 +11,8 @@ import { BoardEditor } from './components/BoardEditor/BoardEditor';
 import { Info } from './components/Info/Info';
 import { GameRenderer } from './components/GameRenderer/GameRenderer';
 import { SettingsDialog } from './components/Settings/SettingsDialog';
-import { GameProvider, useGameContext, type PlayerConfig } from './context/GameContext';
+import { GameProvider, type PlayerConfig } from './context/GameContext';
+import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
 import type { Card as CardType } from './game/Card';
 import { RoutingService } from './services/routing/RoutingService';
@@ -68,7 +69,8 @@ function GameSession() {
     removePreviewPlacement,
     exportGame,
     importGame,
-  } = useGameContext();
+    isGameActive,
+  } = useGame();
   const { sendGameStateToPeers, sendGameStateToHost } = useMultiplayerGame();
 
   // Send game state to peers after each turn (for host)
@@ -105,7 +107,7 @@ function GameSession() {
   ]);
 
   const handleNewGame = () => {
-    if (gameState && gameState.phase !== 'ended') {
+    if (isGameActive && gameState?.phase !== 'ended') {
       if (
         !window.confirm(
           'Are you sure you want to start a new game? This will end the current game.'
@@ -167,14 +169,14 @@ function GameSession() {
 
   // It's "My Turn" if the current active player matches my identity
   const isMyTurn = useMemo(() => {
-    if (!gameState || !currentPlayer) return false;
+    if (!isGameActive || !currentPlayer) return false;
     if (isMultiplayer) {
       return !myPlayerName || currentPlayer.name === myPlayerName;
     }
     return !isAITurn;
-  }, [gameState, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
+  }, [isGameActive, isMultiplayer, myPlayerName, currentPlayer, isAITurn]);
 
-  if (!gameState) {
+  if (!isGameActive || !gameState) {
     const hasGameId = !!RoutingService.getGameIdFromUrl();
 
     // If we have a game ID in URL, stay on the loading screen
@@ -248,7 +250,7 @@ function GameSession() {
 
 function HotseatSetupPage() {
   const navigate = useNavigate();
-  const { startGame, resetSelection } = useGameContext();
+  const { startGame, resetSelection } = useGame();
   const { settings } = useSettings();
 
   const handleStartGame = (playerConfigs: PlayerConfig[], gameMode: GameMode) => {

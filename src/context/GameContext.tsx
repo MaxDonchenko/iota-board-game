@@ -1,15 +1,13 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { useGame, PLAYER_COLORS } from '../hooks/useGame';
+import { useGameImplementation, PLAYER_COLORS, type UseGameReturn } from '../hooks/useGame';
 import type { PlayerConfig } from '@/types/Game.types';
 export { PLAYER_COLORS };
 export type { PlayerConfig };
 
-type GameContextType = ReturnType<typeof useGame>;
-
-const GameContext = createContext<GameContextType | undefined>(undefined);
+export const GameContext = createContext<UseGameReturn | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const game = useGame();
+  const game = useGameImplementation();
   return <GameContext.Provider value={game}>{children}</GameContext.Provider>;
 }
 

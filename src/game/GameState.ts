@@ -188,6 +188,9 @@ export class GameStateManager {
       currentPlayerIndex: nextPlayerIndex,
       turnPhase: 'cardPlacement',
       players: updatedPlayers,
+      isFinalRound:
+        state.isFinalRound ||
+        (state.deck.isEmpty() && updatedPlayers.some((p) => p.hand.length === 0)),
     };
   }
 
@@ -212,7 +215,17 @@ export class GameStateManager {
   }
 
   static checkGameEnd(state: GameState): boolean {
-    return state.deck.isEmpty() && state.players.some((p) => p.hand.length === 0);
+    const deckEmpty = state.deck.isEmpty();
+    const anyoneFinished = state.players.some((p) => p.hand.length === 0);
+
+    if (!deckEmpty || !anyoneFinished) return false;
+
+    if (state.settings.triggerFinalRound) {
+      // If triggerFinalRound is enabled, the game continues until the last player in the rotation finishes their turn
+      return state.currentPlayerIndex === state.players.length - 1;
+    }
+
+    return true;
   }
 
   static setFinalTurn(state: GameState): GameState {

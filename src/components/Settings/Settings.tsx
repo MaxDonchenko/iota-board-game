@@ -1,6 +1,8 @@
+import classNames from 'classnames';
 import { ThemeToggle } from './ThemeToggle';
 import { GameModeSelector } from './GameModeSelector';
 import { useSettings } from '@/context/SettingsContext';
+import { useGame } from '@/hooks/useGame';
 import { Card } from '../Card/Card';
 import { Card as CardClass } from '@/game/Card';
 import styles from './Settings.module.css';
@@ -12,54 +14,62 @@ export function Settings() {
     toggleShowInvalidPlacements,
     setWildcardVariant,
     setCardVariant,
+    toggleTriggerFinalRound,
+    toggleEnableWildcards,
   } = useSettings();
+
+  const { isGameActive } = useGame();
 
   return (
     <div className={styles.settings}>
       <h2 className={styles.title}>Settings</h2>
+
+      {isGameActive && (
+        <div className={styles.disabledMessage}>
+          Some game-rule settings (like Game Mode) are disabled while a game is in progress.
+        </div>
+      )}
 
       <div className={styles.section}>
         <ThemeToggle />
       </div>
 
       <div className={styles.section}>
-        <label className={styles.label}>
-          <input
-            type="checkbox"
-            checked={settings.useGradients}
-            onChange={toggleGradients}
-            className={styles.checkbox}
-          />
-          Enable Card Gradients
-        </label>
-        <p className={styles.description}>
-          Add gradient effects to cards for a more stylish appearance
-        </p>
-      </div>
-
-      <div className={styles.section}>
-        <label className={styles.label}>
-          <input
-            type="checkbox"
-            checked={settings.showInvalidPlacements}
-            onChange={toggleShowInvalidPlacements}
-            className={styles.checkbox}
-          />
-          Show Invalid Placement Hints
-        </label>
-        <p className={styles.description}>
-          Visually mark empty slots where card placement isn't allowed
-        </p>
-      </div>
-
-      <div className={styles.section}>
-        <GameModeSelector />
-      </div>
-
-      <div className={styles.section}>
-        <div className={styles.label} style={{ cursor: 'default' }}>
-          Wildcard Style
+        <div className={styles.label}>Card Style</div>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
+          <div
+            onClick={() => setCardVariant('modern')}
+            style={{
+              cursor: 'pointer',
+              border:
+                settings.cardVariant === 'modern'
+                  ? '2px solid var(--text-primary)'
+                  : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px',
+            }}
+          >
+            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="modern" />
+          </div>
+          <div
+            onClick={() => setCardVariant('original')}
+            style={{
+              cursor: 'pointer',
+              border:
+                settings.cardVariant === 'original'
+                  ? '2px solid var(--text-primary)'
+                  : '2px solid transparent',
+              borderRadius: '4px',
+              padding: '4px',
+            }}
+          >
+            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="original" />
+          </div>
         </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.label}>Wildcard Style</div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div
             onClick={() => setWildcardVariant('modern')}
@@ -93,39 +103,69 @@ export function Settings() {
       </div>
 
       <div className={styles.section}>
-        <div className={styles.label} style={{ cursor: 'default' }}>
-          Card Style
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
-          <div
-            onClick={() => setCardVariant('modern')}
-            style={{
-              cursor: 'pointer',
-              border:
-                settings.cardVariant === 'modern'
-                  ? '2px solid var(--text-primary)'
-                  : '2px solid transparent',
-              borderRadius: '4px',
-              padding: '4px',
-            }}
-          >
-            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="modern" />
-          </div>
-          <div
-            onClick={() => setCardVariant('original')}
-            style={{
-              cursor: 'pointer',
-              border:
-                settings.cardVariant === 'original'
-                  ? '2px solid var(--text-primary)'
-                  : '2px solid transparent',
-              borderRadius: '4px',
-              padding: '4px',
-            }}
-          >
-            <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="original" />
-          </div>
-        </div>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={settings.useGradients}
+            onChange={toggleGradients}
+            className={styles.checkbox}
+          />
+          Enable Card Gradients
+        </label>
+        <p className={styles.description}>
+          Add gradient effects to cards for a more stylish appearance
+        </p>
+      </div>
+
+      <div className={styles.section}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={settings.showInvalidPlacements}
+            onChange={toggleShowInvalidPlacements}
+            className={styles.checkbox}
+          />
+          Show Invalid Placement Hints
+        </label>
+        <p className={styles.description}>
+          Visually mark empty slots where card placement isn't allowed
+        </p>
+      </div>
+
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
+        <GameModeSelector disabled={isGameActive} />
+      </div>
+
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={settings.enableWildcards}
+            onChange={toggleEnableWildcards}
+            className={styles.checkbox}
+            disabled={isGameActive}
+          />
+          Enable Wildcards
+        </label>
+        <p className={styles.description}>
+          Include wildcard cards in the deck that can represent any shape, number, or color
+        </p>
+      </div>
+
+      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={settings.triggerFinalRound}
+            onChange={toggleTriggerFinalRound}
+            className={styles.checkbox}
+            disabled={isGameActive}
+          />
+          Equalize Turns (Final Round)
+        </label>
+        <p className={styles.description}>
+          When a player finishes, continue the round so everyone has the same number of turns
+        </p>
       </div>
     </div>
   );

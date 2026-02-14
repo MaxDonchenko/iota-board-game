@@ -386,6 +386,7 @@ function ThreefoldRepetitionStory() {
         wildcardVariant: 'modern',
         cardVariant: 'modern',
         enableWildcards: true,
+        triggerFinalRound: false,
       }
     );
 

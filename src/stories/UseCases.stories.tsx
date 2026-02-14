@@ -161,6 +161,16 @@ export const FinalTurn: StoryObj = {
   ),
 };
 
+export const FinalRound: StoryObj = {
+  render: () => (
+    <SettingsProvider>
+      <ThemeProvider>
+        <UseCaseStory useCaseName="FinalRound" />
+      </ThemeProvider>
+    </SettingsProvider>
+  ),
+};
+
 export const ComplexGrid: StoryObj = {
   render: () => (
     <SettingsProvider>

@@ -20,6 +20,7 @@ describe('Threefold Repetition', () => {
         wildcardVariant: 'modern',
         cardVariant: 'modern',
         enableWildcards: true,
+        triggerFinalRound: false,
       }
     );
   });
@@ -75,6 +76,7 @@ describe('Threefold Repetition', () => {
           wildcardVariant: 'modern',
           cardVariant: 'modern',
           enableWildcards: true,
+          triggerFinalRound: false,
         }
       );
       gameState.players[0].passCount = 3;
@@ -156,6 +158,7 @@ describe('Threefold Repetition', () => {
           wildcardVariant: 'modern',
           cardVariant: 'modern',
           enableWildcards: true,
+          triggerFinalRound: false,
         }
       );
       gameState.currentPlayerIndex = 2;

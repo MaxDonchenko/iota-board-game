@@ -55,6 +55,28 @@
   font-weight: bold;
 }
 
+.handSize {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: -0.2rem;
+  margin-bottom: 0.1rem;
+  cursor: help;
+  color: var(--text-secondary);
+  width: fit-content;
+}
+
+.cardIcon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+}
+
+.handCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .scoreBarWrapper {
   display: flex;
   align-items: center;

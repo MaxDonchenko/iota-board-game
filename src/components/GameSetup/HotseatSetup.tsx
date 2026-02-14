@@ -5,7 +5,6 @@ import {
   PlayerCountSelector,
   GameModeSelector,
   PlayerConfigList,
-  SetupSection,
 } from '@/components/Setup/SetupComponents';
 import styles from './HotseatSetup.module.css';
 import { RoutingService } from '@/services/routing/RoutingService';
@@ -16,7 +15,7 @@ interface HotseatSetupProps {
 }
 
 export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
-  const { settings, updateSettings } = useSettings();
+  const { settings } = useSettings();
   const [playerCount, setPlayerCount] = useState(() => {
     return RoutingService.getQueryParam('vs') === 'ai' ? 2 : 2;
   });
@@ -34,7 +33,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
     ];
   });
   const [gameMode, setGameMode] = useState<GameMode>(settings.gameMode);
-  const [enableWildcards, setEnableWildcards] = useState(settings.enableWildcards);
 
   const handlePlayerCountChange = useCallback(
     (count: number) => {
@@ -82,15 +80,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
     });
   }, []);
 
-  const handleToggleWildcards = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const enabled = e.target.checked;
-      setEnableWildcards(enabled);
-      updateSettings({ enableWildcards: enabled });
-    },
-    [updateSettings]
-  );
-
   const handleStart = useCallback(() => {
     if (configs.every((c) => c.name.trim().length > 0)) {
       onStartGame(configs, gameMode);
@@ -113,25 +102,6 @@ export function HotseatSetup({ onStartGame, onBack }: HotseatSetupProps) {
       />
 
       <GameModeSelector gameMode={gameMode} onModeChange={handleGameModeChange} />
-
-      <SetupSection label="Wildcards">
-        <label
-          className={styles.label}
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-        >
-          <input
-            type="checkbox"
-            checked={enableWildcards}
-            onChange={handleToggleWildcards}
-            className={styles.checkbox}
-            style={{ marginRight: '0.5rem' }}
-          />
-          Enable Wildcards
-        </label>
-        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-          Include wildcard cards in the deck that can represent any shape, number, or color
-        </p>
-      </SetupSection>
 
       <PlayerConfigList configs={configs} onConfigChange={handleConfigChange} />
 
