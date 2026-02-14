@@ -31,7 +31,7 @@ interface PreviewPlacement {
   wildValue?: WildValue;
 }
 
-interface UseGameReturn {
+export interface UseGameReturn {
   gameState: GameState | null;
   currentPlayer: import('@/types/Game.types').Player | null;
   isAITurn: boolean;
@@ -68,7 +68,10 @@ interface UseGameReturn {
   importGame: (json: string) => { success: boolean; error?: string };
 }
 
-export function useGame(): UseGameReturn {
+// This is the actual logic that runs the game.
+// Most components should use useGame() which will correctly
+// proxy to the context if we are inside a provider (like in Storybook).
+export function useGameImplementation(): UseGameReturn {
   const [gameId, setGameId] = useState<string | null>(() => {
     return RoutingService.getGameIdFromUrl();
   });
@@ -808,4 +811,18 @@ export function useGame(): UseGameReturn {
     exportGame,
     importGame,
   };
+}
+
+import { useContext } from 'react';
+import { GameContext } from '@/context/GameContext';
+
+/**
+ * Proxy hook that allows mocking game logic in Storybook/Tests
+ * via GameContext.Provider, but falls back to real logic otherwise.
+ */
+export function useGame(): UseGameReturn {
+  const context = useContext(GameContext);
+  const implementation = useGameImplementation();
+
+  return context || implementation;
 }
