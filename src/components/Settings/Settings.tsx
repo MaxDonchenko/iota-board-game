@@ -30,8 +30,8 @@ export function Settings() {
         </div>
       )}
 
-      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
-        <ThemeToggle disabled={isGameActive} />
+      <div className={styles.section}>
+        <ThemeToggle />
       </div>
 
       <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
@@ -86,37 +86,33 @@ export function Settings() {
         <GameModeSelector disabled={isGameActive} />
       </div>
 
-      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
-        <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
-          Wildcard Style
-        </div>
+      <div className={styles.section}>
+        <div className={styles.label}>Wildcard Style</div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div
-            onClick={() => !isGameActive && setWildcardVariant('modern')}
+            onClick={() => setWildcardVariant('modern')}
             style={{
-              cursor: isGameActive ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               border:
                 settings.wildcardVariant === 'modern'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
-              opacity: isGameActive && settings.wildcardVariant !== 'modern' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="modern" />
           </div>
           <div
-            onClick={() => !isGameActive && setWildcardVariant('original')}
+            onClick={() => setWildcardVariant('original')}
             style={{
-              cursor: isGameActive ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               border:
                 settings.wildcardVariant === 'original'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
-              opacity: isGameActive && settings.wildcardVariant !== 'original' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="original" />
@@ -124,37 +120,33 @@ export function Settings() {
         </div>
       </div>
 
-      <div className={classNames(styles.section, { [styles.disabled]: isGameActive })}>
-        <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
-          Card Style
-        </div>
+      <div className={styles.section}>
+        <div className={styles.label}>Card Style</div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div
-            onClick={() => !isGameActive && setCardVariant('modern')}
+            onClick={() => setCardVariant('modern')}
             style={{
-              cursor: isGameActive ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               border:
                 settings.cardVariant === 'modern'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
-              opacity: isGameActive && settings.cardVariant !== 'modern' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="modern" />
           </div>
           <div
-            onClick={() => !isGameActive && setCardVariant('original')}
+            onClick={() => setCardVariant('original')}
             style={{
-              cursor: isGameActive ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               border:
                 settings.cardVariant === 'original'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
-              opacity: isGameActive && settings.cardVariant !== 'original' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="original" />
