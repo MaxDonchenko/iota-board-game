@@ -25,3 +25,11 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
+
+.themeToggle.disabled {
+  opacity: 0.6;
+}
+
+.toggleButton:disabled {
+  cursor: not-allowed;
+}

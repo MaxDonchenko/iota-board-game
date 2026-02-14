@@ -47,3 +47,26 @@
 .radio {
   cursor: pointer;
 }
+
+.section.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.section.disabled input,
+.section.disabled label,
+.section.disabled .label {
+  cursor: not-allowed;
+}
+
+.disabledMessage {
+  padding: 0.75rem;
+  background-color: rgba(249, 165, 27, 0.1);
+  border-radius: 6px;
+  color: #f9a51b;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(249, 165, 27, 0.3);
+  font-weight: 500;
+}

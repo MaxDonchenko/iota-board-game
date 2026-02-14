@@ -1,15 +1,20 @@
 import { useTheme } from '@/context/ThemeContext';
 import styles from './ThemeToggle.module.css';
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  disabled?: boolean;
+}
+
+export function ThemeToggle({ disabled }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className={styles.themeToggle}>
+    <div className={`${styles.themeToggle} ${disabled ? styles.disabled : ''}`}>
       <label className={styles.label}>Theme</label>
       <button
-        onClick={toggleTheme}
+        onClick={() => !disabled && toggleTheme()}
         className={styles.toggleButton}
+        disabled={disabled}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       >
         {theme === 'light' ? '🌙 Dark' : '☀️ Light'}

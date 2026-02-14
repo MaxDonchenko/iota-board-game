@@ -1,6 +1,7 @@
 import { ThemeToggle } from './ThemeToggle';
 import { GameModeSelector } from './GameModeSelector';
 import { useSettings } from '@/context/SettingsContext';
+import { useGame } from '@/hooks/useGame';
 import { Card } from '../Card/Card';
 import { Card as CardClass } from '@/game/Card';
 import styles from './Settings.module.css';
@@ -15,21 +16,32 @@ export function Settings() {
     toggleTriggerFinalRound,
   } = useSettings();
 
+  const { gameState } = useGame();
+  const isGameActive = !!gameState;
+
   return (
     <div className={styles.settings}>
       <h2 className={styles.title}>Settings</h2>
 
-      <div className={styles.section}>
-        <ThemeToggle />
+      {isGameActive && (
+        <div className={styles.disabledMessage}>
+          Some settings are hidden or disabled while a game is in progress to prevent logic
+          conflicts.
+        </div>
+      )}
+
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+        <ThemeToggle disabled={isGameActive} />
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
         <label className={styles.label}>
           <input
             type="checkbox"
             checked={settings.useGradients}
             onChange={toggleGradients}
             className={styles.checkbox}
+            disabled={isGameActive}
           />
           Enable Card Gradients
         </label>
@@ -38,13 +50,14 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
         <label className={styles.label}>
           <input
             type="checkbox"
             checked={settings.showInvalidPlacements}
             onChange={toggleShowInvalidPlacements}
             className={styles.checkbox}
+            disabled={isGameActive}
           />
           Show Invalid Placement Hints
         </label>
@@ -53,13 +66,14 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
         <label className={styles.label}>
           <input
             type="checkbox"
             checked={settings.triggerFinalRound}
             onChange={toggleTriggerFinalRound}
             className={styles.checkbox}
+            disabled={isGameActive}
           />
           Equalize Turns (Final Round)
         </label>
@@ -68,39 +82,41 @@ export function Settings() {
         </p>
       </div>
 
-      <div className={styles.section}>
-        <GameModeSelector />
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+        <GameModeSelector disabled={isGameActive} />
       </div>
 
-      <div className={styles.section}>
-        <div className={styles.label} style={{ cursor: 'default' }}>
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+        <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
           Wildcard Style
         </div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div
-            onClick={() => setWildcardVariant('modern')}
+            onClick={() => !isGameActive && setWildcardVariant('modern')}
             style={{
-              cursor: 'pointer',
+              cursor: isGameActive ? 'not-allowed' : 'pointer',
               border:
                 settings.wildcardVariant === 'modern'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
+              opacity: isGameActive && settings.wildcardVariant !== 'modern' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="modern" />
           </div>
           <div
-            onClick={() => setWildcardVariant('original')}
+            onClick={() => !isGameActive && setWildcardVariant('original')}
             style={{
-              cursor: 'pointer',
+              cursor: isGameActive ? 'not-allowed' : 'pointer',
               border:
                 settings.wildcardVariant === 'original'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
+              opacity: isGameActive && settings.wildcardVariant !== 'original' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Square', 1, 'Red', true)} wildcardVariant="original" />
@@ -108,35 +124,37 @@ export function Settings() {
         </div>
       </div>
 
-      <div className={styles.section}>
-        <div className={styles.label} style={{ cursor: 'default' }}>
+      <div className={`${styles.section} ${isGameActive ? styles.disabled : ''}`}>
+        <div className={styles.label} style={{ cursor: isGameActive ? 'not-allowed' : 'default' }}>
           Card Style
         </div>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
           <div
-            onClick={() => setCardVariant('modern')}
+            onClick={() => !isGameActive && setCardVariant('modern')}
             style={{
-              cursor: 'pointer',
+              cursor: isGameActive ? 'not-allowed' : 'pointer',
               border:
                 settings.cardVariant === 'modern'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
+              opacity: isGameActive && settings.cardVariant !== 'modern' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="modern" />
           </div>
           <div
-            onClick={() => setCardVariant('original')}
+            onClick={() => !isGameActive && setCardVariant('original')}
             style={{
-              cursor: 'pointer',
+              cursor: isGameActive ? 'not-allowed' : 'pointer',
               border:
                 settings.cardVariant === 'original'
                   ? '2px solid var(--text-primary)'
                   : '2px solid transparent',
               borderRadius: '4px',
               padding: '4px',
+              opacity: isGameActive && settings.cardVariant !== 'original' ? 0.3 : 1,
             }}
           >
             <Card card={new CardClass('Circle', 3, 'Blue', false)} cardVariant="original" />
