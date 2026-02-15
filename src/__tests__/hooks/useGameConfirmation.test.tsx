@@ -5,6 +5,10 @@ import { RoutingService } from '@/services/routing/RoutingService';
 import { loadGameFromStorage } from '@/utils/gamePersistence';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
+import type { GameState, GamePhase } from '@/types/Game.types';
+import { Grid } from '@/game/Grid';
+import { Deck } from '@/game/Deck';
+import { Card } from '@/game/Card';
 
 // Mock dependecies
 vi.mock('@/services/routing/RoutingService', () => ({
@@ -27,28 +31,38 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>{children}</MemoryRouter>
 );
 
-const createMockGameState = (phase: 'playing' | 'ended', score = 0, gridCount = 1) => ({
-  phase,
-  currentPlayerIndex: 0,
-  players: [{ id: '1', name: 'Test Player', hand: [], score, color: 'red' }],
-  grid: {
-    positions: { size: gridCount } as any, // Mocking map size
-    starterCard: null,
-    starterPosition: null,
-  },
-  deck: {
-    drawPile: [],
-    discardPile: [],
+const createMockGameState = (phase: GamePhase, score = 0, gridCount = 1): GameState => {
+  const grid = new Grid();
+  // starter card at (0,0)
+  grid.setStarterCard(0, 0, new Card('Square', 1, 'Red'));
+
+  if (gridCount > 1) {
+    for (let i = 1; i < gridCount; i++) {
+      grid.positions.set(`${i},0`, new Card('Square', 1, 'Red'));
+    }
+  }
+
+  return {
+    phase,
+    currentPlayerIndex: 0,
+    players: [{ id: '1', name: 'Test Player', hand: [], score, color: 'red' }],
+    grid,
+    deck: new Deck('full'),
+    settings: {
+      theme: 'light',
+      useGradients: true,
+      gameMode: 'full',
+      showInvalidPlacements: false,
+      wildcardVariant: 'modern',
+      cardVariant: 'modern',
+      enableWildcards: true,
+      triggerFinalRound: false,
+    },
     gameMode: 'full',
-    isEmpty: () => true,
-  },
-  settings: {
-    enableWildcards: true,
-    triggerFinalRound: false,
-  },
-  gameMode: 'full',
-  turnPhase: 'cardPlacement',
-});
+    turnPhase: 'cardPlacement',
+    isFinalTurn: false,
+  };
+};
 
 describe('useGameImplementation - importGame confirmation', () => {
   beforeEach(() => {
@@ -59,7 +73,7 @@ describe('useGameImplementation - importGame confirmation', () => {
   });
 
   it('should NOT ask for confirmation on import if current game is ended', () => {
-    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('ended') as any);
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('ended'));
 
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
@@ -71,7 +85,7 @@ describe('useGameImplementation - importGame confirmation', () => {
   });
 
   it('should ask for confirmation on import if game is "touched" (score > 0)', () => {
-    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 10, 1) as any);
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 10, 1));
 
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
@@ -83,7 +97,7 @@ describe('useGameImplementation - importGame confirmation', () => {
   });
 
   it('should ask for confirmation on import if game is "touched" (more than 1 card)', () => {
-    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 2) as any);
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 2));
 
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
@@ -95,7 +109,7 @@ describe('useGameImplementation - importGame confirmation', () => {
   });
 
   it('should NOT ask for confirmation on import if game is "untouched"', () => {
-    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 1) as any);
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 1));
 
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
