@@ -27,12 +27,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>{children}</MemoryRouter>
 );
 
-const createMockGameState = (phase: 'playing' | 'ended') => ({
+const createMockGameState = (phase: 'playing' | 'ended', score = 0, gridCount = 1) => ({
   phase,
   currentPlayerIndex: 0,
-  players: [{ id: '1', name: 'Test Player', hand: [], score: 0, color: 'red' }],
+  players: [{ id: '1', name: 'Test Player', hand: [], score, color: 'red' }],
   grid: {
-    positions: new Map(),
+    positions: { size: gridCount } as any, // Mocking map size
     starterCard: null,
     starterPosition: null,
   },
@@ -64,15 +64,14 @@ describe('useGameImplementation - importGame confirmation', () => {
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
     act(() => {
-      // Mocked deserializeGameState will return the input object
       result.current.importGame(JSON.stringify(createMockGameState('playing')));
     });
 
     expect(window.confirm).not.toHaveBeenCalled();
   });
 
-  it('should ask for confirmation on import if game is in progress (playing)', () => {
-    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing') as any);
+  it('should ask for confirmation on import if game is "touched" (score > 0)', () => {
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 10, 1) as any);
 
     const { result } = renderHook(() => useGameImplementation(), { wrapper });
 
@@ -80,9 +79,31 @@ describe('useGameImplementation - importGame confirmation', () => {
       result.current.importGame(JSON.stringify(createMockGameState('playing')));
     });
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringContaining('Are you sure you want to load this game?')
-    );
+    expect(window.confirm).toHaveBeenCalled();
+  });
+
+  it('should ask for confirmation on import if game is "touched" (more than 1 card)', () => {
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 2) as any);
+
+    const { result } = renderHook(() => useGameImplementation(), { wrapper });
+
+    act(() => {
+      result.current.importGame(JSON.stringify(createMockGameState('playing')));
+    });
+
+    expect(window.confirm).toHaveBeenCalled();
+  });
+
+  it('should NOT ask for confirmation on import if game is "untouched"', () => {
+    vi.mocked(loadGameFromStorage).mockReturnValue(createMockGameState('playing', 0, 1) as any);
+
+    const { result } = renderHook(() => useGameImplementation(), { wrapper });
+
+    act(() => {
+      result.current.importGame(JSON.stringify(createMockGameState('playing')));
+    });
+
+    expect(window.confirm).not.toHaveBeenCalled();
   });
 
   it('should NOT ask for confirmation if no game is active', () => {

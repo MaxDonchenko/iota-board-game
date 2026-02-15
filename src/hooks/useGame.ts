@@ -45,6 +45,7 @@ export interface UseGameReturn {
   recycleWildCard: (replacement: WildCardReplacement) => { success: boolean; error?: string };
   resetGame: () => void;
   isGameActive: boolean;
+  isUntouched: boolean;
 
   // UI selection / preview helpers
   selectedCards: Card[];
@@ -94,6 +95,11 @@ export function useGameImplementation(): UseGameReturn {
   );
 
   const isGameActive = !!gameState;
+
+  const isUntouched = useMemo(
+    () => (gameState ? GameStateManager.isGameUntouched(gameState) : true),
+    [gameState]
+  );
 
   const isAITurn = useMemo(() => currentPlayer?.isAI || false, [currentPlayer]);
 
@@ -766,7 +772,7 @@ export function useGameImplementation(): UseGameReturn {
         const serialized = JSON.parse(json) as SerializableGameState;
         const loadedState = deserializeGameState(serialized);
         const confirmedToLoadImportedGame =
-          isGameActive && gameState?.phase !== 'ended'
+          isGameActive && gameState?.phase !== 'ended' && !isUntouched
             ? confirm(
                 'Are you sure you want to load this game? This will overwrite your current game.'
               )
@@ -783,7 +789,7 @@ export function useGameImplementation(): UseGameReturn {
         return { success: false, error: 'Invalid game JSON' };
       }
     },
-    [isGameActive, gameState?.phase]
+    [isGameActive, gameState, isUntouched]
   );
 
   return {
@@ -797,6 +803,7 @@ export function useGameImplementation(): UseGameReturn {
     recycleWildCard,
     resetGame,
     isGameActive,
+    isUntouched,
 
     selectedCards,
     pendingPlacements,

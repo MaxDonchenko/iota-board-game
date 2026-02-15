@@ -14,7 +14,7 @@ import { SettingsDialog } from './components/Settings/SettingsDialog';
 import { GameProvider, type PlayerConfig } from './context/GameContext';
 import { useGame } from './hooks/useGame';
 import type { GameMode } from './types/Game.types';
-import type { Card as CardType } from './game/Card';
+import { Card as CardType } from './game/Card';
 import { RoutingService } from './services/routing/RoutingService';
 
 import './styles/index.css';
@@ -70,6 +70,7 @@ function GameSession() {
     exportGame,
     importGame,
     isGameActive,
+    isUntouched,
   } = useGame();
   const { sendGameStateToPeers, sendGameStateToHost } = useMultiplayerGame();
 
@@ -107,7 +108,7 @@ function GameSession() {
   ]);
 
   const handleNewGame = () => {
-    if (isGameActive && gameState?.phase !== 'ended') {
+    if (isGameActive && gameState?.phase !== 'ended' && !isUntouched) {
       if (
         !window.confirm(
           'Are you sure you want to start a new game? This will end the current game.'

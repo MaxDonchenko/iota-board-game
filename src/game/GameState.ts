@@ -234,4 +234,10 @@ export class GameStateManager {
       isFinalTurn: true,
     };
   }
+
+  static isGameUntouched(state: GameState): boolean {
+    const allScoresZero = state.players.every((p) => p.score === 0);
+    const onlyStarterCardOnGrid = state.grid.positions.size === 1;
+    return allScoresZero && onlyStarterCardOnGrid;
+  }
 }
