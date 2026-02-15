@@ -84,12 +84,27 @@ export const MultipleTie: StoryObj<typeof GameOver> = {
   },
 };
 
-export const DrawNoMoves: StoryObj<typeof GameOver> = {
+export const NoMovesEnd: StoryObj<typeof GameOver> = {
   args: {
     gameState: {
       ...baseGameState,
-      phase: 'draw',
+      phase: 'ended',
       drawReason: 'no-valid-moves',
+    },
+    onNewGame: () => console.log('New game clicked'),
+  },
+};
+
+export const ThreefoldRepetitionEnd: StoryObj<typeof GameOver> = {
+  args: {
+    gameState: {
+      ...baseGameState,
+      phase: 'ended',
+      drawReason: 'threefold-repetition',
+      players: [
+        { id: '1', name: 'Alice', score: 150, hand: [], color: 'red' },
+        { id: '2', name: 'Bob', score: 100, hand: [], color: 'blue' },
+      ],
     },
     onNewGame: () => console.log('New game clicked'),
   },

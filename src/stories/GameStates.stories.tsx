@@ -394,26 +394,20 @@ function ThreefoldRepetitionStory() {
       }
     );
 
+    initial.players[0].score = 150;
+    initial.players[1].score = 120;
     initial.players.forEach((p: Player) => (p.passCount = 3));
-    initial.phase = 'draw';
+    initial.phase = 'ended';
+    initial.drawReason = 'threefold-repetition';
     initial.turnPhase = 'pass';
     return initial;
   });
 
   return (
     <ThemeSync>
-      <div style={{ padding: '2rem' }}>
-        <h1 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
-          Threefold Repetition — Draw State
-        </h1>
-
-        <div style={{ marginBottom: '2rem' }}>
-          <GameBoard grid={gameState.grid} selectedCards={[]} onPlaceCard={() => {}} />
-        </div>
-
-        <div style={{ marginBottom: '2rem' }}>
-          <ScoreDisplay gameState={gameState} />
-        </div>
+      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+        <h1 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Threefold Repetition</h1>
+        <GameOver gameState={gameState} onNewGame={() => {}} />
       </div>
     </ThemeSync>
   );

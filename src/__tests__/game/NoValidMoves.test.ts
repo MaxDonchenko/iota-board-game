@@ -138,7 +138,7 @@ describe('No Valid Moves - Auto Draw', () => {
 
       const newState = GameStateManager.nextTurn(gameState);
 
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.drawReason).toBe('no-valid-moves');
     });
 
@@ -150,7 +150,7 @@ describe('No Valid Moves - Auto Draw', () => {
 
       const newState = GameStateManager.nextTurn(gameState);
 
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.drawReason).toBe('threefold-repetition');
     });
 
@@ -239,7 +239,7 @@ describe('No Valid Moves - Auto Draw', () => {
 
       const newState = GameStateManager.nextTurn(gameState);
 
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.drawReason).toBe('no-valid-moves');
     });
   });

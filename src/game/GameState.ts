@@ -167,7 +167,7 @@ export class GameStateManager {
     if (!anyPlayerCanMove) {
       return {
         ...state,
-        phase: 'draw',
+        phase: 'ended',
         players: updatedPlayers,
         drawReason: 'no-valid-moves',
       };
@@ -177,7 +177,7 @@ export class GameStateManager {
     if (this.checkThreefoldRepetition({ ...state, players: updatedPlayers })) {
       return {
         ...state,
-        phase: 'draw',
+        phase: 'ended',
         players: updatedPlayers,
         drawReason: 'threefold-repetition',
       };
