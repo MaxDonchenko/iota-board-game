@@ -760,25 +760,31 @@ export function useGameImplementation(): UseGameReturn {
     return json;
   }, [gameState, gameId]);
 
-  const importGame = useCallback((json: string) => {
-    try {
-      const serialized = JSON.parse(json) as SerializableGameState;
-      const loadedState = deserializeGameState(serialized);
-      const confirmedToLoadImportedGame = confirm(
-        'Are you sure you want to load this game? This will overwrite your current game.'
-      );
-      if (!confirmedToLoadImportedGame) return { success: false, error: 'Game load cancelled' };
-      setGameState(loadedState);
-      setGameId(serialized.id);
+  const importGame = useCallback(
+    (json: string) => {
+      try {
+        const serialized = JSON.parse(json) as SerializableGameState;
+        const loadedState = deserializeGameState(serialized);
+        const confirmedToLoadImportedGame =
+          isGameActive && gameState?.phase !== 'ended'
+            ? confirm(
+                'Are you sure you want to load this game? This will overwrite your current game.'
+              )
+            : true;
+        if (!confirmedToLoadImportedGame) return { success: false, error: 'Game load cancelled' };
+        setGameState(loadedState);
+        setGameId(serialized.id);
 
-      // Update URL
-      RoutingService.setGameIdInUrl(serialized.id);
+        // Update URL
+        RoutingService.setGameIdInUrl(serialized.id);
 
-      return { success: true };
-    } catch (e) {
-      return { success: false, error: 'Invalid game JSON' };
-    }
-  }, []);
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: 'Invalid game JSON' };
+      }
+    },
+    [isGameActive, gameState?.phase]
+  );
 
   return {
     gameState,
