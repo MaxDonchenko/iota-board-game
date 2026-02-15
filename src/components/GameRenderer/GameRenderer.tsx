@@ -80,7 +80,7 @@ export function GameRenderer({
   const actionsButtonRef = useRef<HTMLButtonElement>(null);
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  const isGameOver = gameState.phase === 'ended' || gameState.phase === 'draw';
+  const isGameOver = gameState.phase === 'ended';
 
   // "Me" is the provided localPlayer, falling back to currentPlayer
   const playerToShowHand = localPlayer || currentPlayer;
