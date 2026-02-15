@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { GameState } from '@/types/Game.types';
 import { ScoreDisplay } from '../ScoreDisplay/ScoreDisplay';
 import styles from './GameOver.module.css';
@@ -8,14 +9,10 @@ interface GameOverProps {
 }
 
 export function GameOver({ gameState, onNewGame }: GameOverProps) {
-  const isDraw = gameState.phase === 'draw';
-
-  const winners = !isDraw
-    ? (() => {
-        const maxScore = Math.max(...gameState.players.map((p) => p.score));
-        return gameState.players.filter((p) => p.score === maxScore);
-      })()
-    : [];
+  const winners = useMemo(() => {
+    const maxScore = Math.max(...gameState.players.map((p) => p.score));
+    return gameState.players.filter((p) => p.score === maxScore);
+  }, [gameState.players]);
 
   const getDrawReason = () => {
     if (gameState.drawReason === 'no-valid-moves') {
@@ -36,24 +33,24 @@ export function GameOver({ gameState, onNewGame }: GameOverProps) {
 
   return (
     <div className={styles.gameOver}>
-      <h2 className={styles.title}>{isDraw ? 'Game Drawn' : 'Game Over!'}</h2>
+      <h2 className={styles.title}>Game Over!</h2>
 
-      {isDraw ? (
+      {gameState.drawReason && (
         <div className={styles.drawInfo}>
           <div className={styles.drawReasonBadge}>
             {gameState.drawReason === 'no-valid-moves' ? '⚠️' : '🔄'} {getDrawReason()}
           </div>
           <p className={styles.drawMessage}>{getDrawMessage()}</p>
         </div>
-      ) : (
-        <div className={styles.winnerInfo}>
-          <p className={styles.winnerLabel}>{winners.length > 1 ? 'Winners' : 'Winner'}</p>
-          <p className={styles.winnerName} data-testid="winner-name">
-            {winners.map((w) => w.name).join(', ')}
-          </p>
-          <p className={styles.winnerScore}>{winners[0]?.score} points</p>
-        </div>
       )}
+
+      <div className={styles.winnerInfo}>
+        <p className={styles.winnerLabel}>{winners.length > 1 ? 'Winners' : 'Winner'}</p>
+        <p className={styles.winnerName} data-testid="winner-name">
+          {winners.map((w) => w.name).join(', ')}
+        </p>
+        <p className={styles.winnerScore}>{winners[0]?.score} points</p>
+      </div>
 
       <div className={styles.scores}>
         <ScoreDisplay gameState={gameState} />

@@ -125,9 +125,9 @@ describe('Threefold Repetition', () => {
       newState.currentPlayerIndex = 1;
       newState.turnPhase = 'pass';
 
-      // Player 2 passes (gets 3rd pass) - NOW it's a draw
+      // Player 2 passes (gets 3rd pass) - NOW it's ended
       newState = GameStateManager.nextTurn(newState);
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.players[1].passCount).toBe(3);
     });
 
@@ -219,11 +219,11 @@ describe('Threefold Repetition', () => {
       expect(state.players[0].passCount).toBe(3);
       expect(state.phase).toBe('playing');
 
-      // Round 3: Player 2 passes - DRAW!
+      // Round 3: Player 2 passes - ENDED!
       state.turnPhase = 'pass';
       state = GameStateManager.nextTurn(state);
       expect(state.players[1].passCount).toBe(3);
-      expect(state.phase).toBe('draw');
+      expect(state.phase).toBe('ended');
     });
 
     it('should reset pass counter if a player makes a move between passes', () => {
@@ -296,7 +296,7 @@ describe('Threefold Repetition', () => {
 
       const newState = GameStateManager.nextTurn(gameState);
 
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.drawReason).toBe('threefold-repetition');
     });
 
@@ -317,7 +317,7 @@ describe('Threefold Repetition', () => {
       const newState = GameStateManager.nextTurn(gameState);
 
       // Threefold repetition is checked first
-      expect(newState.phase).toBe('draw');
+      expect(newState.phase).toBe('ended');
       expect(newState.drawReason).toBe('threefold-repetition');
     });
   });

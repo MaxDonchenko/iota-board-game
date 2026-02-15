@@ -2,7 +2,7 @@ import type { SerializableGameState } from '@/utils/gamePersistence';
 
 export const drawByThreefoldRepetitionGameState: SerializableGameState = {
   id: 'game-1767474469607-z2429l804',
-  phase: 'draw',
+  phase: 'ended',
   currentPlayerIndex: 0,
   turnPhase: 'pass',
   players: [
